@@ -85,6 +85,10 @@ void PrintUsage()
         << "  sovereign-cli project-summary [--save] [dir]\n"
         << "  sovereign-cli review-diff [--save] <diff-file>\n"
         << "  sovereign-cli policy-check <role> <action>\n"
+        << "  sovereign-cli policy-dry-run <role> <action>\n"
+        << "  sovereign-cli policy-version\n"
+        << "  sovereign-cli policy-rule-set <action> <min-role> <allow|deny>\n"
+        << "  sovereign-cli audit-verify\n"
         << "  sovereign-cli chat-tools <prompt...>\n"
         << "  sovereign-cli execute <action> <decision-hex>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
@@ -361,7 +365,74 @@ int main(int argc, char** argv)
                   << (r.value.effect == sovereign::policy::PolicyEffect::Allow
                           ? "allow"
                           : "deny")
-                  << " reason=" << r.value.reason << '\n';
+                  << " reason=" << r.value.reason
+                  << " version=" << r.value.policy_version
+                  << " dry_run=" << (r.value.dry_run ? "1" : "0") << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "policy-dry-run" && argc >= 4)
+    {
+        sovereign::PrincipalId id{};
+        std::vector<std::string> roles{argv[2]};
+        auto r = host.Policy().DryRun(id, roles, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "policy-dry-run failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "effect="
+                  << (r.value.effect == sovereign::policy::PolicyEffect::Allow
+                          ? "allow"
+                          : "deny")
+                  << " reason=" << r.value.reason
+                  << " version=" << r.value.policy_version
+                  << " dry_run=1\n";
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "policy-version")
+    {
+        std::cout << "policy_version=" << host.Policy().Version() << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "policy-rule-set" && argc >= 5)
+    {
+        sovereign::policy::PolicyRule rule;
+        rule.action = argv[2];
+        rule.min_role = argv[3];
+        rule.effect = (std::string(argv[4]) == "allow")
+                          ? sovereign::policy::PolicyEffect::Allow
+                          : sovereign::policy::PolicyEffect::Deny;
+        auto r = host.Policy().SetRule(rule);
+        if (!r.Ok())
+        {
+            std::cerr << "policy-rule-set failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "policy_version=" << host.Policy().Version() << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "audit-verify")
+    {
+        auto r = host.Audit().VerifyChain();
+        if (!r.Ok())
+        {
+            std::cerr << "audit-verify failed\n";
+            host.Close();
+            return 1;
+        }
+        auto tip = host.Audit().ChainTip();
+        std::cout << "audit_chain_ok=" << (r.value ? "1" : "0")
+                  << " tip=" << (tip.Ok() ? tip.value : "?") << '\n';
         host.Close();
         return 0;
     }

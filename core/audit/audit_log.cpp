@@ -150,15 +150,122 @@ AuditError AuditLog::Load()
     return AuditError::Ok;
 }
 
+namespace {
+std::string FnvHex(const std::string& s)
+{
+    std::uint64_t h = 14695981039346656037ull;
+    for (unsigned char c : s)
+    {
+        h ^= c;
+        h *= 1099511628211ull;
+    }
+    static constexpr char k[] = "0123456789abcdef";
+    std::string o(16, '0');
+    for (int i = 15; i >= 0; --i)
+    {
+        o[i] = k[h & 0xF];
+        h >>= 4;
+    }
+    return o;
+}
+} // namespace
+
 AuditError AuditLog::AppendLine(const AuditEntry& e) const
 {
     std::ofstream out(directory_ / "audit.dat", std::ios::app);
     if (!out)
         return AuditError::StorageFailure;
-    out << Hex(e.id.bytes) << '|' << e.unix_seconds << '|' << Esc(e.category)
-        << '|' << Esc(e.action) << '|' << Hex(e.actor.bytes) << '|'
-        << Esc(e.subject) << '|' << Esc(e.detail) << '\n';
+    std::string line = Hex(e.id.bytes) + "|" + std::to_string(e.unix_seconds) + "|" +
+                       Esc(e.category) + "|" + Esc(e.action) + "|" + Hex(e.actor.bytes) +
+                       "|" + Esc(e.subject) + "|" + Esc(e.detail);
+    out << line << '\n';
+    // chain: prev|entry_hash
+    std::string prev = "genesis";
+    {
+        std::ifstream cin(directory_ / "audit.chain");
+        std::string last;
+        while (std::getline(cin, last))
+        {
+            if (!last.empty())
+                prev = last;
+        }
+        // prev field is full previous line of chain or genesis
+        auto bar = prev.find('|');
+        if (bar != std::string::npos)
+            prev = prev.substr(bar + 1);
+    }
+    const std::string entry_hash = FnvHex(prev + "|" + line);
+    std::ofstream cout(directory_ / "audit.chain", std::ios::app);
+    if (cout)
+        cout << prev << '|' << entry_hash << '\n';
     return AuditError::Ok;
+}
+
+Result<bool> AuditLog::VerifyChain() const
+{
+    std::lock_guard lock(mutex_);
+    Result<bool> result;
+    result.value = true;
+    std::ifstream data(directory_ / "audit.dat");
+    std::ifstream chain(directory_ / "audit.chain");
+    if (!data)
+    {
+        result.value = true; // empty
+        return result;
+    }
+    std::string prev = "genesis";
+    std::string line;
+    std::string cline;
+    while (std::getline(data, line))
+    {
+        if (line.empty())
+            continue;
+        if (!std::getline(chain, cline))
+        {
+            result.value = false;
+            return result;
+        }
+        auto bar = cline.find('|');
+        if (bar == std::string::npos)
+        {
+            result.value = false;
+            return result;
+        }
+        const std::string recorded_prev = cline.substr(0, bar);
+        const std::string recorded_hash = cline.substr(bar + 1);
+        if (recorded_prev != prev)
+        {
+            result.value = false;
+            return result;
+        }
+        const std::string expect = FnvHex(prev + "|" + line);
+        if (expect != recorded_hash)
+        {
+            result.value = false;
+            return result;
+        }
+        prev = recorded_hash;
+    }
+    return result;
+}
+
+Result<std::string> AuditLog::ChainTip() const
+{
+    std::lock_guard lock(mutex_);
+    Result<std::string> result;
+    std::ifstream chain(directory_ / "audit.chain");
+    std::string last, line;
+    while (std::getline(chain, line))
+        if (!line.empty())
+            last = line;
+    if (last.empty())
+        result.value = "genesis";
+    else
+    {
+        auto bar = last.find('|');
+        result.value = bar == std::string::npos ? last : last.substr(bar + 1);
+    }
+    return result;
 }
 
 Result<AuditEntryId> AuditLog::Append(const AuditEntry& entry)

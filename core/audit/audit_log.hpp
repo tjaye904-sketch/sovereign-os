@@ -19,6 +19,10 @@ public:
 
     Result<AuditEntryId> Append(const AuditEntry& entry);
     Result<std::vector<AuditEntry>> List(std::size_t limit = 100) const;
+    // Phase XII: integrity of append-only log
+    Result<bool> VerifyChain() const;
+    Result<std::string> ChainTip() const;
+
     Result<std::vector<AuditEntry>> ListByCategory(
         const std::string& category,
         std::size_t limit = 100) const;

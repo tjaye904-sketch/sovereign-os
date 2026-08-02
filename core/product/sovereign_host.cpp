@@ -45,6 +45,8 @@ bool SovereignHost::Open()
     {
         return false;
     }
+    if (policy_.Open(config_.data_root / "policy") != policy::PolicyError::Ok)
+        return false;
     if (audit_.Open(config_.data_root / "audit") != audit::AuditError::Ok)
     {
         return false;
