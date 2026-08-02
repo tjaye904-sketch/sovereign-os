@@ -1,0 +1,4 @@
+add_library(sovereign_os_runtime STATIC service_orchestrator.cpp)
+target_include_directories(sovereign_os_runtime PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(sovereign_os_runtime PUBLIC cxx_std_23)
+target_compile_options(sovereign_os_runtime PRIVATE -Wall -Wextra -Wpedantic)
