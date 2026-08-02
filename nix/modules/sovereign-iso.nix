@@ -1,6 +1,23 @@
 # Sovereign OS live/installer image module (NixOS)
 { config, pkgs, lib, ... }:
 
+let
+  firstBoot = pkgs.writeShellScriptBin "sovereign-first-boot" ''
+    set -euo pipefail
+    export SOVEREIGN_DATA_ROOT="''${SOVEREIGN_DATA_ROOT:-/var/lib/sovereign}"
+    mkdir -p "$SOVEREIGN_DATA_ROOT"
+    if [ ! -d "$SOVEREIGN_DATA_ROOT/identity" ]; then
+      echo "=== Sovereign first boot ==="
+      echo "No identity store. Bootstrap an owner:"
+      echo "  sovereign-cli bootstrap <name> <secret>"
+      echo "  sovereign-cli login <name> <secret>"
+      echo "  sovereign-cli brief"
+    else
+      echo "Sovereign data at $SOVEREIGN_DATA_ROOT"
+      sovereign-cli status 2>/dev/null || true
+    fi
+  '';
+in
 {
   isoImage = {
     isoName = lib.mkForce "sovereign-os-${config.system.nixos.label}-${pkgs.stdenv.hostPlatform.system}.iso";
@@ -10,7 +27,6 @@
     squashfsCompression = "zstd -Xcompression-level 6";
   };
 
-  # Boot / kernel
   boot.kernelParams = [
     "console=ttyS0,115200n8"
     "console=tty0"
@@ -23,15 +39,14 @@
   ];
 
   networking.hostName = "sovereign";
-  # installation-cd-minimal enables wireless; avoid NM conflict
   networking.networkmanager.enable = lib.mkForce false;
   networking.wireless.enable = lib.mkDefault true;
   networking.firewall.allowedTCPPorts = [ 22 ];
 
-  # Primary OS surface
   environment.systemPackages = with pkgs; [
     sovereign-cli
     sovereign-daemon
+    firstBoot
     git
     vim
     htop
@@ -42,20 +57,29 @@
     usbutils
     lm_sensors
     openssl
-    # argon2 linked into sovereign-cli at build time
   ];
 
-  # Sovereign user (live)
+  environment.variables.SOVEREIGN_DATA_ROOT = "/var/lib/sovereign";
+  environment.variables.OLLAMA_HOST = "http://127.0.0.1:11434";
+  environment.variables.SOVEREIGN_OLLAMA_MODEL = "openclaw";
+  environment.variables.SOVEREIGN_EMBED_MODEL = "nomic-embed-text";
+
   users.users.sovereign = {
     isNormalUser = true;
     description = "Sovereign OS operator";
-    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
+    extraGroups = [ "wheel" "video" "audio" ];
     initialPassword = "sovereign";
   };
   users.users.root.initialPassword = "sovereign";
   security.sudo.wheelNeedsPassword = false;
 
-  # Services: daemon as primary orchestration
+  services.getty.autologinUser = lib.mkForce "sovereign";
+  users.users.nixos.initialPassword = lib.mkForce "sovereign";
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/sovereign 0750 sovereign sovereign -"
+  ];
+
   systemd.services.sovereign-daemon = {
     description = "Sovereign OS continuous agent loop";
     wantedBy = [ "multi-user.target" ];
@@ -77,28 +101,33 @@
     };
   };
 
-  # First-login banner
   environment.etc."motd".text = ''
     ============================================
       Sovereign OS (NixOS live image)
     ============================================
-      CLI:     sovereign-cli
-      Status:  sovereign-cli status
-      Inspect: sovereign-cli inspect
-      Brief:   sovereign-cli brief
-      User:    sovereign / sovereign  (change immediately)
+      CLI:       sovereign-cli
+      Status:    sovereign-cli status
+      Inspect:   sovereign-cli inspect
+      First boot: sovereign-first-boot
+      Bootstrap: sovereign-cli bootstrap owner 'secret'
+      User:      sovereign / sovereign  (change immediately)
     ============================================
   '';
 
-  services.getty.helpLine = ''
-    Sovereign OS live — login: sovereign / sovereign
+  services.getty.helpLine = lib.mkForce ''
+    Sovereign OS live — autologin: sovereign / sovereign
   '';
 
-  # Observability / SSH for recovery
+  environment.interactiveShellInit = ''
+    if [ -z "''${SOVEREIGN_FIRST_BOOT_SHOWN:-}" ]; then
+      export SOVEREIGN_FIRST_BOOT_SHOWN=1
+      command -v sovereign-first-boot >/dev/null && sovereign-first-boot || true
+    fi
+  '';
+
   services.openssh.enable = true;
   services.openssh.settings.PermitRootLogin = "yes";
 
-  # Locale
   time.timeZone = "UTC";
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = "us";

@@ -14,6 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(SOVEREIGN_BUILD_TESTS "Build Sovereign tests" ON)
 
 add_subdirectory(core/common)
+add_subdirectory(core/os_runtime)
 add_subdirectory(core/audit)
 add_subdirectory(core/goals)
 add_subdirectory(core/briefing)

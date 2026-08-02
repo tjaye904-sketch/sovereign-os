@@ -1,6 +1,6 @@
-// sovereign-daemon — long-running agent loop (owner decision 1B).
-// Periodically runs due AgentScheduler jobs (e.g. brief → memory).
+// sovereign-daemon — Phase II OS runtime: ServiceOrchestrator + agent loop.
 
+#include "service_orchestrator.hpp"
 #include "sovereign_host.hpp"
 
 #include <atomic>
@@ -30,15 +30,38 @@ std::filesystem::path DefaultDataRoot()
         return std::filesystem::path(home) / ".local" / "share" / "sovereign";
     return std::filesystem::temp_directory_path() / "sovereign";
 }
+
+const char* StateName(sovereign::os_runtime::ServiceState s)
+{
+    using sovereign::os_runtime::ServiceState;
+    switch (s)
+    {
+    case ServiceState::Stopped:
+        return "stopped";
+    case ServiceState::Starting:
+        return "starting";
+    case ServiceState::Running:
+        return "running";
+    case ServiceState::Degraded:
+        return "degraded";
+    case ServiceState::Failed:
+        return "failed";
+    case ServiceState::Stopping:
+        return "stopping";
+    }
+    return "unknown";
+}
 } // namespace
 
 int main(int argc, char** argv)
 {
-    if (argc >= 2 && (std::string(argv[1]) == "--help" || std::string(argv[1]) == "-h"))
+    if (argc >= 2 &&
+        (std::string(argv[1]) == "--help" || std::string(argv[1]) == "-h"))
     {
-        std::cout << "sovereign-daemon [tick_seconds]\n"
-                  << "  Long-running Sovereign agent loop. SIGINT/SIGTERM to stop.\n"
-                  << "  Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
+        std::cout
+            << "sovereign-daemon [tick_seconds]\n"
+            << "  Phase II orchestrator + agent loop. SIGINT/SIGTERM to stop.\n"
+            << "  Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
         return 0;
     }
     std::uint64_t tick_seconds = 60;
@@ -58,14 +81,74 @@ int main(int argc, char** argv)
         cfg.default_model = m;
 
     sovereign::product::SovereignHost host(cfg);
-    if (!host.Open())
+    sovereign::os_runtime::ServiceOrchestrator orch;
+
     {
-        std::cerr << "daemon: failed to open host at " << cfg.data_root << '\n';
+        sovereign::os_runtime::ServiceSpec s;
+        s.name = "host";
+        s.restart = sovereign::os_runtime::RestartPolicy::No;
+        s.start = [&] {
+            if (!host.Open())
+            {
+                std::cerr << "daemon: host open failed at " << cfg.data_root
+                          << '\n';
+                return false;
+            }
+            return true;
+        };
+        s.stop = [&] { host.Close(); };
+        s.health = [&] { return true; };
+        orch.Register(std::move(s));
+    }
+    {
+        sovereign::os_runtime::ServiceSpec s;
+        s.name = "agent-tick";
+        s.after = {"host"};
+        s.restart = sovereign::os_runtime::RestartPolicy::OnFailure;
+        s.max_restarts = 10;
+        s.start = [] { return true; };
+        s.stop = [] {};
+        s.health = [] { return true; };
+        orch.Register(std::move(s));
+    }
+    {
+        sovereign::os_runtime::ServiceSpec s;
+        s.name = "audit-heartbeat";
+        s.after = {"host"};
+        s.restart = sovereign::os_runtime::RestartPolicy::OnFailure;
+        s.start = [&] {
+            sovereign::audit::AuditEntry e;
+            e.category = "daemon";
+            e.action = "start";
+            e.detail = "orchestrator online";
+            static_cast<void>(host.Audit().Append(e));
+            return true;
+        };
+        s.stop = [&] {
+            sovereign::audit::AuditEntry e;
+            e.category = "daemon";
+            e.action = "stop";
+            e.detail = "orchestrator offline";
+            static_cast<void>(host.Audit().Append(e));
+        };
+        s.health = [] { return true; };
+        orch.Register(std::move(s));
+    }
+
+    if (!orch.StartAll())
+    {
+        std::cerr << "daemon: orchestrator StartAll failed\n";
+        for (const auto& st : orch.List())
+            std::cerr << "  " << st.name << " " << StateName(st.state) << " "
+                      << st.last_error << '\n';
         return 1;
     }
 
     std::cout << "sovereign-daemon started data_root=" << cfg.data_root
-              << " tick_s=" << tick_seconds << std::endl;
+              << " tick_s=" << tick_seconds << " orchestrator=on" << std::endl;
+    for (const auto& st : orch.List())
+        std::cout << "  service " << st.name << "=" << StateName(st.state)
+                  << std::endl;
 
     while (g_run)
     {
@@ -73,6 +156,7 @@ int main(int argc, char** argv)
         const auto now = static_cast<std::uint64_t>(
             duration_cast<seconds>(system_clock::now().time_since_epoch())
                 .count());
+        orch.WatchdogTick();
         auto due = host.Agent().Due(now);
         if (due.Ok())
         {
@@ -101,7 +185,7 @@ int main(int argc, char** argv)
             std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
-    host.Close();
+    orch.StopAll();
     std::cout << "sovereign-daemon stopped" << std::endl;
     return 0;
 }
