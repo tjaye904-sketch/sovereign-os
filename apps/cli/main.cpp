@@ -39,6 +39,8 @@ void PrintUsage()
         << "Usage:\n"
         << "  sovereign-cli status\n"
         << "  sovereign-cli bootstrap <name> <secret>\n"
+        << "  sovereign-cli service-create <name>\n"
+        << "  sovereign-cli machine-create <name>\n"
         << "  sovereign-cli login <name> <secret>\n"
         << "  sovereign-cli workspace-create <name> <kind>\n"
         << "  sovereign-cli workspace-list\n"
@@ -645,6 +647,55 @@ int main(int argc, char** argv)
             return 1;
         }
         std::cout << "operator_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "service-create" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().CreateServicePrincipal(sid, argv[2]);
+        if (!r.Ok())
+        {
+            std::cerr << "service-create failed error="
+                      << static_cast<int>(r.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "service_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "machine-create" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().CreateMachinePrincipal(sid, argv[2]);
+        if (!r.Ok())
+        {
+            std::cerr << "machine-create failed error="
+                      << static_cast<int>(r.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "machine_id=" << ToHex(r.value.bytes) << '\n';
         host.Close();
         return 0;
     }

@@ -172,6 +172,77 @@ Result<PrincipalId> IdentityService::CreateOperator(
     return result;
 }
 
+
+Result<PrincipalId> IdentityService::CreateServicePrincipal(
+    const SessionId& owner_session,
+    const std::string& display_name)
+{
+    Result<PrincipalId> result;
+    auto gate = RequireActiveOwnerSession(owner_session);
+    if (!gate.Ok())
+    {
+        result.error = gate.error;
+        return result;
+    }
+    if (display_name.empty())
+    {
+        result.error = IdentityError::InvalidArgument;
+        return result;
+    }
+    const auto now = NowUnixSeconds();
+    Principal svc{
+        .id = NewPrincipalId(),
+        .kind = PrincipalKind::Service,
+        .status = PrincipalStatus::Active,
+        .display_name = display_name,
+        .created_unix_seconds = now,
+        .updated_unix_seconds = now};
+    auto inserted = store_.InsertPrincipal(svc);
+    if (!inserted.Ok())
+    {
+        result.error = inserted.error;
+        return result;
+    }
+    static_cast<void>(store_.AssignRole(svc.id, kRoleService));
+    result.value = svc.id;
+    return result;
+}
+
+Result<PrincipalId> IdentityService::CreateMachinePrincipal(
+    const SessionId& owner_session,
+    const std::string& display_name)
+{
+    Result<PrincipalId> result;
+    auto gate = RequireActiveOwnerSession(owner_session);
+    if (!gate.Ok())
+    {
+        result.error = gate.error;
+        return result;
+    }
+    if (display_name.empty())
+    {
+        result.error = IdentityError::InvalidArgument;
+        return result;
+    }
+    const auto now = NowUnixSeconds();
+    Principal dev{
+        .id = NewPrincipalId(),
+        .kind = PrincipalKind::Device,
+        .status = PrincipalStatus::Active,
+        .display_name = display_name,
+        .created_unix_seconds = now,
+        .updated_unix_seconds = now};
+    auto inserted = store_.InsertPrincipal(dev);
+    if (!inserted.Ok())
+    {
+        result.error = inserted.error;
+        return result;
+    }
+    // Machines carry operator-class access only when roles assigned explicitly
+    result.value = dev.id;
+    return result;
+}
+
 Result<Principal> IdentityService::GetPrincipal(const PrincipalId& id) const
 {
     return store_.GetPrincipal(id);

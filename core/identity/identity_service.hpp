@@ -23,6 +23,15 @@ public:
         const std::string& display_name,
         const std::string& secret);
 
+    // Phase III — service & machine identities (no interactive login secret required)
+    Result<PrincipalId> CreateServicePrincipal(
+        const SessionId& owner_session,
+        const std::string& display_name);
+
+    Result<PrincipalId> CreateMachinePrincipal(
+        const SessionId& owner_session,
+        const std::string& display_name);
+
     Result<Principal> GetPrincipal(const PrincipalId& id) const;
     Result<std::vector<Principal>> ListPrincipals(
         const SessionId& requester_session) const;
