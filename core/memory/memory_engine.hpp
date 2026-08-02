@@ -21,6 +21,15 @@ public:
     Result<std::vector<MemoryRecord>> ListAll() const;
     Result<std::vector<MemoryRecord>> Search(const std::string& query) const;
 
+    // Phase V — importance & aging
+    Result<void> Touch(const RecordId& id); // bump access
+    Result<void> SetImportance(const RecordId& id, double importance);
+    Result<std::vector<ScoredRecord>> Ranked(std::size_t limit = 50) const;
+    // Remove records with aged score below threshold (does not delete if score ok)
+    Result<std::uint32_t> PruneBelow(double min_score);
+
+    static double AgeScore(const MemoryRecord& r, std::uint64_t now_unix);
+
 private:
     MemoryError Load();
     MemoryError Save() const;

@@ -47,6 +47,11 @@ public:
         const std::string& subject,
         const std::string& body);
 
+    // Phase VI: decompose goal into steps + confidence estimate
+    Result<ExecutionPlan> BuildPlan(
+        const PrincipalId& requester,
+        const std::string& goal);
+
 private:
     static AnalysisId NewId();
     static std::uint64_t Now();

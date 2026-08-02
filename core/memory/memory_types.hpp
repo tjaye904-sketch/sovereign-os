@@ -29,6 +29,16 @@ struct MemoryRecord
     std::uint64_t created_unix_seconds{0};
     std::vector<std::string> tags;
     std::string body;
+    // Phase V
+    double importance{0.5}; // 0..1
+    std::uint64_t last_access_unix_seconds{0};
+    std::uint32_t access_count{0};
+};
+
+struct ScoredRecord
+{
+    MemoryRecord record;
+    double score{0}; // aged importance
 };
 
 enum class MemoryError : std::uint8_t

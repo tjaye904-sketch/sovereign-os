@@ -59,6 +59,25 @@ struct ReflectionNote
     std::uint64_t created_unix_seconds{0};
 };
 
+// Phase VI — multi-step plan with confidence
+struct PlanStep
+{
+    std::string action;
+    std::string detail;
+    bool requires_governance{false};
+};
+
+struct ExecutionPlan
+{
+    AnalysisId id{};
+    PrincipalId requester{};
+    std::string goal;
+    std::vector<PlanStep> steps;
+    double confidence{0.0}; // 0..1
+    std::string uncertainty_notes;
+    std::uint64_t created_unix_seconds{0};
+};
+
 enum class CognitiveError : std::uint8_t
 {
     Ok = 0,

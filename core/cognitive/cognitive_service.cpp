@@ -175,3 +175,62 @@ Result<ReflectionNote> CognitiveService::Reflect(
 }
 
 } // namespace sovereign::cognitive
+
+Result<ExecutionPlan> CognitiveService::BuildPlan(
+    const PrincipalId& requester,
+    const std::string& goal)
+{
+    Result<ExecutionPlan> result;
+    if (goal.empty())
+    {
+        result.error = CognitiveError::InvalidArgument;
+        return result;
+    }
+    ExecutionPlan plan;
+    plan.id = NewId();
+    plan.requester = requester;
+    plan.goal = goal;
+    plan.created_unix_seconds = Now();
+
+    // Deterministic decomposition heuristics (local, no model required)
+    PlanStep s1;
+    s1.action = "inspect";
+    s1.detail = "Review current system status and relevant memory";
+    plan.steps.push_back(s1);
+
+    PlanStep s2;
+    s2.action = "policy-dry-run";
+    s2.detail = "Dry-run policy for candidate actions related to: " + goal;
+    plan.steps.push_back(s2);
+
+    PlanStep s3;
+    s3.action = "recommend";
+    s3.detail = "Submit governed recommendation for goal";
+    s3.requires_governance = true;
+    plan.steps.push_back(s3);
+
+    PlanStep s4;
+    s4.action = "execute";
+    s4.detail = "Execute only after governance approval";
+    s4.requires_governance = true;
+    plan.steps.push_back(s4);
+
+    // Confidence: higher when goal is short/specific; lower when vague
+    const double len_factor = goal.size() < 20 ? 0.55 : (goal.size() < 80 ? 0.72 : 0.65);
+    plan.confidence = len_factor;
+    plan.uncertainty_notes =
+        "Heuristic plan without live model; confidence is an estimate. "
+        "Governed steps require human approval.";
+
+    if (memory_)
+    {
+        sovereign::memory::MemoryRecord rec;
+        rec.author = requester;
+        rec.tags = {"cognitive", "plan"};
+        rec.body = "plan:" + goal + " conf=" + std::to_string(plan.confidence);
+        rec.importance = 0.7;
+        static_cast<void>(memory_->Append(rec));
+    }
+    result.value = std::move(plan);
+    return result;
+}

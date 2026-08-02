@@ -4,6 +4,8 @@
 #include <fstream>
 #include <random>
 #include <sstream>
+#include <cmath>
+#include <algorithm>
 
 namespace sovereign::memory
 {
@@ -171,6 +173,9 @@ MemoryError MemoryEngine::Load()
         r.created_unix_seconds = std::stoull(p[2]);
         r.tags = SplitTags(p[3]);
         r.body = Unesc(p[4]);
+        if (p.size() >= 6) r.importance = std::stod(p[5]);
+        if (p.size() >= 7) r.last_access_unix_seconds = std::stoull(p[6]);
+        if (p.size() >= 8) r.access_count = static_cast<std::uint32_t>(std::stoul(p[7]));
         records_.push_back(r);
     }
     return MemoryError::Ok;
@@ -186,7 +191,10 @@ MemoryError MemoryEngine::Save() const
             << Hex(r.author.bytes) << '|'
             << r.created_unix_seconds << '|'
             << JoinTags(r.tags) << '|'
-            << Esc(r.body) << '\n';
+            << Esc(r.body) << '|'
+            << r.importance << '|'
+            << r.last_access_unix_seconds << '|'
+            << r.access_count << '\n';
     }
     return MemoryError::Ok;
 }
@@ -211,6 +219,10 @@ Result<RecordId> MemoryEngine::Append(const MemoryRecord& record)
     {
         r.created_unix_seconds = Now();
     }
+    if (r.last_access_unix_seconds == 0)
+        r.last_access_unix_seconds = r.created_unix_seconds;
+    if (r.importance <= 0.0)
+        r.importance = 0.5;
     records_.push_back(r);
     if (Save() != MemoryError::Ok)
     {
@@ -296,3 +308,106 @@ Result<std::vector<MemoryRecord>> MemoryEngine::Search(const std::string& query)
 }
 
 } // namespace sovereign::memory
+
+double MemoryEngine::AgeScore(const MemoryRecord& r, std::uint64_t now_unix)
+{
+    const std::uint64_t base = r.last_access_unix_seconds
+                                   ? r.last_access_unix_seconds
+                                   : r.created_unix_seconds;
+    const double age_days =
+        now_unix > base ? static_cast<double>(now_unix - base) / 86400.0 : 0.0;
+    // exponential decay half-life ~30 days, boosted by access_count
+    const double decay = std::exp(-age_days / 30.0);
+    const double boost = 1.0 + 0.05 * static_cast<double>(r.access_count);
+    double s = r.importance * decay * boost;
+    if (s < 0) s = 0;
+    if (s > 1) s = 1;
+    return s;
+}
+
+Result<void> MemoryEngine::Touch(const RecordId& id)
+{
+    std::lock_guard lock(mutex_);
+    Result<void> result;
+    for (auto& r : records_)
+    {
+        if (r.id == id)
+        {
+            r.last_access_unix_seconds = Now();
+            ++r.access_count;
+            if (Save() != MemoryError::Ok)
+                result.error = MemoryError::StorageFailure;
+            return result;
+        }
+    }
+    result.error = MemoryError::NotFound;
+    return result;
+}
+
+Result<void> MemoryEngine::SetImportance(const RecordId& id, double importance)
+{
+    std::lock_guard lock(mutex_);
+    Result<void> result;
+    if (importance < 0.0 || importance > 1.0)
+    {
+        result.error = MemoryError::InvalidArgument;
+        return result;
+    }
+    for (auto& r : records_)
+    {
+        if (r.id == id)
+        {
+            r.importance = importance;
+            if (Save() != MemoryError::Ok)
+                result.error = MemoryError::StorageFailure;
+            return result;
+        }
+    }
+    result.error = MemoryError::NotFound;
+    return result;
+}
+
+Result<std::vector<ScoredRecord>> MemoryEngine::Ranked(std::size_t limit) const
+{
+    std::lock_guard lock(mutex_);
+    Result<std::vector<ScoredRecord>> result;
+    const auto now = Now();
+    for (const auto& r : records_)
+    {
+        ScoredRecord s;
+        s.record = r;
+        s.score = AgeScore(r, now);
+        result.value.push_back(std::move(s));
+    }
+    std::sort(result.value.begin(), result.value.end(),
+              [](const ScoredRecord& a, const ScoredRecord& b) {
+                  return a.score > b.score;
+              });
+    if (result.value.size() > limit)
+        result.value.resize(limit);
+    return result;
+}
+
+Result<std::uint32_t> MemoryEngine::PruneBelow(double min_score)
+{
+    std::lock_guard lock(mutex_);
+    Result<std::uint32_t> result;
+    const auto now = Now();
+    std::vector<MemoryRecord> keep;
+    std::uint32_t removed = 0;
+    for (const auto& r : records_)
+    {
+        if (AgeScore(r, now) < min_score)
+            ++removed;
+        else
+            keep.push_back(r);
+    }
+    records_.swap(keep);
+    if (Save() != MemoryError::Ok)
+    {
+        result.error = MemoryError::StorageFailure;
+        return result;
+    }
+    result.value = removed;
+    return result;
+}

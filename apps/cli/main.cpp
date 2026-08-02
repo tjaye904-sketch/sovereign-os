@@ -85,6 +85,9 @@ void PrintUsage()
         << "  sovereign-cli project-summary [--save] [dir]\n"
         << "  sovereign-cli review-diff [--save] <diff-file>\n"
         << "  sovereign-cli policy-check <role> <action>\n"
+        << "  sovereign-cli memory-rank\n"
+        << "  sovereign-cli memory-prune <min-score>\n"
+        << "  sovereign-cli plan <goal...>\n"
         << "  sovereign-cli policy-dry-run <role> <action>\n"
         << "  sovereign-cli policy-version\n"
         << "  sovereign-cli policy-rule-set <action> <min-role> <allow|deny>\n"
@@ -437,7 +440,118 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    if (cmd == "audit-list")
+    
+    if (cmd == "memory-rank")
+    {
+        auto r = host.Memory().Ranked(20);
+        if (!r.Ok())
+        {
+            std::cerr << "memory-rank failed\n";
+            host.Close();
+            return 1;
+        }
+        for (const auto& s : r.value)
+        {
+            std::cout << "score=" << s.score << " importance=" << s.record.importance
+                      << " body=" << s.record.body.substr(0, 80) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "memory-prune" && argc >= 3)
+    {
+        double min_score = std::stod(argv[2]);
+        auto r = host.Memory().PruneBelow(min_score);
+        if (!r.Ok())
+        {
+            std::cerr << "memory-prune failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "removed=" << r.value << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "memory-importance" && argc >= 4)
+    {
+        sovereign::memory::RecordId id{};
+        // accept hex id
+        auto hex = std::string(argv[2]);
+        if (hex.size() == 32)
+        {
+            auto n = [](char c) {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return -1;
+            };
+            for (std::size_t i = 0; i < 16; ++i)
+            {
+                int hi = n(hex[i * 2]), lo = n(hex[i * 2 + 1]);
+                if (hi < 0 || lo < 0)
+                {
+                    std::cerr << "bad record id\n";
+                    host.Close();
+                    return 1;
+                }
+                id.bytes[i] = static_cast<std::uint8_t>((hi << 4) | lo);
+            }
+        }
+        double imp = std::stod(argv[3]);
+        auto r = host.Memory().SetImportance(id, imp);
+        if (!r.Ok())
+        {
+            std::cerr << "memory-importance failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "ok\n";
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "plan" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::PrincipalId actor{};
+        // use session validation path via identity if available — store principal in session file?
+        // Fallback: nil principal is ok for plan heuristics
+        std::string goal;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2) goal.push_back(' ');
+            goal += argv[i];
+        }
+        auto r = host.Cognitive().BuildPlan(actor, goal);
+        if (!r.Ok())
+        {
+            std::cerr << "plan failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "goal=" << r.value.goal << '\n';
+        std::cout << "confidence=" << r.value.confidence << '\n';
+        std::cout << "uncertainty=" << r.value.uncertainty_notes << '\n';
+        for (std::size_t i = 0; i < r.value.steps.size(); ++i)
+        {
+            const auto& st = r.value.steps[i];
+            std::cout << "step" << i << " action=" << st.action
+                      << " gov=" << (st.requires_governance ? "1" : "0")
+                      << " detail=" << st.detail << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+if (cmd == "audit-list")
     {
         if (argc >= 3)
         {
