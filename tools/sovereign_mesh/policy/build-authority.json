@@ -1,0 +1,64 @@
+{
+  "$schema": "../schemas/build-authority.schema.json",
+  "policy_id": "sovereign-build-authority-v1",
+  "version": 1,
+  "human_authority": {
+    "principal": "sovereign-owner",
+    "exclusive_actions": [
+      "approve_design",
+      "reject_design",
+      "request_revision",
+      "approve_integration",
+      "approve_merge",
+      "approve_release",
+      "expand_agent_permissions",
+      "modify_governance"
+    ]
+  },
+  "agent_default_permissions": [
+    "inspect",
+    "analyze",
+    "propose",
+    "draft",
+    "test",
+    "review",
+    "recommend"
+  ],
+  "agent_prohibited_actions": [
+    "write_primary_checkout",
+    "merge_primary_branch",
+    "push_remote",
+    "publish_artifact",
+    "release",
+    "modify_governance",
+    "expand_own_permissions",
+    "approve_own_work",
+    "disable_audit",
+    "bypass_sandbox",
+    "bypass_approval"
+  ],
+  "repository_controls": {
+    "primary_branch": "master",
+    "agent_worktree_required": true,
+    "direct_primary_checkout_writes": false,
+    "direct_primary_branch_commits": false,
+    "remote_pushes": false
+  },
+  "execution_controls": {
+    "default_mode": "preview",
+    "dangerous_bypass_flags": [
+      "--yolo",
+      "--dangerously-bypass-approvals-and-sandbox",
+      "--dangerously-bypass-hook-trust"
+    ],
+    "shell_hooks_auto_accept": false,
+    "network_access_default": "restricted",
+    "approval_required_for_mutation": true
+  },
+  "integration_controls": {
+    "approved_decision_required": true,
+    "independent_review_required": true,
+    "tests_required": true,
+    "evidence_packet_required": true
+  }
+}

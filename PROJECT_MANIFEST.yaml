@@ -1,0 +1,67 @@
+schema_version: 1
+
+project:
+  name: Sovereign
+  repository_root: .
+  default_documentation_root: docs/project
+
+state:
+  current_phase: runtime-platform-complete
+  current_milestone: identity-service
+  runtime_complete: true
+  backend_complete: false
+  product_complete: false
+
+progress_estimates:
+  runtime_platform_percent: "98-99"
+  blueprint_backend_percent: "20-30"
+  full_product_percent: "10-20"
+
+canonical_documents:
+  vision: docs/project/VISION.md
+  bootstrap: docs/project/SOVEREIGN_BOOTSTRAP.md
+  identity_service_spec: docs/project/IDENTITY_SERVICE_SPEC.md
+  status: docs/project/PROJECT_STATUS.md
+  implementation_matrix: docs/project/IMPLEMENTATION_MATRIX.md
+  roadmap: docs/project/IMPLEMENTATION_ROADMAP.md
+  engineering_journal: docs/project/ENGINEERING_JOURNAL.md
+
+governance:
+  latest_decision:
+    id: GD-001
+    path: docs/project/governance/GD-001-Engineering-Governance.md
+  decisions_directory: docs/project/governance
+
+audits:
+  latest:
+    id: Audit-001
+    path: docs/project/AUDITS/Audit-001-Runtime-v1.md
+    status: accepted
+  directory: docs/project/AUDITS
+
+development:
+  current_branch_at_manifest_creation: "dw-001-002-agent-runner"
+  next_service: identity
+  recommended_service_order:
+    - identity
+    - governance
+    - policy
+    - memory
+    - workspace
+    - archive
+    - curiosity
+    - model-router
+    - synchronization
+    - reasoning
+    - decision
+    - reflection
+
+validation:
+  last_recorded_test_total: 100
+  last_recorded_test_passed: 100
+  last_recorded_test_failed: 0
+  evidence_source: docs/project/AUDITS/Audit-001-Runtime-v1.md
+
+metadata:
+  created: "2026-07-26"
+  last_updated: "2026-07-29"

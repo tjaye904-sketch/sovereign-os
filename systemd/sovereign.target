@@ -1,0 +1,5 @@
+[Unit]
+Description=Sovereign Cognitive OS
+Requires=multi-user.target
+After=multi-user.target
+AllowIsolate=yes

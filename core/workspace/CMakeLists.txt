@@ -1,0 +1,4 @@
+add_library(sovereign_workspace STATIC workspace_service.cpp)
+target_include_directories(sovereign_workspace PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(sovereign_workspace PUBLIC cxx_std_23)
+target_compile_options(sovereign_workspace PRIVATE -Wall -Wextra -Wpedantic)

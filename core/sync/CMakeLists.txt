@@ -1,0 +1,7 @@
+add_library(sovereign_sync STATIC sync_service.cpp peer_bundle.cpp)
+target_include_directories(sovereign_sync PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(sovereign_sync PUBLIC cxx_std_23)
+target_link_libraries(sovereign_sync PUBLIC sovereign_common)
+target_compile_options(sovereign_sync PRIVATE -Wall -Wextra -Wpedantic)
+
+target_link_libraries(sovereign_sync PUBLIC sovereign_goals sovereign_memory sovereign_semantic sovereign_audit)

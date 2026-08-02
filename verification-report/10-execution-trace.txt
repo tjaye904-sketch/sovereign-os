@@ -1,0 +1,53 @@
+# Observable execution trace — E2E
+timestamp=2026-07-30T12:32:24Z
+STEP data_root=/tmp/tmp.Lv34LuNG5Z
+STEP bootstrap
+owner_id=a536fdba93a3b5b792b623ed9a34f9a9
+STEP login
+session_id=7573a7223f56bb10f1bc64bda3beb8c6
+STEP workspace-create
+workspace_id=cef26a1fac3c7def1f0478db5f06fb3f
+STEP memory-add
+record_id=cf51f58e1f3d4c40c215a9ae0671a4aa
+STEP chat (may fail offline)
+TRACE model_offline_allowed
+STEP recommend
+TRACE decision_id=7263cdb00288b482ae3c034cbdf373e9
+STEP approve
+approved
+evidence_artifact=ce50e85352d270056c0812fa36406f1a
+STEP execute
+executed ok detail=executed:ship
+STEP inspect audit
+=== Sovereign transparency report ===
+
+## immutable audit evidence
+  entries=3 (tail)
+  1785414744 identity/bootstrap_owner owner created
+  1785414744 identity/login session issued
+  1785414744 governance/approve e2e approve
+  store=append-only file audit.dat under data_root/audit
+STEP inspect coverage
+=== Sovereign transparency report ===
+
+## specification coverage (approved v1)
+  identity=complete governance=complete policy=complete
+  memory=complete semantic=complete workspace=complete
+  archive=complete sync_peer=complete goals=complete
+  briefing=complete audit=complete domain_agents=complete
+  daemon=complete cli=complete transparency=this_report
+  deferred_by_owner=http_api,desktop,hermes_bridge
+  approved_v1_scope=100%
+STEP restart persistence
+TRACE memory_persisted=yes
+TRACE workspace_persisted=yes
+data_root="/tmp/tmp.Lv34LuNG5Z"
+ollama=down
+workspaces=1
+argon2=t=2 m_kib=32768 p=2
+surface=cli-only
+sync=peer-bundle
+hermes=separate
+model=openclaw
+embed_model=nomic-embed-text (fallback hash-v1)
+e2e-temp-dataroot: OK

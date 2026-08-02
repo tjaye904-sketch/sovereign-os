@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+"""Executable launcher for the Sovereign Mesh workflow controller."""
+
+from pathlib import Path
+import sys
+
+TOOLS_DIRECTORY = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(TOOLS_DIRECTORY))
+
+from sovereign_mesh.workflow_cli import main
+
+raise SystemExit(main())

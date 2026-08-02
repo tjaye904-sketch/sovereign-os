@@ -1,0 +1,5 @@
+add_library(sovereign_semantic STATIC local_embedder.cpp semantic_store.cpp)
+target_include_directories(sovereign_semantic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(sovereign_semantic PUBLIC cxx_std_23)
+target_link_libraries(sovereign_semantic PUBLIC sovereign_common)
+target_compile_options(sovereign_semantic PRIVATE -Wall -Wextra -Wpedantic)

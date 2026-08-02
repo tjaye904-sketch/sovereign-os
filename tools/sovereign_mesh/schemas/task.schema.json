@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sovereign://schemas/task.schema.json",
+  "title": "Sovereign Development Task",
+  "type": "object",
+  "required": [
+    "task_id",
+    "title",
+    "objective",
+    "base_commit",
+    "risk_tier",
+    "allowed_paths",
+    "acceptance_criteria",
+    "status"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^SDM-[0-9]{4,}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "string",
+      "minLength": 1
+    },
+    "base_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "risk_tier": {
+      "enum": ["low", "moderate", "high", "critical"]
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "assigned_workers": {
+      "type": "array",
+      "items": {
+        "enum": ["codex", "hermes", "openclaw"]
+      },
+      "uniqueItems": true
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "approved_for_work",
+        "in_progress",
+        "awaiting_review",
+        "awaiting_user_decision",
+        "approved",
+        "rejected",
+        "revision_requested",
+        "integrated",
+        "verified"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

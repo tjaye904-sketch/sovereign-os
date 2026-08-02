@@ -1,0 +1,62 @@
+add_library(
+    sovereign_event_runtime
+    STATIC
+    event_bus.cpp
+    runtime_message_bus.cpp
+    runtime_service_invoker.cpp
+    runtime_service_route.cpp
+    runtime_service_dispatcher.cpp
+    runtime_service_message_protocol.cpp
+    runtime_service_message_gateway.cpp
+    runtime_service_routed_message_protocol.cpp
+    runtime_service_routed_message_gateway.cpp
+    runtime_service_endpoint_protocol.cpp
+    runtime_service_endpoint.cpp
+    runtime_service_capability_negotiator.cpp
+    runtime_service_capability_provider_selection_policy.cpp
+    runtime_service_capability_provider_selection_policy_protocol.cpp
+    runtime_service_capability_provider_selection_policy_service.cpp
+    runtime_service_capability_protocol.cpp
+    runtime_service_capability_invoker.cpp
+    runtime_service_capability_invocation_protocol.cpp
+    runtime_service_capability_invocation_policy.cpp
+    runtime_service_capability_invocation_policy_protocol.cpp
+    runtime_service_capability_invocation_policy_service.cpp
+    dead_letter_queue.cpp
+    event_queue.cpp
+    event_router.cpp
+    scheduler.cpp
+    service_host.cpp
+    lifecycle_manager.cpp
+    runtime.cpp
+    memory_log_sink.cpp
+    config_manager.cpp
+    health_monitor.cpp
+    uuid.cpp
+    log_manager.cpp
+    service_registry.cpp
+    service_dependency.cpp
+    service_capability.cpp
+)
+
+target_include_directories(
+    sovereign_event_runtime
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_compile_features(
+    sovereign_event_runtime
+    PUBLIC
+        cxx_std_23
+)
+
+target_compile_options(
+    sovereign_event_runtime
+    PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+        -Wshadow
+)

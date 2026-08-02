@@ -1,0 +1,5 @@
+add_library(sovereign_executor STATIC action_executor.cpp)
+target_include_directories(sovereign_executor PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(sovereign_executor PUBLIC cxx_std_23)
+target_link_libraries(sovereign_executor PUBLIC sovereign_cognitive sovereign_policy)
+target_compile_options(sovereign_executor PRIVATE -Wall -Wextra -Wpedantic)

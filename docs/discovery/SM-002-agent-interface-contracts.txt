@@ -1,0 +1,1345 @@
+============================================================
+SOVEREIGN MERGE — SM-002 AGENT INTERFACE CONTRACTS
+Generated: 2026-07-22T03:53:11-04:00
+Repository: /home/tjaye904/sovereign
+Base commit: 66f9195aa284018c0e949df48b566c7fb7e0696f
+============================================================
+
+=== GOVERNANCE SAFETY NOTES ===
+No agent execution is performed by this packet.
+No configuration file contents are dumped.
+No secret stores are queried.
+No worktrees, agents, tasks, or sessions are created.
+Dangerous bypass flags are prohibited.
+
+============================================================
+HERMES STATUS
+COMMAND: hermes status
+============================================================
+
+┌─────────────────────────────────────────────────────────┐
+│                 ⚕ Hermes Agent Status                  │
+└─────────────────────────────────────────────────────────┘
+
+◆ Environment
+  Project:      /home/tjaye904/.hermes/hermes-agent
+  Python:       3.11.15
+  .env file:    ✓ exists
+  Model:        nemotron-3-super:cloud
+  Provider:     ollama-launch
+
+◆ API Keys
+  OpenRouter    ✗ (not set)
+  OpenAI        ✗ (not set)
+  Google / Gemini  ✗ (not set)
+  DeepSeek      ✗ (not set)
+  xAI / Grok    ✗ (not set)
+  NVIDIA NIM    ✗ (not set)
+  Z.AI / GLM    ✗ (not set)
+  Kimi          ✗ (not set)
+  StepFun Step Plan  ✗ (not set)
+  MiniMax       ✗ (not set)
+  MiniMax-CN    ✗ (not set)
+  Firecrawl     ✗ (not set)
+  Tavily        ✗ (not set)
+  Browser Use   ✗ (not set)
+  Browserbase   ✗ (not set)
+  FAL           ✗ (not set)
+  ElevenLabs    ✗ (not set)
+  GitHub        ✗ (not set)
+  Anthropic     ✗ (not set)
+
+◆ Auth Providers
+  Nous Portal   ✗ not logged in (run: hermes portal)
+  OpenAI Codex  ✗ not logged in (run: hermes model)
+    Auth file:  /home/tjaye904/.hermes/auth.json
+    Error:      No Codex credentials stored. Run `hermes auth` to authenticate.
+  Qwen OAuth    ✗ not logged in (run: qwen auth qwen-oauth)
+    Auth file:  /home/tjaye904/.qwen/oauth_creds.json
+    Error:      Qwen CLI credentials not found. Run 'qwen auth qwen-oauth' first.
+  MiniMax OAuth  ✗ not logged in (run: hermes auth add minimax-oauth)
+  xAI OAuth     ✗ not logged in (run: hermes auth add xai-oauth)
+    Auth file:  /home/tjaye904/.hermes/auth.json
+    Error:      No xAI OAuth credentials stored. Select xAI Grok OAuth (SuperGrok / Premium+) in `hermes model`.
+
+◆ API-Key Providers
+  Z.AI / GLM       ✗ not configured (run: hermes model)
+  Kimi / Moonshot  ✗ not configured (run: hermes model)
+  StepFun Step Plan ✗ not configured (run: hermes model)
+  MiniMax          ✗ not configured (run: hermes model)
+  MiniMax (China)  ✗ not configured (run: hermes model)
+
+◆ Terminal Backend
+  Backend:      local
+  Sudo:         ✗ disabled
+
+◆ Messaging Platforms
+  Telegram      ✓ configured (home: 8395087769)
+  Discord       ✗ not configured
+  WhatsApp      ✗ not configured
+  Signal        ✗ not configured
+  Slack         ✗ not configured
+  Email         ✗ not configured
+  SMS           ✗ not configured
+  DingTalk      ✗ not configured
+  Feishu        ✗ not configured
+  WeCom         ✗ not configured
+  WeCom Callback  ✗ not configured
+  Weixin        ✗ not configured
+  BlueBubbles   ✗ not configured
+  QQBot         ✗ not configured
+  Yuanbao       ✗ not configured
+
+◆ Gateway Service
+  Status:       ✗ stopped
+  Manager:      systemd (user)
+  Service:      installed but stopped
+
+◆ Scheduled Jobs
+  Jobs:         0
+
+◆ Sessions
+  Active:       0
+
+────────────────────────────────────────────────────────────
+  Run 'hermes doctor' for detailed diagnostics
+  Run 'hermes setup' to configure
+
+
+============================================================
+HERMES MODEL COMMAND HELP
+COMMAND: hermes model --help
+============================================================
+usage: hermes model [-h] [--refresh] [--portal-url PORTAL_URL]
+                    [--inference-url INFERENCE_URL] [--client-id CLIENT_ID]
+                    [--scope SCOPE] [--no-browser] [--manual-paste]
+                    [--timeout TIMEOUT] [--ca-bundle CA_BUNDLE] [--insecure]
+
+Interactively select your inference provider and default model
+
+options:
+  -h, --help            show this help message and exit
+  --refresh             Wipe the model picker disk cache and re-fetch every
+                        provider's live /v1/models list.
+  --portal-url PORTAL_URL
+                        Portal base URL for Nous login (default: production
+                        portal)
+  --inference-url INFERENCE_URL
+                        Inference API base URL for Nous login (default:
+                        production inference API)
+  --client-id CLIENT_ID
+                        OAuth client id to use for Nous login (default:
+                        hermes-cli)
+  --scope SCOPE         OAuth scope to request for Nous login
+  --no-browser          Do not attempt to open the browser automatically
+                        during Nous login
+  --manual-paste        For loopback OAuth providers (xai-oauth, ...): skip
+                        the local callback listener and paste the failed
+                        callback URL from your browser instead. Use on
+                        browser-only remotes (Cloud Shell, Codespaces, EC2
+                        Instance Connect, ...). See #26923.
+  --timeout TIMEOUT     HTTP request timeout in seconds for Nous login
+                        (default: 15)
+  --ca-bundle CA_BUNDLE
+                        Path to CA bundle PEM file for Nous TLS verification
+  --insecure            Disable TLS verification for Nous login (testing only)
+
+============================================================
+HERMES PROFILE COMMAND HELP
+COMMAND: hermes profile --help
+============================================================
+usage: hermes profile [-h]
+                      {list,use,create,delete,describe,show,alias,rename,export,import,install,update,info}
+                      ...
+
+positional arguments:
+  {list,use,create,delete,describe,show,alias,rename,export,import,install,update,info}
+    list                List all profiles
+    use                 Set sticky default profile
+    create              Create a new profile
+    delete              Delete a profile
+    describe            Read or set a profile's description (used by the
+                        kanban orchestrator)
+    show                Show profile details
+    alias               Manage wrapper scripts
+    rename              Rename a profile
+    export              Export a profile to archive
+    import              Import a profile from archive
+    install             Install a profile distribution from a git URL or local
+                        directory
+    update              Re-pull a distribution and apply updates (user data
+                        preserved)
+    info                Show a profile's distribution manifest (version,
+                        requirements, source)
+
+options:
+  -h, --help            show this help message and exit
+
+============================================================
+HERMES KANBAN COMMAND HELP
+COMMAND: hermes kanban --help
+============================================================
+usage: hermes kanban [-h] [--board <slug>]
+                     {init,boards,create,swarm,list,ls,show,assign,reclaim,reassign,diagnostics,diag,link,unlink,claim,comment,complete,edit,block,schedule,unblock,promote,archive,tail,dispatch,daemon,watch,stats,notify-subscribe,notify-list,notify-unsubscribe,log,runs,heartbeat,assignees,context,specify,decompose,gc}
+                     ...
+
+Durable SQLite-backed task board shared across Hermes profiles. Tasks are
+claimed atomically, can depend on other tasks, and are executed by a named
+profile in an isolated workspace. See https://hermes-
+agent.nousresearch.com/docs/user-guide/features/kanban or docs/hermes-
+kanban-v1-spec.pdf for the full design.
+
+positional arguments:
+  {init,boards,create,swarm,list,ls,show,assign,reclaim,reassign,diagnostics,diag,link,unlink,claim,comment,complete,edit,block,schedule,unblock,promote,archive,tail,dispatch,daemon,watch,stats,notify-subscribe,notify-list,notify-unsubscribe,log,runs,heartbeat,assignees,context,specify,decompose,gc}
+    init                Create kanban.db if missing (idempotent)
+    boards              Manage kanban boards (one board per project /
+                        workstream)
+    create              Create a new task
+    swarm               Create a Kanban Swarm v1 graph (parallel workers →
+                        verifier → synthesizer)
+    list (ls)           List tasks
+    show                Show a task with comments + events
+    assign              Assign or reassign a task
+    reclaim             Release an active worker claim on a running task
+    reassign            Reassign a task to a different profile, optionally
+                        reclaiming first
+    diagnostics (diag)  List active diagnostics on the current board
+    link                Add a parent->child dependency
+    unlink              Remove a parent->child dependency
+    claim               Atomically claim a ready task (prints resolved
+                        workspace path)
+    comment             Append a comment
+    complete            Mark one or more tasks done
+    edit                Edit recovery fields on an already-completed task
+    block               Mark one or more tasks blocked
+    schedule            Park one or more tasks in Scheduled (waiting on time,
+                        not human input)
+    unblock             Return one or more blocked/scheduled tasks to ready
+    promote             Manually move one or more todo/blocked tasks to ready
+                        (recovery path)
+    archive             Archive one or more tasks
+    tail                Follow a task's event stream
+    dispatch            One dispatcher pass: reclaim stale, promote ready,
+                        spawn workers
+    daemon              DEPRECATED — dispatcher now runs in the gateway. Use
+                        `hermes gateway start`.
+    watch               Live-stream task_events to the terminal (Ctrl+C to
+                        exit)
+    stats               Per-status + per-assignee counts + oldest-ready age
+    notify-subscribe    Subscribe a gateway source to a task's terminal events
+                        (used by /kanban subscribe in the gateway adapter)
+    notify-list         List notification subscriptions (optionally for a
+                        single task)
+    notify-unsubscribe  Remove a gateway subscription from a task
+    log                 Print the worker log for a task (from <kanban-
+                        root>/kanban/logs/)
+    runs                Show attempt history for a task (one row per run:
+                        profile, outcome, elapsed, summary)
+    heartbeat           Emit a heartbeat event for a running task (worker
+                        liveness signal)
+    assignees           List known profiles + per-profile task counts (union
+                        of ~/.hermes/profiles/ and current assignees on the
+                        board)
+    context             Print the full context a worker sees for a task (title
+                        + body + parent results + comments).
+    specify             Flesh out a triage-column task into a concrete spec
+                        (title + body) and promote it to todo. Uses the
+                        auxiliary LLM configured under
+                        auxiliary.triage_specifier.
+    decompose           Decompose a triage-column task into a graph of child
+                        tasks routed to specialist profiles by description.
+                        Falls back to specify-style single-task promotion when
+                        the task doesn't benefit from fan-out. Uses
+                        auxiliary.kanban_decomposer.
+    gc                  Garbage-collect archived-task workspaces, old events,
+                        and old logs
+
+options:
+  -h, --help            show this help message and exit
+  --board <slug>        Board slug to operate on. Defaults to the current
+                        board (set via `hermes kanban boards switch <slug>` or
+                        the HERMES_KANBAN_BOARD env var). Use `hermes kanban
+                        boards list` to see all boards.
+
+============================================================
+HERMES ACP COMMAND HELP
+COMMAND: hermes acp --help
+============================================================
+usage: hermes acp [-h] [--accept-hooks] [--version] [--check] [--setup]
+                  [--setup-browser] [--yes]
+
+Start Hermes Agent in ACP mode for editor integration (VS Code, Zed,
+JetBrains)
+
+options:
+  -h, --help       show this help message and exit
+  --accept-hooks   Auto-approve unseen shell hooks without a TTY prompt
+                   (equivalent to HERMES_ACCEPT_HOOKS=1 / hooks_auto_accept:
+                   true).
+  --version        Print Hermes ACP version and exit
+  --check          Verify ACP dependencies and adapter imports, then exit
+  --setup          Run interactive Hermes provider/model setup for ACP
+                   terminal auth
+  --setup-browser  Install agent-browser + Playwright Chromium into
+                   ~/.hermes/node/ for browser tool support (idempotent).
+  --yes, -y        Accept all prompts (used by --setup-browser to skip the
+                   ~400 MB Chromium download confirmation).
+
+============================================================
+HERMES MCP COMMAND HELP
+COMMAND: hermes mcp --help
+============================================================
+usage: hermes mcp [-h] [--accept-hooks]
+                  {serve,add,remove,rm,list,ls,test,configure,config,login,picker,catalog,install}
+                  ...
+
+Manage MCP server connections and run Hermes as an MCP server. MCP servers
+provide additional tools via the Model Context Protocol. Use 'hermes mcp add'
+to connect to a new server, or 'hermes mcp serve' to expose Hermes
+conversations over MCP.
+
+positional arguments:
+  {serve,add,remove,rm,list,ls,test,configure,config,login,picker,catalog,install}
+    serve               Run Hermes as an MCP server (expose conversations to
+                        other agents)
+    add                 Add an MCP server (discovery-first install)
+    remove (rm)         Remove an MCP server
+    list (ls)           List configured MCP servers
+    test                Test MCP server connection
+    configure (config)  Toggle tool selection
+    login               Force re-authentication for an OAuth-based MCP server
+    picker              Interactive catalog picker (also the default for
+                        `hermes mcp`)
+    catalog             List Nous-approved MCPs available for one-click
+                        install
+    install             Install a catalog MCP by name (e.g. `hermes mcp
+                        install n8n`)
+
+options:
+  -h, --help            show this help message and exit
+  --accept-hooks        Auto-approve unseen shell hooks without a TTY prompt
+                        (equivalent to HERMES_ACCEPT_HOOKS=1 /
+                        hooks_auto_accept: true).
+
+============================================================
+HERMES TOOLS COMMAND HELP
+COMMAND: hermes tools --help
+============================================================
+usage: hermes tools [-h] [--summary] {list,disable,enable,post-setup} ...
+
+Enable, disable, or list tools for CLI, Telegram, Discord, etc. Built-in
+toolsets use plain names (e.g. web, memory). MCP tools use server:tool
+notation (e.g. github:create_issue). Run 'hermes tools' with no subcommand for
+the interactive configuration UI.
+
+positional arguments:
+  {list,disable,enable,post-setup}
+    list                Show all tools and their enabled/disabled status
+    disable             Disable toolsets or MCP tools
+    enable              Enable toolsets or MCP tools
+    post-setup          Run a provider's post-setup install hook
+                        (npm/pip/binary)
+
+options:
+  -h, --help            show this help message and exit
+  --summary             Print a summary of enabled tools per platform and exit
+
+============================================================
+HERMES CHECKPOINTS COMMAND HELP
+COMMAND: hermes checkpoints --help
+============================================================
+usage: hermes checkpoints [-h] COMMAND ...
+
+Manage the filesystem checkpoint store — the shadow git repo hermes uses to
+snapshot working directories before write_file/patch/terminal calls. Lets you
+see how much space checkpoints occupy, force a prune, or wipe the base.
+
+positional arguments:
+  COMMAND
+    status      Show total size, project count, and per-project breakdown
+    list        Alias for 'status'
+    prune       Delete orphan/stale checkpoints and GC the store
+    clear       Delete the entire checkpoint base (all /rollback history)
+    clear-legacy
+                Delete only the legacy-<ts>/ archives from v1 migration
+
+options:
+  -h, --help    show this help message and exit
+
+============================================================
+HERMES SESSIONS COMMAND HELP
+COMMAND: hermes sessions --help
+============================================================
+usage: hermes sessions [-h]
+                       {list,export,delete,prune,optimize,repair,stats,rename,browse}
+                       ...
+
+View and manage the SQLite session store
+
+positional arguments:
+  {list,export,delete,prune,optimize,repair,stats,rename,browse}
+    list                List recent sessions
+    export              Export sessions to a JSONL file
+    delete              Delete a specific session
+    prune               Delete old sessions
+    optimize            Reclaim disk space: merge FTS5 segments + VACUUM (no
+                        data change)
+    repair              Repair a malformed state.db schema so hidden sessions
+                        reappear
+    stats               Show session store statistics
+    rename              Set or change a session's title
+    browse              Interactive session picker — browse, search, and
+                        resume sessions
+
+options:
+  -h, --help            show this help message and exit
+
+============================================================
+HERMES SECURITY COMMAND HELP
+COMMAND: hermes security --help
+============================================================
+usage: hermes security [-h] <subcommand> ...
+
+On-demand vulnerability scan against OSV.dev. Covers the Hermes venv
+(installed PyPI dists), Python deps declared by plugins under
+~/.hermes/plugins/, and pinned npx/uvx MCP servers in config.yaml. Does NOT
+scan globally-installed packages or editor/browser extensions.
+
+positional arguments:
+  <subcommand>
+    audit       Run a one-shot supply-chain audit
+
+options:
+  -h, --help    show this help message and exit
+
+============================================================
+HERMES CONFIG COMMAND HELP
+COMMAND: hermes config --help
+============================================================
+usage: hermes config [-h] {show,edit,set,path,env-path,check,migrate} ...
+
+Manage Hermes Agent configuration
+
+positional arguments:
+  {show,edit,set,path,env-path,check,migrate}
+    show                Show current configuration
+    edit                Open config file in editor
+    set                 Set a configuration value
+    path                Print config file path
+    env-path            Print .env file path
+    check               Check for missing/outdated config
+    migrate             Update config with new options
+
+options:
+  -h, --help            show this help message and exit
+
+============================================================
+HERMES DOCTOR
+COMMAND: hermes doctor
+============================================================
+
+┌─────────────────────────────────────────────────────────┐
+│                 🩺 Hermes Doctor                        │
+└─────────────────────────────────────────────────────────┘
+
+◆ Security Advisories
+  ✓ No active security advisories
+
+◆ MCP Server Security
+  ✓ No suspicious MCP stdio commands
+
+◆ Python Environment
+  ✓ Python 3.11.15
+  ✓ Virtual environment active
+  ✓ Version files consistent (0.17.0)
+
+◆ SSL / CA Certificates
+  ✓ SSL CA certificate bundle is valid
+
+◆ Required Packages
+  ✓ OpenAI SDK
+  ✓ Rich (terminal UI)
+  ✓ python-dotenv
+  ✓ PyYAML
+  ✓ HTTPX
+  ✓ Croniter (cron expressions) (optional)
+  ✓ python-telegram-bot (optional)
+  ✓ discord.py (optional)
+
+◆ Configuration Files
+  ✓ ~/.hermes/.env file exists
+  ✓ API key or custom endpoint configured
+  ✓ ~/.hermes/config.yaml exists
+  ⚠ Config version outdated (v0 → v30) (new settings available)
+
+◆ xAI Model Retirement (May 15, 2026)
+  ✓ No retired xAI models in config
+
+◆ Auth Providers
+  ⚠ Nous Portal auth (not logged in)
+  ⚠ OpenAI Codex auth (not logged in)
+    → No Codex credentials stored. Run `hermes auth` to authenticate.
+  ⚠ Google Gemini OAuth (not logged in)
+  ⚠ MiniMax OAuth (not logged in)
+  ⚠ xAI OAuth (not logged in)
+    → No xAI OAuth credentials stored. Select xAI Grok OAuth (SuperGrok / Premium+) in `hermes model`.
+
+◆ Directory Structure
+  ✓ ~/.hermes directory exists
+  ✓ ~/.hermes/cron/ exists
+  ✓ ~/.hermes/sessions/ exists
+  ✓ ~/.hermes/logs/ exists
+  ✓ ~/.hermes/skills/ exists
+  ✓ ~/.hermes/memories/ exists
+  ✓ ~/.hermes/SOUL.md exists (persona configured)
+  ✓ ~/.hermes/memories/ directory exists
+    → MEMORY.md not created yet (will be created when the agent first writes a memory)
+    → USER.md not created yet (will be created when the agent first writes a memory)
+  ✓ ~/.hermes/state.db exists (4 sessions)
+
+◆ Gateway Service
+  ✓ Systemd linger enabled (gateway service survives logout)
+
+◆ Command Installation
+  ✓ Venv entry point exists (venv/bin/hermes)
+  ✓ ~/.local/bin/hermes exists (non-symlink)
+
+◆ External Tools
+  ✓ git
+  ✓ ripgrep (rg) (faster file search)
+  ⚠ docker not found (optional)
+  ✓ Node.js
+  ✓ agent-browser (Node.js) (browser automation)
+  ✓ Playwright Chromium (browser engine)
+  ✓ Browser tools (agent-browser) deps (no known vulnerabilities)
+  ⚠ web workspace deps (0 critical, 2 high, 0 moderate — build-tool advisory; clears via lockfile bump)
+    →   ^ build-time tooling (not runtime); if manual npm remediation errors with an arborist crash it's a known npm bug — clears via a lockfile bump
+  ⚠ ui-tui workspace deps (0 critical, 2 high, 0 moderate — build-tool advisory; clears via lockfile bump)
+    →   ^ build-time tooling (not runtime); if manual npm remediation errors with an arborist crash it's a known npm bug — clears via a lockfile bump
+
+◆ API Connectivity
+  Running 26 connectivity checks in parallel…                                                                        ⚠ OpenRouter API (not configured)
+
+◆ Tool Availability
+  ✓ browser
+  ✓ clarify
+  ✓ code_execution
+  ✓ cronjob
+  ✓ terminal
+  ✓ delegation
+  ✓ file
+  ✓ memory
+  ✓ session_search
+  ✓ skills
+  ✓ todo
+  ✓ tts
+  ✓ vision
+  ✓ video
+  ✓ kanban (runtime-gated; loaded only for dispatcher-spawned workers)
+  ⚠ browser-cdp (system dependency not met)
+  ⚠ computer_use (system dependency not met)
+  ⚠ discord (missing DISCORD_BOT_TOKEN)
+  ⚠ discord_admin (missing DISCORD_BOT_TOKEN)
+  ⚠ feishu_doc (system dependency not met)
+  ⚠ feishu_drive (system dependency not met)
+  ⚠ homeassistant (system dependency not met)
+  ⚠ image_gen (system dependency not met)
+  ⚠ moa (missing OPENROUTER_API_KEY)
+  ⚠ video_gen (system dependency not met)
+  ⚠ web (missing EXA_API_KEY, PARALLEL_API_KEY, TAVILY_API_KEY, FIRECRAWL_API_KEY, FIRECRAWL_API_URL, FIRECRAWL_GATEWAY_URL, TOOL_GATEWAY_DOMAIN, TOOL_GATEWAY_SCHEME, TOOL_GATEWAY_USER_TOKEN)
+  ⚠ x_search (missing XAI_API_KEY)
+  ⚠ hermes-yuanbao (system dependency not met)
+  ⚠ spotify (system dependency not met)
+
+◆ Skills Hub
+  ⚠ Skills Hub directory not initialized (run: hermes skills list)
+  ⚠ No GITHUB_TOKEN (60 req/hr rate limit — set in ~/.hermes/.env for better rates)
+
+◆ Memory Provider
+  ✓ Built-in memory active (no external provider configured — this is fine)
+
+────────────────────────────────────────────────────────────
+  Found 4 issue(s) to address:
+
+  1. Run 'hermes doctor --fix' or 'hermes setup' to migrate config
+  2. web workspace has 2 npm vulnerabilities
+  3. ui-tui workspace has 2 npm vulnerabilities
+  4. Run 'hermes setup' to configure missing API keys for full tool access
+
+  Tip: run 'hermes doctor --fix' to auto-fix what's possible.
+
+
+============================================================
+OPENCLAW HEALTH
+COMMAND: openclaw health
+============================================================
+Telegram: configured
+Gateway event loop: ok max=22ms p99=21ms util=0.006 cpu=0.009
+Agents: main (default)
+Heartbeat interval: 30m (main)
+Session store (main): /home/tjaye904/.openclaw/agents/main/sessions/sessions.json (2 entries)
+- agent:main:telegram:direct:8395087769 (66m ago)
+- agent:main:main (1449m ago)
+
+============================================================
+OPENCLAW STATUS
+COMMAND: openclaw status
+============================================================
+OpenClaw status
+
+Overview
+┌──────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Item                 │ Value                                                                                         │
+├──────────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────┤
+│ OS                   │ linux 7.0.11-76070011-generic (x64) · node 22.23.0                                            │
+│ Dashboard            │ http://127.0.0.1:18789/                                                                       │
+│ Tailscale exposure   │ off                                                                                           │
+│ Channel              │ stable (default)                                                                              │
+│ Update               │ npm · deps ok                                                                                 │
+│ Gateway              │ local · ws://127.0.0.1:18789 (local loopback) · reachable 49ms · auth token · pop-os (192.    │
+│                      │ 168.1.126) app 2026.7.1-2 linux 7.0.11-76070011-generic                                       │
+│ Gateway self         │ pop-os (192.168.1.126) app 2026.7.1-2 linux 7.0.11-76070011-generic                           │
+│ Gateway service      │ systemd user installed · enabled · running (pid 10931, state active)                          │
+│ Node service         │ systemd user not installed                                                                    │
+│ Agents               │ 1 · no workspaces bootstrapping · sessions 2 · default main active 1h ago                     │
+│ Memory               │ enabled (plugin memory-core) · not checked                                                    │
+│ Plugin compatibility │ none                                                                                          │
+│ Probes               │ skipped (use --deep)                                                                          │
+│ Events               │ none                                                                                          │
+│ Tasks                │ none                                                                                          │
+│ Heartbeat            │ 30m (main)                                                                                    │
+│ Sessions             │ 2 active · default nemotron-3-super:cloud (262k ctx) · ~/.openclaw/agents/main/sessions/      │
+│                      │ sessions.json                                                                                 │
+└──────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Security audit
+Skipped in fast status. Full report: openclaw security audit
+Deep probe: openclaw status --deep
+
+Channels
+┌──────────┬─────────┬────────┬────────────────────────────────────────────────────────────────────────────────────────┐
+│ Channel  │ Enabled │ State  │ Detail                                                                                 │
+├──────────┼─────────┼────────┼────────────────────────────────────────────────────────────────────────────────────────┤
+│ telegram │ ON      │ SETUP  │ configured; status unavailable in fast mode                                            │
+└──────────┴─────────┴────────┴────────────────────────────────────────────────────────────────────────────────────────┘
+
+Sessions
+┌──────────────────────────────────────┬────────┬─────────┬────────────────────────┬──────────────────┬────────────────┐
+│ Key                                  │ Kind   │ Age     │ Model                  │ Runtime          │ Tokens         │
+├──────────────────────────────────────┼────────┼─────────┼────────────────────────┼──────────────────┼────────────────┤
+│ agent:main:telegram:direct:8395…     │ direct │ 1h ago  │ nemotron-3-super:cloud │ OpenClaw Default │ 23k/262k (9%)  │
+│ agent:main:main                      │ direct │ 24h ago │ nemotron-3-super:cloud │ OpenClaw Default │ 50k/262k (19%) │
+└──────────────────────────────────────┴────────┴─────────┴────────────────────────┴──────────────────┴────────────────┘
+
+FAQ: https://docs.openclaw.ai/faq
+Troubleshooting: https://docs.openclaw.ai/troubleshooting
+Next steps:
+  Need to share?      openclaw status --all
+  Need to debug live? openclaw logs --follow
+  Need to test channels? openclaw status --deep
+
+============================================================
+OPENCLAW AGENT COMMAND HELP
+COMMAND: openclaw agent --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw agent [options]
+
+Run an agent turn via the Gateway (use --local for embedded)
+
+Options:
+  --agent <id>               Agent id (overrides routing bindings)
+  --channel <channel>        Delivery channel:
+                             last|telegram|whatsapp|discord|irc|googlechat|slack|signal|imessage|feishu|nostr|msteams|mattermost|nextcloud-talk|matrix|raft|line|zalo|clickclack|zalouser|sms|synology-chat|tlon|qa-channel|qqbot|twitch
+                             (omit to use the main session channel)
+  --deliver                  Send the agent's reply back to the selected channel
+                             (default: false)
+  -h, --help                 Display help for command
+  --json                     Output result as JSON (default: false)
+  --local                    Run the embedded agent locally (requires model
+                             provider API keys in your shell) (default: false)
+  -m, --message <text>       Message body for the agent
+  --message-file <path>      Read the agent message body from a UTF-8 file
+  --model <id>               Model override for this run (provider/model or
+                             model id)
+  --reply-account <id>       Delivery account id override
+  --reply-channel <channel>  Delivery channel override (separate from routing)
+  --reply-to <target>        Delivery target override (separate from session
+                             routing)
+  --session-id <id>          Use an explicit session id
+  --session-key <key>        Explicit session key (agent:<id>:<key>, or scoped
+                             to --agent)
+  -t, --to <number>          Recipient number in E.164 used to derive the
+                             session key
+  --thinking <level>         Thinking level: off | minimal | low | medium | high
+                             | xhigh | adaptive | max where supported
+  --timeout <seconds>        Override agent command timeout (seconds, default
+                             600 or config value)
+  --verbose <on|off>         Persist agent verbose level for the session
+
+Examples:
+  openclaw agent --to +15555550123 --message "status update"
+    Start a new session.
+  openclaw agent --agent ops --message "Summarize logs"
+    Use a specific agent.
+  openclaw agent --agent ops --message-file ./task.md
+    Read a multiline message file.
+  openclaw agent --session-key agent:ops:incident-42 --message "Summarize status"
+    Target an exact session key.
+  openclaw agent --session-id 1234 --message "Summarize inbox" --thinking medium
+    Target a session with explicit thinking level.
+  openclaw agent --to +15555550123 --message "Trace logs" --verbose on --json
+    Enable verbose logging and JSON output.
+  openclaw agent --to +15555550123 --message "Summon reply" --deliver
+    Deliver reply.
+  openclaw agent --agent ops --message "Generate report" --deliver --reply-channel slack --reply-to "#reports"
+    Send reply to a different channel/target.
+
+Docs: https://docs.openclaw.ai/cli/agent
+
+============================================================
+OPENCLAW AGENTS COMMAND HELP
+COMMAND: openclaw agents --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw agents [options] [command]
+
+Manage isolated agents (workspaces + auth + routing)
+
+Options:
+  -h, --help    Display help for command
+
+Commands:
+  add           Add a new isolated agent
+  bind          Add routing bindings for an agent
+  bindings      List routing bindings
+  delete        Delete an agent and prune workspace/state
+  list          List configured agents
+  set-identity  Update an agent identity (name/theme/emoji/avatar)
+  unbind        Remove routing bindings for an agent
+
+Docs: https://docs.openclaw.ai/cli/agents
+
+
+============================================================
+OPENCLAW WORKTREES COMMAND HELP
+COMMAND: openclaw worktrees --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw worktrees [options] [command]
+
+Create, inspect, restore, and clean up managed worktrees
+
+Options:
+  -h, --help  Display help for command
+
+Commands:
+  create      Create a managed worktree
+  gc          Run managed worktree cleanup now
+  list        List active and restorable managed worktrees
+  remove      Snapshot and remove a managed worktree
+  restore     Restore a managed worktree from its snapshot
+
+============================================================
+OPENCLAW TASKS COMMAND HELP
+COMMAND: openclaw tasks --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw tasks [options] [command]
+
+Inspect durable background tasks and TaskFlow state
+
+Options:
+  -h, --help        Display help for command
+  --json            Output as JSON (default: false)
+  --runtime <name>  Filter by kind (subagent, acp, cron, cli)
+  --status <name>   Filter by status (queued, running, succeeded, failed,
+                    timed_out, cancelled, lost)
+
+Commands:
+  audit             Show stale or broken background tasks and TaskFlows
+  cancel            Cancel a running background task
+  flow              Inspect durable TaskFlow state under tasks
+  list              List tracked background tasks
+  maintenance       Preview or apply tasks and TaskFlow maintenance
+  notify            Set task notify policy
+  show              Show one background task by task id, run id, or session key
+
+============================================================
+OPENCLAW APPROVALS COMMAND HELP
+COMMAND: openclaw approvals --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw approvals|exec-approvals [options] [command]
+
+Manage exec approvals (gateway or node host)
+
+Options:
+  -h, --help  Display help for command
+
+Commands:
+  allowlist   Edit the per-agent allowlist
+  get         Fetch exec approvals snapshot
+  set         Replace exec approvals with a JSON file
+
+Docs: https://docs.openclaw.ai/cli/approvals
+
+
+============================================================
+OPENCLAW EXEC POLICY COMMAND HELP
+COMMAND: openclaw exec-policy --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw exec-policy [options] [command]
+
+Show or synchronize requested exec policy with host approvals
+
+Options:
+  -h, --help  Display help for command
+
+Commands:
+  help        Display help for command
+  preset      Apply a synchronized preset: "yolo", "cautious", or "deny-all"
+  set         Synchronize local config and host approvals using explicit values
+  show        Show the local config policy, host approvals, and effective merge
+
+Docs: https://docs.openclaw.ai/cli/approvals
+
+
+============================================================
+OPENCLAW AUDIT COMMAND HELP
+COMMAND: openclaw audit --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw audit [options]
+
+Inspect metadata-only agent run and tool action records
+
+Options:
+  --after <timestamp>   Include records at/after ISO time or Unix milliseconds
+  --agent <id>          Filter by agent id
+  --before <timestamp>  Include records at/before ISO time or Unix milliseconds
+  --cursor <sequence>   Continue from a previous result cursor
+  -h, --help            Display help for command
+  --json                Output a bounded JSON page (default: false)
+  --kind <kind>         Filter by kind (agent_run or tool_action)
+  --limit <count>       Maximum records (1-500) (default: "100")
+  --run <id>            Filter by run id
+  --session <key>       Filter by exact session key
+  --status <status>     Filter by status (started, succeeded, failed, cancelled,
+                        timed_out, blocked, unknown)
+
+Docs: https://docs.openclaw.ai/cli/audit
+
+
+============================================================
+OPENCLAW MCP COMMAND HELP
+COMMAND: openclaw mcp --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw mcp [options] [command]
+
+Manage OpenClaw mcp.servers config and channel bridge
+
+Options:
+  -h, --help  Display help for command
+
+Commands:
+  add         Add one MCP server from flags and probe it before saving
+  configure   Update MCP server operator controls without replacing the server
+  doctor      Check configured MCP servers for static setup problems
+  list        List OpenClaw-managed MCP servers from mcp.servers
+  login       Authorize an OAuth MCP server
+  logout      Clear stored OAuth credentials for an MCP server
+  probe       Connect to configured MCP servers and list available capabilities
+  reload      Dispose cached MCP runtimes so new config is used on the next turn
+  serve       Expose OpenClaw channels over MCP stdio
+  set         Set one OpenClaw-managed MCP server from a JSON object
+  show        Show one OpenClaw-managed MCP server or the full mcp.servers
+              config
+  status      Show configured MCP server transport status without connecting
+  tools       Update per-server MCP tool include/exclude filters
+  unset       Remove one OpenClaw-managed MCP server
+
+============================================================
+OPENCLAW SANDBOX COMMAND HELP
+COMMAND: openclaw sandbox --help
+============================================================
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw sandbox [options] [command]
+
+Manage sandbox containers (Docker-based agent isolation)
+
+Options:
+  -h, --help  Display help for command
+
+Commands:
+  explain     Explain effective sandbox/tool policy for a session/agent
+  list        List sandbox containers and their status
+  recreate    Remove containers to force recreation with updated config
+
+Examples:
+  openclaw sandbox list
+    List all sandbox containers.
+  openclaw sandbox list --browser
+    List only browser containers.
+  openclaw sandbox recreate --all
+    Recreate all containers.
+  openclaw sandbox recreate --session main
+    Recreate a specific session.
+  openclaw sandbox recreate --agent mybot
+    Recreate agent containers.
+  openclaw sandbox explain
+    Explain effective sandbox config.
+
+
+Docs: https://docs.openclaw.ai/cli/sandbox
+
+
+============================================================
+OPENCLAW MODELS STATUS
+COMMAND: openclaw models status
+============================================================
+Config        : ~/.openclaw/openclaw.json
+Agent dir     : ~/.openclaw/agents/main/agent
+Default       : ollama/nemotron-3-super:cloud
+Fallbacks (0) : -
+Image model   : -
+Image fallbacks (0): -
+Aliases (0)   : -
+Configured models (0): all
+
+Auth overview
+Auth store    : ~/.openclaw/agents/main/agent/openclaw-agent.sqlite
+Shell env     : off
+Providers w/ OAuth/tokens (0): -
+- ollama effective=profiles:~/.openclaw/agents/main/agent/openclaw-agent.sqlite | profiles=1 (oauth=0, token=<REDACTED> api_key=<REDACTED> | ollama:default=ref(file:/profiles/ollama/default/key) | synthetic=plugin-owned | source=models.providers.ollama (synthetic local key)
+
+OAuth/token status
+- none
+
+============================================================
+OPENCLAW AGENT INVENTORY
+COMMAND: openclaw agents list
+============================================================
+Agents:
+- main (default)
+  Workspace: ~/.openclaw/workspace
+  Agent dir: ~/.openclaw/agents/main/agent
+  Model: ollama/nemotron-3-super:cloud
+  Routing rules: 1
+  Routing: default (no explicit rules)
+Routing rules map channel/account/peer to an agent. Use --bindings for full rules.
+Channel status reflects local config/creds. For live health: openclaw channels status --probe.
+
+============================================================
+OPENCLAW WORKTREE INVENTORY
+COMMAND: openclaw worktrees list
+============================================================
+No managed worktrees.
+
+============================================================
+OPENCLAW TASK INVENTORY
+COMMAND: openclaw tasks list
+============================================================
+Background tasks: 0
+Task pressure: 0 queued · 0 running · 0 issues
+No background tasks found. Run openclaw tasks audit to check for stale task state.
+
+============================================================
+CODEX EXEC COMMAND HELP
+COMMAND: codex exec --help
+============================================================
+Run Codex non-interactively
+
+Usage: codex exec [OPTIONS] [PROMPT]
+       codex exec [OPTIONS] <COMMAND> [ARGS]
+
+Commands:
+  resume  Resume a previous session by id or pick the most recent with --last
+  review  Run a code review against the current repository
+  help    Print this message or the help of the given subcommand(s)
+
+Arguments:
+  [PROMPT]
+          Initial instructions for the agent. If not provided as an argument (or if `-` is used),
+          instructions are read from stdin. If stdin is piped and a prompt is also provided, stdin is
+          appended as a `<stdin>` block
+
+Options:
+  -c, --config <key=value>
+          Override a configuration value that would otherwise be loaded from `~/.codex/config.toml`. Use a
+          dotted path (`foo.bar.baz`) to override nested values. The `value` portion is parsed as TOML. If
+          it fails to parse as TOML, the raw string is used as a literal.
+          
+          Examples: - `-c model="o3"` - `-c 'sandbox_permissions=["disk-full-rea<REDACTED>"]'` - `-c
+          shell_environment_policy.inherit=all`
+
+      --enable <FEATURE>
+          Enable a feature (repeatable). Equivalent to `-c features.<name>=true`
+
+      --disable <FEATURE>
+          Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
+
+      --strict-config
+          Error out when config.toml contains fields that are not recognized by this version of Codex
+
+  -i, --image <FILE>...
+          Optional image(s) to attach to the initial prompt
+
+  -m, --model <MODEL>
+          Model the agent should use
+
+      --oss
+          Use open-source provider
+
+      --local-provider <OSS_PROVIDER>
+          Specify which local provider to use (lmstudio or ollama). If not specified with --oss, will use
+          config default or show selection
+
+  -p, --profile <CONFIG_PROFILE_V2>
+          Layer $CODEX_HOME/<name>.config.toml on top of the base user config
+
+  -s, --sandbox <SANDBOX_MODE>
+          Select the sandbox policy to use when executing model-generated shell commands
+          
+          [possible values: read-only, workspace-write, danger-full-access]
+
+      --dangerously-bypass-approvals-and-sandbox
+          Skip all confirmation prompts and execute commands without sandboxing. EXTREMELY DANGEROUS.
+          Intended solely for running in environments that are externally sandboxed
+
+      --dangerously-bypass-hook-trust
+          Run enabled hooks without requiring persisted hook trust for this invocation. DANGEROUS. Intended
+          only for automation that already vets hook sources
+
+  -C, --cd <DIR>
+          Tell the agent to use the specified directory as its working root
+
+      --add-dir <DIR>
+          Additional directories that should be writable alongside the primary workspace
+
+      --skip-git-repo-check
+          Allow running Codex outside a Git repository
+
+      --ephemeral
+          Run without persisting session files to disk
+
+      --ignore-user-config
+          Do not load `$CODEX_HOME/config.toml`; auth still uses `CODEX_HOME`
+
+      --ignore-rules
+          Do not load user or project execpolicy `.rules` files
+
+      --output-schema <FILE>
+          Path to a JSON Schema file describing the model's final response shape
+
+      --color <COLOR>
+          Specifies color settings for use in the output
+          
+          [default: auto]
+          [possible values: always, never, auto]
+
+      --json
+          Print events to stdout as JSONL
+
+  -o, --output-last-message <FILE>
+          Specifies file where the last message from the agent should be written
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+
+============================================================
+CODEX REVIEW COMMAND HELP
+COMMAND: codex review --help
+============================================================
+Run a code review non-interactively
+
+Usage: codex review [OPTIONS] [PROMPT]
+
+Arguments:
+  [PROMPT]
+          Custom review instructions. If `-` is used, read from stdin
+
+Options:
+  -c, --config <key=value>
+          Override a configuration value that would otherwise be loaded from `~/.codex/config.toml`. Use a
+          dotted path (`foo.bar.baz`) to override nested values. The `value` portion is parsed as TOML. If
+          it fails to parse as TOML, the raw string is used as a literal.
+          
+          Examples: - `-c model="o3"` - `-c 'sandbox_permissions=["disk-full-rea<REDACTED>"]'` - `-c
+          shell_environment_policy.inherit=all`
+
+      --strict-config
+          Error out when config.toml contains fields that are not recognized by this version of Codex
+
+      --enable <FEATURE>
+          Enable a feature (repeatable). Equivalent to `-c features.<name>=true`
+
+      --uncommitted
+          Review staged, unstaged, and untracked changes
+
+      --base <BRANCH>
+          Review changes against the given base branch
+
+      --disable <FEATURE>
+          Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
+
+      --commit <SHA>
+          Review the changes introduced by a commit
+
+      --title <TITLE>
+          Optional commit title to display in the review summary
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+============================================================
+CODEX MCP SERVER COMMAND HELP
+COMMAND: codex mcp-server --help
+============================================================
+Start Codex as an MCP server (stdio)
+
+Usage: codex mcp-server [OPTIONS]
+
+Options:
+  -c, --config <key=value>
+          Override a configuration value that would otherwise be loaded from `~/.codex/config.toml`. Use a
+          dotted path (`foo.bar.baz`) to override nested values. The `value` portion is parsed as TOML. If
+          it fails to parse as TOML, the raw string is used as a literal.
+          
+          Examples: - `-c model="o3"` - `-c 'sandbox_permissions=["disk-full-rea<REDACTED>"]'` - `-c
+          shell_environment_policy.inherit=all`
+
+      --strict-config
+          Error out when config.toml contains fields that are not recognized by this version of Codex
+
+      --enable <FEATURE>
+          Enable a feature (repeatable). Equivalent to `-c features.<name>=true`
+
+      --disable <FEATURE>
+          Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+============================================================
+CODEX DOCTOR
+COMMAND: codex doctor
+============================================================
+Codex Doctor v0.144.6 · linux-x86_64
+
+Notes
+   ↑ updates      0.145.0 available (current 0.144.6)
+   ⚠ websocket    Responses WebSocket failed; HTTPS fallback may still work - Check proxy, VPN, firewall, DNS, custom CA, and WebSocket policy support.
+─────────────────────────────────────────────────────────────
+
+Environment
+  ✓ system       en-US
+      os                       Pop!_OS 24.4.0 (noble) [64-bit]
+      OS language              en-US
+      LANG                     en_US.UTF-8
+      VISUAL                   not set
+      EDITOR                   not set
+  ✓ runtime      npm (package /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl, bin /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin, resources /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-resources, path /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path)
+      version                  0.144.6
+      install method           npm (package /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl, bin /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin, resources /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-resources, path /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path)
+      commit                   unknown
+      executable               ~/.npm-global/lib/node_m…wn-linux-musl/bin/codex
+  ✓ install      consistent
+      context                  npm (package /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl, bin /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/bin, resources /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-resources, path /home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path)
+      managed by               npm: yes · bun: no · pnpm: no · package root /home/tjaye904/.npm-global/lib/node_modules/@openai/codex
+      PATH entries (7)         ~/.npm-global/bin/codex
+                               ~/.npm-global/bin/codex
+                               ~/.local/bin/codex
+                               … (full list with --all)
+      npm update target        ~/.npm-global/lib/node_modules/@openai/codex
+  ✓ search       file exists (bundled, `/home/tjaye904/.npm-global/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path/rg`)
+      search command           ~/.npm-global/lib/node_m…inux-musl/codex-path/rg
+      search provider          bundled
+      search command readiness file exists
+  ✓ git          git version 2.43.0
+      selected git             /usr/bin/git
+      version                  git version 2.43.0
+      exec path                /usr/lib/git-core
+      repo detected            true
+      repo root                ~/sovereign
+      .git entry               directory
+      branch                   master
+      PATH entries (2)         /usr/bin/git
+                               /bin/git
+  ✓ terminal     VS Code 1.127.0
+      terminal                 VS Code
+      TERM_PROGRAM             vscode
+      terminal version         1.127.0
+      stdin is terminal        true
+      stdout is terminal       false
+      stderr is terminal       false
+      terminal size            108x56
+      color output             disabled (stdout is not a terminal)
+      COLORTERM                truecolor
+      effective locale         en_US.UTF-8
+      WAYLAND_DISPLAY          present
+      DISPLAY                  present
+  ✓ title        default · project sovereign
+      title source             default
+      title items              activity, project-name
+      activity item            true
+      project source           git repo root
+      project value            sovereign
+  ✓ state        databases healthy
+      CODEX_HOME               ~/.codex (dir)
+      log dir                  ~/.codex/log (dir)
+      sqlite home              ~/.codex (dir)
+      state DB                 ~/.codex/state_5.sqlite (file) · integrity ok
+      log DB                   ~/.codex/logs_2.sqlite (file) · integrity ok
+      goals DB                 ~/.codex/goals_1.sqlite (file) · integrity ok
+      memories DB              ~/.codex/memories_1.sqlite (file) · integrity ok
+      active rollouts          2 files · 126.47 KB (avg 63.23 KB)
+      archived rollouts        0 files · 0 B (avg 0 B)
+  ✓ threads      rollout files and state DB thread inventory agree
+      default model provider   openai
+      rollout DB active files  2
+      rollout DB archived files 0
+      rollout DB scan errors   0
+      rollout DB malformed file names 0
+      rollout DB scan cap reached false
+      rollout DB rows          2
+      rollout DB active rows   2
+      rollout DB archived rows 0
+      rollout DB missing active rows 0
+      rollout DB missing archived rows 0
+      rollout DB stale rows    0
+      rollout DB archive mismatches 0
+      rollout DB duplicate rollout thread ids 0
+      rollout DB duplicate DB paths 0
+      rollout DB model providers ollama-launch=1, openai=1
+      rollout DB sources       cli=2
+
+Configuration
+  ✓ config       loaded
+      model                    <default> · openai
+      cwd                      ~/sovereign
+      config.toml              ~/.codex/config.toml
+      config.toml parse        ok
+      MCP servers              0
+      feature flags            35 enabled · 0 overridden (full list with --all)
+  ✓ auth         auth is configured
+      auth storage mode        File
+      auth file                ~/.codex/auth.json
+      stored auth mode         api_key
+      stored API key           true
+      stored ChatGPT tokens    false
+      stored agent identity    false
+  ✓ mcp          no MCP servers configured
+  ✓ sandbox      restricted fs + restricted network · approval OnRequest
+      approval policy          OnRequest
+      filesystem sandbox       restricted
+      network sandbox          restricted
+      linux helper             ~/.codex/tmp/arg0/codex-…2dp/codex-linux-sandbox
+      execve wrapper helper    ~/.codex/tmp/arg0/codex-…dp/codex-execve-wrapper
+
+Updates
+  ✓ updates      update configuration is locally consistent
+      startup update check     true
+      update action            npm install -g @openai/codex
+      version cache            ~/.codex/version.json
+      cached latest version    0.144.6
+      last checked at          2026-07-21 09:26 UTC
+      npm update target        ~/.npm-global/lib/node_modules/@openai/codex
+      latest version           0.145.0
+      latest version status    newer version is available
+
+Connectivity
+  ✓ network      no proxy env vars
+      proxy env vars           none
+  ⚠ websocket    Responses WebSocket failed; HTTPS fallback may still work — Check proxy, VPN, firewall, DNS, custom CA, and WebSocket policy support.
+      model provider           openai
+      provider name            OpenAI
+      wire API                 responses
+      supports websockets      true
+      proxy env vars           none
+      connect timeout          15000 ms
+      auth mode                api_key
+      endpoint                 wss://api.openai.com/v1/<redacted>
+      DNS                      2 IPv4, 0 IPv6, first IPv4
+      handshake transport error http 401 Unauthorized: Some("{\n  \"error\": {\n    \"message\": \"Incorrect API key provided: sk-proj-*******************************************************************************************************************************************************2BcA. You can find your API key at https://platform.openai.com/account/<redacted>    \"type\": \"invalid_request_error\",\n    \"code\": \"invalid_api_key\",\n    \"param\": null\n  },\n  \"status\": 401\n}")
+  ✓ reachability active provider endpoints are reachable over HTTP
+      reachability mode        API key auth
+      openai API base URL      https://api.openai.com/v1 reachable (HTTP 404)
+      openai API route probe   https://api.openai.com/v1/<redacted> route exists (HTTP 401)
+
+Background Server
+  ○ app-server   not running (ephemeral mode)
+      daemon state dir         ~/.codex/app-server-daemon
+      settings                 ~/.codex/app-server-daemon/settings.json (missing)
+      pid file                 ~/.codex/app-server-daemon/app-server.pid (missing)
+      update-loop pid file     ~/.codex/app-server-daem…/app-server-updater.pid (missing)
+      control socket           ~/.codex/app-server-cont…app-server-control.sock
+      status                   not running
+      mode                     ephemeral
+
+─────────────────────────────────────────────────────────────
+16 ok · 1 idle · 2 notes · 1 warn · 0 fail degraded
+
+--summary compact output           --all expand truncated lists
+--json redacted report
+
+============================================================
+PROCESS AND LISTENER CORRELATION
+============================================================
+
+Relevant processes:
+ollama      9702       1 SNsl Wed Jul 22 02:25:35 2026 /usr/local/bin/ollama serve
+tjaye904   10931    1356 SNsl Wed Jul 22 02:42:25 2026 /home/tjaye904/.hermes/node/bin/node /home/tjaye904/.npm-global/lib/node_modules/openclaw/dist/index.js gateway --port 18789
+tjaye904   12517   12381 Sl   Wed Jul 22 02:50:53 2026 /home/tjaye904/.vscode/extensions/openai.chatgpt-26.715.61943-linux-x64/bin/linux-x86_64/codex -c features.code_mode_host=true app-server --analytics-default-enabled
+tjaye904   13074   11346 S+   Wed Jul 22 02:51:48 2026 journalctl --user -u openclaw-gateway.service -f
+
+Relevant listeners:
+LISTEN 0      511        127.0.0.1:18789      0.0.0.0:*    users:(("node",pid=10931,fd=33))
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*                                    
+LISTEN 0      511            [::1]:18789         [::]:*    users:(("node",pid=10931,fd=34))
+
+============================================================
+INTERFACE EXECUTABLES
+============================================================
+codex        /home/tjaye904/.npm-global/bin/codex
+openclaw     /home/tjaye904/.npm-global/bin/openclaw
+hermes       /home/tjaye904/.local/bin/hermes
+ollama       /usr/local/bin/ollama
+git          /usr/bin/git
+cmake        /usr/bin/cmake
+ctest        /usr/bin/ctest
+
+============================================================
+REPOSITORY STATE
+============================================================
+?? docs/
+
+HEAD:
+66f9195 RT-170 add capability trace report descriptor runtime
+
+============================================================
+SM-002 DISCOVERY COMPLETE
+============================================================

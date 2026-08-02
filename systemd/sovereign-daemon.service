@@ -1,0 +1,19 @@
+[Unit]
+Description=Sovereign OS Daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sovereign
+Environment=SOVEREIGN_DATA_ROOT=/var/lib/sovereign
+Environment=OLLAMA_HOST=http://127.0.0.1:11434
+Environment=SOVEREIGN_OLLAMA_MODEL=openclaw
+Environment=SOVEREIGN_EMBED_MODEL=nomic-embed-text
+ExecStart=/usr/local/bin/sovereign-daemon 60
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=sovereign.target
+multi-user.target

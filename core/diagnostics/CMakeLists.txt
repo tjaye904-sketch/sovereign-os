@@ -1,0 +1,5 @@
+add_library(sovereign_diagnostics STATIC transparency_report.cpp)
+target_include_directories(sovereign_diagnostics PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(sovereign_diagnostics PUBLIC cxx_std_23)
+target_link_libraries(sovereign_diagnostics PUBLIC sovereign_product)
+target_compile_options(sovereign_diagnostics PRIVATE -Wall -Wextra -Wpedantic)

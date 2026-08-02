@@ -1,0 +1,751 @@
+============================================================
+SOVEREIGN MERGE — SM-001 ENVIRONMENT DISCOVERY
+Generated: 2026-07-22T03:45:16-04:00
+Host: pop-os
+User: tjaye904
+Repository: /home/tjaye904/sovereign
+============================================================
+
+=== REPOSITORY STATE ===
+?? SM-001-environment-discovery.txt
+66f9195 RT-170 add capability trace report descriptor runtime
+260d739 repair RT-119 through RT-129 release checksum manifests
+a24dd22 repair RT-156 RT-157 missing recovery verification extension artifacts
+61368c7 RT-169 add migration dispatch diagnostic recovery verification integration extension continuation validation integration stability report continuation validation integration extension
+d4cd715 RT-168 add migration dispatch diagnostic recovery verification integration extension continuation validation integration stability report continuation validation integration
+
+Top-level directories:
+.
+./core
+./core/runtime
+./releases
+./releases/RT-002_Event_Runtime_v0.1.0
+./releases/RT-003_Scheduler_Runtime_v0.1.0
+./releases/RT-004_Service_Runtime_v0.1.0
+./releases/RT-005_Lifecycle_Runtime_v0.1.0
+./releases/RT-006_Runtime_Coordinator_v0.1.0
+./releases/RT-007_Logging_Runtime_v0.1.0
+./releases/RT-008_Configuration_Runtime_v0.1.0
+./releases/RT-009_Diagnostics_Runtime_v0.1.0
+./releases/RT-010_Identity_Runtime_v0.1.0
+./releases/RT-011_Event_Traceability_Runtime_v0.1.0
+./releases/RT-012_Event_Classification_Runtime_v0.1.0
+./releases/RT-013_Event_Routing_Policy_Runtime_v0.1.0
+./releases/RT-014_Event_Delivery_Semantics_Runtime_v0.1.0
+./releases/RT-015_Event_Retry_Policy_Runtime_v0.1.0
+./releases/RT-016_Dead_Letter_Queue_Runtime_v0.1.0
+./releases/RT-017_Dead_Letter_Replay_Runtime_v0.1.0
+./testing
+./testing/runtime
+
+=== BUILD SYSTEM ENTRY POINTS ===
+./CMakeLists.txt
+./core/runtime/CMakeLists.txt
+./releases/RT-002_Event_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-003_Scheduler_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-004_Service_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-005_Lifecycle_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-006_Runtime_Coordinator_v0.1.0/CMakeLists.txt
+./releases/RT-007_Logging_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-008_Configuration_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-009_Diagnostics_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-010_Identity_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-011_Event_Traceability_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-012_Event_Classification_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-013_Event_Routing_Policy_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-014_Event_Delivery_Semantics_Runtime_v0.1.0/CMakeLists.txt
+./releases/RT-015_Event_Retry_Policy_Runtime_v0.1.0/CMakeLists.txt
+./testing/runtime/CMakeLists.txt
+
+=== RUNTIME SERVICE PATTERNS ===
+core/runtime/CMakeLists.txt
+core/runtime/config_entry.hpp
+core/runtime/config_manager.cpp
+core/runtime/config_manager.hpp
+core/runtime/config_value.hpp
+core/runtime/dead_letter_event.hpp
+core/runtime/dead_letter_queue.cpp
+core/runtime/dead_letter_queue.hpp
+core/runtime/dead_letter_replay_result.hpp
+core/runtime/event_bus.cpp
+core/runtime/event_bus.hpp
+core/runtime/event_category.hpp
+core/runtime/event_delivery_result.hpp
+core/runtime/event_dispatcher.hpp
+core/runtime/event.hpp
+core/runtime/event_metadata.hpp
+core/runtime/event_priority.hpp
+core/runtime/event_queue.cpp
+core/runtime/event_queue.hpp
+core/runtime/event_retry_policy.hpp
+core/runtime/event_router.cpp
+core/runtime/event_router.hpp
+core/runtime/event_security.hpp
+core/runtime/event_subscription.hpp
+core/runtime/frame_context.hpp
+core/runtime/health_monitor.cpp
+core/runtime/health_monitor.hpp
+core/runtime/health_record.hpp
+core/runtime/health_state.hpp
+core/runtime/identifier.hpp
+core/runtime/identity_types.hpp
+core/runtime/lifecycle_manager.cpp
+core/runtime/lifecycle_manager.hpp
+core/runtime/lifecycle_transition.hpp
+core/runtime/log_level.hpp
+core/runtime/log_manager.cpp
+core/runtime/log_manager.hpp
+core/runtime/log_record.hpp
+core/runtime/log_sink.hpp
+core/runtime/memory_log_sink.cpp
+core/runtime/memory_log_sink.hpp
+core/runtime/runtime.cpp
+core/runtime/runtime.hpp
+core/runtime/runtime_message_bus.cpp
+core/runtime/runtime_message_bus.hpp
+core/runtime/runtime_message_request.hpp
+core/runtime/runtime_message_response.hpp
+core/runtime/runtime_service_capability_invocation_policy.cpp
+core/runtime/runtime_service_capability_invocation_policy.hpp
+core/runtime/runtime_service_capability_invocation_policy_protocol.cpp
+core/runtime/runtime_service_capability_invocation_policy_protocol.hpp
+core/runtime/runtime_service_capability_invocation_policy_service.cpp
+core/runtime/runtime_service_capability_invocation_policy_service.hpp
+core/runtime/runtime_service_capability_invocation_protocol.cpp
+core/runtime/runtime_service_capability_invocation_protocol.hpp
+core/runtime/runtime_service_capability_invoker.cpp
+core/runtime/runtime_service_capability_invoker.hpp
+core/runtime/runtime_service_capability_negotiator.cpp
+core/runtime/runtime_service_capability_negotiator.hpp
+core/runtime/runtime_service_capability_pipeline_diagnostics.hpp
+core/runtime/runtime_service_capability_protocol.cpp
+core/runtime/runtime_service_capability_protocol.hpp
+core/runtime/runtime_service_capability_provider_selection_policy.cpp
+core/runtime/runtime_service_capability_provider_selection_policy.hpp
+core/runtime/runtime_service_capability_provider_selection_policy_protocol.cpp
+core/runtime/runtime_service_capability_provider_selection_policy_protocol.hpp
+core/runtime/runtime_service_capability_provider_selection_policy_service.cpp
+core/runtime/runtime_service_capability_provider_selection_policy_service.hpp
+core/runtime/runtime_service_capability_trace_query.hpp
+core/runtime/runtime_service_capability_trace_report_descriptor.hpp
+core/runtime/runtime_service_capability_trace_report_deserialization.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_deserialization.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_validation.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_validation_integration.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_extension.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration_extension.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_recovery_verification_integration_extension.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_serialization.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostics.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatch_diagnostic_validation.hpp
+core/runtime/runtime_service_capability_trace_report_migration_dispatcher.hpp
+core/runtime/runtime_service_capability_trace_report_migration.hpp
+core/runtime/runtime_service_capability_trace_report_migration_registry.hpp
+core/runtime/runtime_service_capability_trace_report_persistence.hpp
+core/runtime/runtime_service_capability_trace_report_schema_version_detection.hpp
+core/runtime/runtime_service_dispatcher.cpp
+core/runtime/runtime_service_dispatcher.hpp
+core/runtime/runtime_service_endpoint.cpp
+core/runtime/runtime_service_endpoint.hpp
+core/runtime/runtime_service_endpoint_protocol.cpp
+core/runtime/runtime_service_endpoint_protocol.hpp
+core/runtime/runtime_service_invocation.hpp
+core/runtime/runtime_service_invoker.cpp
+core/runtime/runtime_service_invoker.hpp
+core/runtime/runtime_service_message_gateway.cpp
+core/runtime/runtime_service_message_gateway.hpp
+core/runtime/runtime_service_message_protocol.cpp
+core/runtime/runtime_service_message_protocol.hpp
+core/runtime/runtime_service_route.cpp
+core/runtime/runtime_service_routed_message_gateway.cpp
+core/runtime/runtime_service_routed_message_gateway.hpp
+core/runtime/runtime_service_routed_message_protocol.cpp
+core/runtime/runtime_service_routed_message_protocol.hpp
+core/runtime/runtime_service_route.hpp
+core/runtime/runtime_state.hpp
+core/runtime/scheduler.cpp
+core/runtime/scheduler.hpp
+core/runtime/service_capability.cpp
+core/runtime/service_capability.hpp
+core/runtime/service_dependency.cpp
+core/runtime/service_dependency.hpp
+core/runtime/service_host.cpp
+core/runtime/service_host.hpp
+core/runtime/service.hpp
+core/runtime/service_registry.cpp
+core/runtime/service_registry.hpp
+core/runtime/service_state.hpp
+core/runtime/subscription_configuration.hpp
+core/runtime/subscription_inventory_page.hpp
+core/runtime/subscription_inventory_query.hpp
+core/runtime/subscription_inventory_sort.hpp
+core/runtime/subscription_lifecycle.hpp
+core/runtime/subscription_snapshot.hpp
+core/runtime/uuid.cpp
+core/runtime/uuid.hpp
+
+=== TEST REGISTRATION PATTERNS ===
+testing/runtime/CMakeLists.txt
+testing/runtime/configuration_runtime_smoke_test.cpp
+testing/runtime/dead_letter_replay_smoke_test.cpp
+testing/runtime/dead_letter_runtime_smoke_test.cpp
+testing/runtime/diagnostics_runtime_smoke_test.cpp
+testing/runtime/event_classification_smoke_test.cpp
+testing/runtime/event_delivery_semantics_smoke_test.cpp
+testing/runtime/event_retry_policy_smoke_test.cpp
+testing/runtime/event_routing_policy_smoke_test.cpp
+testing/runtime/event_runtime_smoke_test.cpp
+testing/runtime/event_traceability_smoke_test.cpp
+testing/runtime/identity_runtime_smoke_test.cpp
+testing/runtime/lifecycle_runtime_smoke_test.cpp
+testing/runtime/logging_runtime_smoke_test.cpp
+testing/runtime/runtime_capability_pipeline_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_policy_composition_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_deserialization_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_deserialization_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_validation_integration_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_validation_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration_extension_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_serialization_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_validation_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_dispatcher_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_registry_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_migration_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_persistence_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_registry_backed_migration_dispatcher_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_schema_version_detection_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_serialization_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_explanation_report_view_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_outlier_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_percentile_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_quartile_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_shape_classification_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_shape_confidence_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_shape_explanation_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_shape_explanation_stability_report_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_shape_explanation_stability_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_skewness_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_statistical_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_distribution_query_statistics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_query_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_query_execution_diagnostics_smoke_test.cpp
+testing/runtime/runtime_capability_trace_query_pagination_smoke_test.cpp
+testing/runtime/runtime_capability_trace_query_smoke_test.cpp
+testing/runtime/runtime_capability_trace_query_summary_smoke_test.cpp
+testing/runtime/runtime_capability_trace_report_descriptor_smoke_test.cpp
+testing/runtime/runtime_capability_trace_result_status_distribution_smoke_test.cpp
+testing/runtime/runtime_capability_trace_retention_smoke_test.cpp
+testing/runtime/runtime_coordinator_smoke_test.cpp
+testing/runtime/runtime_message_bus_smoke_test.cpp
+testing/runtime/runtime_message_request_response_smoke_test.cpp
+testing/runtime/runtime_message_response_helper_smoke_test.cpp
+testing/runtime/runtime_service_capability_invocation_policy_protocol_smoke_test.cpp
+testing/runtime/runtime_service_capability_invocation_policy_service_smoke_test.cpp
+testing/runtime/runtime_service_capability_invocation_policy_smoke_test.cpp
+testing/runtime/runtime_service_capability_invocation_smoke_test.cpp
+testing/runtime/runtime_service_capability_negotiation_smoke_test.cpp
+testing/runtime/runtime_service_capability_provider_selection_policy_protocol_smoke_test.cpp
+testing/runtime/runtime_service_capability_provider_selection_policy_service_smoke_test.cpp
+testing/runtime/runtime_service_capability_provider_selection_policy_smoke_test.cpp
+testing/runtime/runtime_service_dispatcher_smoke_test.cpp
+testing/runtime/runtime_service_endpoint_smoke_test.cpp
+testing/runtime/runtime_service_invocation_smoke_test.cpp
+testing/runtime/runtime_service_message_gateway_smoke_test.cpp
+testing/runtime/runtime_service_routed_message_gateway_smoke_test.cpp
+testing/runtime/scheduler_smoke_test.cpp
+testing/runtime/service_capability_runtime_smoke_test.cpp
+testing/runtime/service_dependency_runtime_smoke_test.cpp
+testing/runtime/service_registry_runtime_smoke_test.cpp
+testing/runtime/service_runtime_smoke_test.cpp
+testing/runtime/stable_subscription_identity_smoke_test.cpp
+testing/runtime/subscription_configuration_smoke_test.cpp
+testing/runtime/subscription_inventory_execution_diagnostics_smoke_test.cpp
+testing/runtime/subscription_inventory_multi_sort_smoke_test.cpp
+testing/runtime/subscription_inventory_page_smoke_test.cpp
+testing/runtime/subscription_inventory_query_diagnostics_smoke_test.cpp
+testing/runtime/subscription_inventory_query_smoke_test.cpp
+testing/runtime/subscription_inventory_smoke_test.cpp
+testing/runtime/subscription_inventory_sort_diagnostics_smoke_test.cpp
+testing/runtime/subscription_inventory_sort_normalization_smoke_test.cpp
+testing/runtime/subscription_inventory_sort_smoke_test.cpp
+testing/runtime/subscription_lifecycle_smoke_test.cpp
+testing/runtime/subscription_snapshot_smoke_test.cpp
+
+=== CODEX DISCOVERY ===
+Executable: /home/tjaye904/.npm-global/bin/codex
+
+Version:
+codex-cli 0.144.6
+
+Help:
+Codex CLI
+
+If no subcommand is specified, options will be forwarded to the interactive CLI.
+
+Usage: codex [OPTIONS] [PROMPT]
+       codex [OPTIONS] <COMMAND> [ARGS]
+
+Commands:
+  exec            Run Codex non-interactively [aliases: e]
+  review          Run a code review non-interactively
+  login           Manage login
+  logout          Remove stored authentication credentials
+  mcp             Manage external MCP servers for Codex
+  plugin          Manage Codex plugins
+  mcp-server      Start Codex as an MCP server (stdio)
+  app-server      [experimental] Run the app server or related tooling
+  remote-control  [experimental] Manage the app-server daemon with remote control enabled
+  completion      Generate shell completion scripts
+  update          Update Codex to the latest version
+  doctor          Diagnose local Codex installation, config, auth, and runtime health
+  sandbox         Run commands within a Codex-provided sandbox
+  debug           Debugging tools
+  apply           Apply the latest diff produced by Codex agent as a `git apply` to your local working tree
+                  [aliases: a]
+  resume          Resume a previous interactive session (picker by default; use --last to continue the most
+                  recent)
+  archive         Archive a saved session by id or session name
+  delete          Permanently delete a saved session by id or session name
+  unarchive       Unarchive a saved session by id or session name
+  fork            Fork a previous interactive session (picker by default; use --last to fork the most
+                  recent)
+  cloud           [EXPERIMENTAL] Browse tasks from Codex Cloud and apply changes locally
+  exec-server     [EXPERIMENTAL] Run the standalone exec-server service
+  features        Inspect feature flags
+  help            Print this message or the help of the given subcommand(s)
+
+Arguments:
+  [PROMPT]
+          Optional user prompt to start the session
+
+Options:
+  -c, --config <key=value>
+          Override a configuration value that would otherwise be loaded from `~/.codex/config.toml`. Use a
+          dotted path (`foo.bar.baz`) to override nested values. The `value` portion is parsed as TOML. If
+          it fails to parse as TOML, the raw string is used as a literal.
+          
+          Examples: - `-c model="o3"` - `-c 'sandbox_permissions=["disk-full-read-access"]'` - `-c
+          shell_environment_policy.inherit=all`
+
+      --enable <FEATURE>
+          Enable a feature (repeatable). Equivalent to `-c features.<name>=true`
+
+      --disable <FEATURE>
+          Disable a feature (repeatable). Equivalent to `-c features.<name>=false`
+
+      --remote <ADDR>
+          Connect the TUI to a remote app server endpoint.
+          
+          Accepted forms: `ws://host:port`, `wss://host:port`, `unix://`, or `unix://PATH`.
+
+      --remote-auth-token-env <ENV_VAR>
+          Name of the environment variable containing the bearer token to send to a remote app server
+          websocket
+
+      --strict-config
+          Error out when config.toml contains fields that are not recognized by this version of Codex
+
+  -i, --image <FILE>...
+          Optional image(s) to attach to the initial prompt
+
+  -m, --model <MODEL>
+          Model the agent should use
+
+      --oss
+          Use open-source provider
+
+      --local-provider <OSS_PROVIDER>
+          Specify which local provider to use (lmstudio or ollama). If not specified with --oss, will use
+          config default or show selection
+
+  -p, --profile <CONFIG_PROFILE_V2>
+          Layer $CODEX_HOME/<name>.config.toml on top of the base user config
+
+  -s, --sandbox <SANDBOX_MODE>
+          Select the sandbox policy to use when executing model-generated shell commands
+          
+          [possible values: read-only, workspace-write, danger-full-access]
+
+      --dangerously-bypass-approvals-and-sandbox
+          Skip all confirmation prompts and execute commands without sandboxing. EXTREMELY DANGEROUS.
+          Intended solely for running in environments that are externally sandboxed
+
+      --dangerously-bypass-hook-trust
+          Run enabled hooks without requiring persisted hook trust for this invocation. DANGEROUS. Intended
+          only for automation that already vets hook sources
+
+  -C, --cd <DIR>
+          Tell the agent to use the specified directory as its working root
+
+      --add-dir <DIR>
+          Additional directories that should be writable alongside the primary workspace
+
+  -a, --ask-for-approval <APPROVAL_POLICY>
+          Configure when the model requires human approval before executing a command
+
+          Possible values:
+          - untrusted:  Only run "trusted" commands (e.g. ls, cat, sed) without asking for user approval.
+            Will escalate to the user if the model proposes a command that is not in the "trusted" set
+          - on-request: The model decides when to ask the user for approval
+          - never:      Never ask for user approval Execution failures are immediately returned to the model
+
+      --search
+          Enable live web search. When enabled, the native Responses `web_search` tool is available to the
+          model (no per‑call approval)
+
+      --no-alt-screen
+          Disable alternate screen mode
+          
+          Runs the TUI in inline mode, preserving terminal scrollback history.
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+
+=== OPENCLAW DISCOVERY ===
+Executable candidates:
+/home/tjaye904/.npm-global/bin/openclaw
+
+openclaw version:
+OpenClaw 2026.7.1-2 (0790d9f)
+
+openclaw help:
+
+OpenClaw 2026.7.1-2 (0790d9f) — All your chats, one OpenClaw.
+
+Usage: openclaw [options] [command]
+
+Options:
+  --container <name>   Run the CLI inside a running Podman/Docker container
+                       named <name> (default: env OPENCLAW_CONTAINER)
+  --dev                Dev profile: isolate state under ~/.openclaw-dev, default
+                       gateway port 19001, and shift derived ports
+                       (browser/canvas)
+  -h, --help           Display help for command
+  --log-level <level>  Global log level override for file + console
+                       (silent|fatal|error|warn|info|debug|trace)
+  --no-color           Disable ANSI colors
+  --profile <name>     Use a named profile (isolates
+                       OPENCLAW_STATE_DIR/OPENCLAW_CONFIG_PATH under
+                       ~/.openclaw-<name>)
+  -V, --version        output the version number
+
+Commands:
+  Hint: commands suffixed with * have subcommands. Run <command> --help for details.
+  acp *                Run an ACP bridge backed by the Gateway
+  agent                Run an agent turn via the Gateway (use --local for
+                       embedded)
+  agents *             Manage isolated agents (workspaces + auth + routing)
+  approvals *          Manage exec approvals (gateway or node host)
+  attach               Attach Claude Code to a gateway session with scoped MCP
+                       tools
+  audit                Inspect metadata-only agent run and tool action records
+  backup *             Create and verify local backup archives for OpenClaw
+                       state
+  capability *         Run provider capability commands (fallback alias: infer)
+  channels *           Manage connected chat channels and accounts
+  chat                 Open a local terminal UI (alias for tui --local)
+  clawbot *            Legacy clawbot command aliases
+  commitments *        List and manage inferred follow-up commitments
+  completion           Generate shell completion script
+  config *             Non-interactive config helpers
+                       (get/set/patch/unset/file/schema/validate). Run without
+                       subcommand for guided setup.
+  configure            Interactive configuration for credentials, channels,
+                       gateway, and agent defaults
+  crestodian           Open the ring-zero setup and repair helper
+  cron *               Manage cron jobs (via Gateway)
+  daemon *             Manage the Gateway service (launchd/systemd/schtasks)
+  dashboard            Open the Control UI with your current token
+  devices *            Device pairing and auth tokens
+  directory *          Lookup contact and group IDs (self, peers, groups) for
+                       supported chat channels
+  dns *                DNS helpers for wide-area discovery (Tailscale + CoreDNS)
+  docs                 Search the live OpenClaw docs
+  doctor               Health checks + quick fixes for the gateway and channels
+  exec-approvals *     Manage exec approvals (alias for approvals)
+  exec-policy *        Show or synchronize requested exec policy with host
+                       approvals
+  gateway *            Run, inspect, and query the WebSocket Gateway
+  health               Fetch health from the running gateway
+  help                 Display help for command
+  hooks *              Manage internal agent hooks
+  infer *              Run provider-backed inference commands through a stable
+                       CLI surface
+  logs                 Tail gateway file logs via RPC
+  mcp *                Manage OpenClaw mcp.servers config and channel bridge
+  memory *             Search, inspect, and reindex memory files
+  message *            Send, read, and manage messages and channel actions
+  migrate *            Import state from another agent system
+  models *             Model discovery, scanning, and configuration
+  node *               Run and manage the headless node host service
+  nodes *              Manage gateway-owned nodes (pairing, status, invoke, and
+                       media)
+  onboard              Guided setup for auth, models, Gateway, workspace,
+                       channels, and skills
+  pairing *            Secure DM pairing (approve inbound requests)
+  plugins *            Manage OpenClaw plugins and extensions
+  promos *             Discover and claim promotional model offers from ClawHub
+  proxy *              Run the OpenClaw debug proxy and inspect captured traffic
+  qr                   Generate a mobile pairing QR code and setup code
+  reset                Reset local config/state (keeps the CLI installed)
+  sandbox *            Manage sandbox containers (Docker-based agent isolation)
+  secrets *            Secrets runtime controls
+  security *           Audit local config and state for common security
+                       foot-guns
+  sessions *           List stored conversation sessions
+  setup                Alias for openclaw onboard
+  skills *             List and inspect available skills
+  status               Show channel health and recent session recipients
+  system *             System tools (events, heartbeat, presence)
+  tasks *              Inspect durable background tasks and TaskFlow state
+  terminal             Open a local terminal UI (alias for tui --local)
+  transcripts *        Inspect stored transcripts
+  tui                  Open a terminal UI connected to the Gateway
+  uninstall            Uninstall the gateway service + local data (CLI remains)
+  update *             Update OpenClaw and inspect update channel status
+  webhooks *           Webhook helpers and integrations
+  worktrees *          Create, inspect, restore, and clean up managed worktrees
+
+Examples:
+  openclaw onboard
+    Run guided setup for a local Gateway, workspace, auth, and channels.
+  openclaw setup
+    Create the baseline config, workspace, and session folders.
+  openclaw configure
+    Change models, Gateway, channels, plugins, skills, and health checks.
+  openclaw status
+    Check Gateway, channel, model, and recent-session status.
+  openclaw doctor --fix
+    Repair common config, service, plugin, and channel problems.
+  openclaw channels add
+    Add or update a chat channel account with guided prompts.
+  openclaw channels status
+    See connected messaging accounts and login state.
+  openclaw --dev gateway
+    Run a dev Gateway (isolated state/config) on ws://127.0.0.1:19001.
+  openclaw gateway run --force
+    Start the Gateway and replace anything bound to its port.
+  openclaw models status
+    Show model/provider auth health before running agents.
+  openclaw plugins list
+    Inspect enabled, disabled, and installed plugins.
+  openclaw agent --to +15555550123 --message "Run summary" --deliver
+    Run one agent turn through the Gateway and optionally deliver the reply.
+  openclaw message send --channel telegram --target @mychat --message "Hi"
+    Send via your Telegram bot.
+
+Docs: https://docs.openclaw.ai/cli
+
+
+=== OPENCLAW USER CONFIGURATION LOCATIONS ===
+/home/tjaye904/2026-06-20T02-57-18.344-04-00-openclaw-backup.tar.gz
+/home/tjaye904/.cache/claude-cli-nodejs/-tmp-openclaw-crestodian-planner-RfnKsx
+/home/tjaye904/.cache/claude-cli-nodejs/-tmp-openclaw-crestodian-planner-WbzEzD
+/home/tjaye904/.claude/projects/-tmp-openclaw-crestodian-planner-RfnKsx
+/home/tjaye904/.claude/projects/-tmp-openclaw-crestodian-planner-WbzEzD
+/home/tjaye904/.config/systemd/user/openclaw-gateway.service
+/home/tjaye904/.config/systemd/user/openclaw-gateway.service.bak
+/home/tjaye904/.local/share/Trash/files/openknot.openclaw-extension-0.2.1
+/home/tjaye904/.local/share/Trash/info/openknot.openclaw-extension-0.2.1.trashinfo
+/home/tjaye904/.npm-global/bin/openclaw
+/home/tjaye904/.ollama/backup/openclaw
+/home/tjaye904/.openclaw
+/home/tjaye904/.openclaw/completions/openclaw.bash
+/home/tjaye904/.openclaw/completions/openclaw.fish
+/home/tjaye904/.openclaw/completions/openclaw.ps1
+/home/tjaye904/.openclaw/completions/openclaw.zsh
+/home/tjaye904/.openclaw/openclaw.json
+/home/tjaye904/.openclaw/openclaw.json.bak
+/home/tjaye904/.openclaw/openclaw.json.bak.1
+/home/tjaye904/.openclaw/openclaw.json.bak.2
+/home/tjaye904/.openclaw/openclaw.json.bak.3
+/home/tjaye904/.openclaw/openclaw.json.bak.4
+/home/tjaye904/.openclaw/openclaw.json.before-disable-sqlite-vec-20260722-023859.bak
+/home/tjaye904/.openclaw/openclaw.json.before-ollama-secretref-20260722-021225.bak
+/home/tjaye904/.openclaw/openclaw.json.before-rt170-cleanup-20260722-021445.bak
+/home/tjaye904/.openclaw/openclaw.json.before-telegram-message-tool-20260722-024222.bak
+/home/tjaye904/.openclaw/openclaw.json.last-good
+/home/tjaye904/.openclaw/openclaw.json.pre-update
+/home/tjaye904/openclaw-schema.json
+/home/tjaye904/openclaw-security-phase1.json5
+/home/tjaye904/.openclaw/state/openclaw.sqlite
+/home/tjaye904/.openclaw/state/openclaw.sqlite-shm
+/home/tjaye904/.openclaw/state/openclaw.sqlite-wal
+/home/tjaye904/.openclaw/workspace/.openclaw
+/home/tjaye904/.openclaw/workspace/openclaw-workspace-state.json
+/home/tjaye904/sovereign-agent-backups/20260722_005815/openclaw.json
+/home/tjaye904/.vscode/extensions/openknot.openclaw-extension-0.2.1
+/home/tjaye904/.vscode/OPENCLAW_CODEX_SETUP.md
+
+=== OLLAMA DISCOVERY ===
+Executable: /usr/local/bin/ollama
+
+Version:
+ollama version is 0.32.1
+
+Installed models:
+NAME                       ID              SIZE      MODIFIED          
+nomic-embed-text:latest    0a109f422b47    274 MB    About an hour ago    
+
+Running models:
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+
+Service status:
+Unit ollama.service could not be found.
+● ollama.service - Ollama Service
+     Loaded: loaded (/etc/systemd/system/ollama.service; enabled; preset: enabled)
+     Active: active (running) since Wed 2026-07-22 02:25:36 EDT; 1h 19min ago
+   Main PID: 9702 (ollama)
+      Tasks: 19 (limit: 70402)
+     Memory: 277.8M (peak: 888.2M)
+        CPU: 41.849s
+     CGroup: /system.slice/ollama.service
+             └─9702 /usr/local/bin/ollama serve
+
+Jul 22 02:39:30 pop-os ollama[9702]: slot      release: id  0 | task 8 | stop processing: n_tokens = 11, truncated = 0
+Jul 22 02:39:30 pop-os ollama[9702]: srv  update_slots: all slots are idle
+Jul 22 02:39:30 pop-os ollama[9702]: [GIN] 2026/07/22 - 02:39:30 | 200 |  5.560595482s |       127.0.0.1 | POST     "/api/embed"
+Jul 22 02:42:37 pop-os ollama[9702]: [GIN] 2026/07/22 - 02:42:37 | 200 |     119.236µs |       127.0.0.1 | POST     "/api/show"
+Jul 22 02:47:45 pop-os ollama[9702]: [GIN] 2026/07/22 - 02:47:45 | 200 |  2.657091737s |       127.0.0.1 | POST     "/api/chat"
+Jul 22 03:45:18 pop-os ollama[9702]: [GIN] 2026/07/22 - 03:45:18 | 200 |       34.19µs |       127.0.0.1 | GET      "/api/version"
+Jul 22 03:45:18 pop-os ollama[9702]: [GIN] 2026/07/22 - 03:45:18 | 200 |      21.151µs |       127.0.0.1 | HEAD     "/"
+Jul 22 03:45:18 pop-os ollama[9702]: [GIN] 2026/07/22 - 03:45:18 | 200 |     123.084µs |       127.0.0.1 | GET      "/api/tags"
+Jul 22 03:45:18 pop-os ollama[9702]: [GIN] 2026/07/22 - 03:45:18 | 200 |      32.764µs |       127.0.0.1 | HEAD     "/"
+Jul 22 03:45:18 pop-os ollama[9702]: [GIN] 2026/07/22 - 03:45:18 | 200 |      84.334µs |       127.0.0.1 | GET      "/api/ps"
+
+Local API tags:
+{"models":[{"name":"nomic-embed-text:latest","model":"nomic-embed-text:latest","modified_at":"2026-07-22T02:35:57.42865673-04:00","size":274302450,"digest":"0a109f422b47e3a30ba2b10eca18548e944e8a23073ee3f3e947efcf3c45e59f","details":{"parent_model":"","format":"gguf","family":"nomic-bert","families":["nomic-bert"],"parameter_size":"137M","quantization_level":"F16","context_length":2048,"embedding_length":768},"capabilities":["embedding"]}]}
+
+=== CONTAINER TOOLING ===
+Docker executable: 
+Docker version:
+Command 'docker' not found, but can be installed with:
+sudo apt install docker.io      # version 29.1.3-0ubuntu3~24.04.2, or
+sudo apt install podman-docker  # version 4.9.3+ds1-1ubuntu0.2
+
+Docker Compose version:
+Command 'docker' not found, but can be installed with:
+sudo apt install docker.io      # version 29.1.3-0ubuntu3~24.04.2, or
+sudo apt install podman-docker  # version 4.9.3+ds1-1ubuntu0.2
+
+Podman executable: 
+Podman version:
+Command 'podman' not found, but can be installed with:
+sudo apt install podman
+
+Current containers:
+Command 'docker' not found, but can be installed with:
+sudo apt install docker.io      # version 29.1.3-0ubuntu3~24.04.2, or
+sudo apt install podman-docker  # version 4.9.3+ds1-1ubuntu0.2
+
+=== VS CODE EXTENSIONS ===
+VS Code executable: /usr/bin/code
+
+Relevant extensions:
+openai.chatgpt
+openknot.openclaw-extension
+
+=== NETWORK LISTENERS OF INTEREST ===
+LISTEN 0      4096       127.0.0.1:11434      0.0.0.0:*                                    
+
+=== COMPILER AND LANGUAGE TOOLING ===
+CMake: cmake version 3.28.3
+C++ compiler: c++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+Python: Python 3.12.3
+Node: v22.23.0
+npm: 12.0.1
+
+=== EXISTING AGENT OR MODEL REFERENCES ===
+./releases/RT-012_Event_Classification_Runtime_v0.1.0/SHA256SUMS:2:19bf6a00471a3685d00b6c1dd52087adf7e3579ffff304972066aabc798c780b  ./codex/BUILD_STATUS.md
+./releases/RT-012_Event_Classification_Runtime_v0.1.0/SHA256SUMS:3:d7e3576a6c926b58378e48e27df72976cf1bed986f39bbc171db858cec6c3024  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-013_Event_Routing_Policy_Runtime_v0.1.0/SHA256SUMS:2:52b8255ee059fe1e79400f96c98d4220a4cd5007efdcdf37368b9a6b3d92db8d  ./codex/BUILD_STATUS.md
+./releases/RT-013_Event_Routing_Policy_Runtime_v0.1.0/SHA256SUMS:3:194dd7e7055a308280f10bef547024893f42d0f3805b3bb167ab4ab2e7fa403f  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-014_Event_Delivery_Semantics_Runtime_v0.1.0/SHA256SUMS:2:4e51aecefbabcec0923c250f77168731e72fc60702e260d7f967664c18268ae6  ./codex/BUILD_STATUS.md
+./releases/RT-014_Event_Delivery_Semantics_Runtime_v0.1.0/SHA256SUMS:3:08fe1b204cc8a583967676fbe5775b697543faa7a79648c04f744c46280fb2d5  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-004_Service_Runtime_v0.1.0/SHA256SUMS:2:053e8d00eefee25ec5521b0ec885ddc86c00e4d2f4b69e84fd446858f2d175ba  ./codex/BUILD_STATUS.md
+./releases/RT-004_Service_Runtime_v0.1.0/SHA256SUMS:3:3b2b6fd2d5913bf770abdd0d658105c57db119c81fb9410eba942150d3c7cdc1  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-016_Dead_Letter_Queue_Runtime_v0.1.0/SHA256SUMS:1:56e534a9ac580b13333444911ea3b0abcd5e4b3d92973fd56dff3cfe05dccd6d  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-006_Runtime_Coordinator_v0.1.0/SHA256SUMS:2:58b07fb41d5c5a6e9feb42efea14fd447d6088fefd0a9e7c7963cc6b49e1a801  ./codex/BUILD_STATUS.md
+./releases/RT-006_Runtime_Coordinator_v0.1.0/SHA256SUMS:3:6589f7ecc21b5ae26d782343a47a5ad23d16501ce99b2470b9d3735c76f47104  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-003_Scheduler_Runtime_v0.1.0/SHA256SUMS:2:99fb5bca4bd3efed5e3ca6299d1a4f8c618498508837c43480dd513d977cfb04  ./codex/BUILD_STATUS.md
+./releases/RT-003_Scheduler_Runtime_v0.1.0/SHA256SUMS:3:dc3c52d43d8e5797b9666fc077b74367cc9d276d7c10b851d8e95b1a6bd584fc  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-009_Diagnostics_Runtime_v0.1.0/SHA256SUMS:2:1ef393c602985a13b10c44a633951bb87d08a2031b80979bf17b67c9e054e7c6  ./codex/BUILD_STATUS.md
+./releases/RT-009_Diagnostics_Runtime_v0.1.0/SHA256SUMS:3:cb4781204f646308d9e32a79a9e69506b2591a04dc5a720180fe1b4bfe19983f  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-011_Event_Traceability_Runtime_v0.1.0/SHA256SUMS:2:5626c9f2b173a1eb0783789b7bb312cfd8d5c8ac956f3923151b8cf7bb595542  ./codex/BUILD_STATUS.md
+./releases/RT-011_Event_Traceability_Runtime_v0.1.0/SHA256SUMS:3:da205bc046aa95c30b3fb4d048668760e773d6c39077bdff11d628f57b070d20  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-015_Event_Retry_Policy_Runtime_v0.1.0/SHA256SUMS:2:c3e5a11beeecac05ca59aab85be0c8ef04f5233fac930c171bff429aa36fb50f  ./codex/BUILD_STATUS.md
+./releases/RT-015_Event_Retry_Policy_Runtime_v0.1.0/SHA256SUMS:3:f061408eb50855cc234b871394cb4c900f5988c719dfd4a6f26cd45cd42f0090  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-017_Dead_Letter_Replay_Runtime_v0.1.0/SHA256SUMS:1:272f6e872456be7001c25f6d86a15fdbeffb912182cde98ac0ce9996ab300d09  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-002_Event_Runtime_v0.1.0/SHA256SUMS:2:c0d63c6d59f7a6091003d771bac19749808baa67310fcb58052ab4fbc4ba6474  ./codex/BUILD_STATUS.md
+./releases/RT-005_Lifecycle_Runtime_v0.1.0/SHA256SUMS:2:13def5a53f72b6882dc1ece290d678a808ad6a03990e0885ee8823bb2980af79  ./codex/BUILD_STATUS.md
+./releases/RT-005_Lifecycle_Runtime_v0.1.0/SHA256SUMS:3:1f721896fdbb81fc0aaebe79db2bb4ed0e895b2b3fbb2bcb0f0212b5220914aa  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-007_Logging_Runtime_v0.1.0/SHA256SUMS:2:09ca70f83fbff03dd6267fca982f3f15e80ae2a77c699a99081c15d6947be4e8  ./codex/BUILD_STATUS.md
+./releases/RT-007_Logging_Runtime_v0.1.0/SHA256SUMS:3:286dd4a25274039d0f88f99893abf461ad45ad85208d64986ae2510543fedef5  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-010_Identity_Runtime_v0.1.0/SHA256SUMS:2:570b397136f2969c96f9fc3d9f90d894c52d194ea1e7cff721d62d2d6acd6c16  ./codex/BUILD_STATUS.md
+./releases/RT-010_Identity_Runtime_v0.1.0/SHA256SUMS:3:87ce73d6e5d708af24542ad0cf27bfc79771d97e2908a2d795418f07349bfd13  ./codex/IMPLEMENTATION_LOG.md
+./releases/RT-008_Configuration_Runtime_v0.1.0/SHA256SUMS:2:1498bbe354be280e9e4319f330bd9fe7f5aaf7b66b4721569b85c9296c06d7e5  ./codex/BUILD_STATUS.md
+./releases/RT-008_Configuration_Runtime_v0.1.0/SHA256SUMS:3:14baf7cfd4cba8500b34006afbf87e66835bbc2cc22b348e98e0168bd44458e2  ./codex/IMPLEMENTATION_LOG.md
+
+=== CURRENT TEST INVENTORY ===
+  Test  #73: runtime_capability_trace_distribution_explanation_report_deserialization_smoke_test
+  Test  #74: runtime_capability_trace_distribution_explanation_report_persistence_smoke_test
+  Test  #75: runtime_capability_trace_distribution_explanation_report_migration_smoke_test
+  Test  #76: runtime_capability_trace_distribution_explanation_report_schema_version_detection_smoke_test
+  Test  #77: runtime_capability_trace_distribution_explanation_report_migration_dispatcher_smoke_test
+  Test  #78: runtime_capability_trace_distribution_explanation_report_migration_registry_smoke_test
+  Test  #79: runtime_capability_trace_distribution_explanation_report_registry_backed_migration_dispatcher_smoke_test
+  Test  #80: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostics_smoke_test
+  Test  #81: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_serialization_smoke_test
+  Test  #82: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_deserialization_smoke_test
+  Test  #83: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_validation_smoke_test
+  Test  #84: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_smoke_test
+  Test  #85: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_smoke_test
+  Test  #86: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_smoke_test
+  Test  #87: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_smoke_test
+  Test  #88: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_validation_smoke_test
+  Test  #89: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_validation_integration_smoke_test
+  Test  #90: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_smoke_test
+  Test  #91: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_smoke_test
+  Test  #92: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_smoke_test
+  Test  #93: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_smoke_test
+  Test  #94: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_smoke_test
+  Test  #95: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_smoke_test
+  Test  #96: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_smoke_test
+  Test  #97: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_smoke_test
+  Test  #98: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration_smoke_test
+  Test  #99: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration_extension_smoke_test
+  Test #100: runtime_capability_trace_report_descriptor_smoke_test
+
+Total Tests: 100
+
+=== DISCOVERY COMPLETE ===

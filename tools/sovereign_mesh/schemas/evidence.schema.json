@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sovereign://schemas/evidence.schema.json",
+  "title": "Sovereign Engineering Evidence",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "task_id",
+    "worker",
+    "worktree",
+    "base_commit",
+    "result",
+    "artifacts"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^SDM-[0-9]{4,}$"
+    },
+    "worker": {
+      "enum": ["codex", "hermes", "openclaw", "human"]
+    },
+    "worktree": {
+      "type": "string",
+      "minLength": 1
+    },
+    "base_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "result": {
+      "enum": ["succeeded", "failed", "blocked", "cancelled"]
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "path", "sha256"],
+        "properties": {
+          "kind": {
+            "enum": [
+              "diff",
+              "build_log",
+              "test_log",
+              "review",
+              "agent_output",
+              "audit"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

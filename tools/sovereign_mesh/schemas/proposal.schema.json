@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sovereign://schemas/proposal.schema.json",
+  "title": "Sovereign Integration Proposal",
+  "type": "object",
+  "required": [
+    "proposal_id",
+    "task_id",
+    "base_commit",
+    "summary",
+    "evidence_ids",
+    "reviews",
+    "test_status",
+    "state"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^SDM-[0-9]{4,}$"
+    },
+    "base_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["reviewer", "verdict"],
+        "properties": {
+          "reviewer": {
+            "enum": ["codex", "hermes", "openclaw", "human"]
+          },
+          "verdict": {
+            "enum": ["approve", "request_changes", "reject"]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "test_status": {
+      "enum": ["passed", "failed", "not_run"]
+    },
+    "state": {
+      "enum": [
+        "proposed",
+        "reviewed",
+        "awaiting_user_decision",
+        "approved",
+        "rejected",
+        "revision_requested",
+        "executed",
+        "verified"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

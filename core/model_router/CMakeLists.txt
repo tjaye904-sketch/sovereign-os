@@ -1,0 +1,4 @@
+add_library(sovereign_model_router STATIC ollama_client.cpp model_router.cpp)
+target_include_directories(sovereign_model_router PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(sovereign_model_router PUBLIC cxx_std_23)
+target_compile_options(sovereign_model_router PRIVATE -Wall -Wextra -Wpedantic)

@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+"""Executable entry point for the Sovereign Development Mesh."""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+PACKAGE_PARENT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(PACKAGE_PARENT))
+
+from sovereign_mesh.cli import main  # noqa: E402
+
+raise SystemExit(main())

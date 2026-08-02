@@ -1,0 +1,1276 @@
+add_executable(
+    event_runtime_smoke_test
+    event_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    event_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME event_runtime_smoke_test
+    COMMAND event_runtime_smoke_test
+)
+
+add_executable(
+    scheduler_smoke_test
+    scheduler_smoke_test.cpp
+)
+
+target_link_libraries(
+    scheduler_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME scheduler_smoke_test
+    COMMAND scheduler_smoke_test
+)
+
+add_executable(
+    service_runtime_smoke_test
+    service_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    service_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME service_runtime_smoke_test
+    COMMAND service_runtime_smoke_test
+)
+
+add_executable(
+    lifecycle_runtime_smoke_test
+    lifecycle_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    lifecycle_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME lifecycle_runtime_smoke_test
+    COMMAND lifecycle_runtime_smoke_test
+)
+
+add_executable(
+    runtime_coordinator_smoke_test
+    runtime_coordinator_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_coordinator_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_coordinator_smoke_test
+    COMMAND runtime_coordinator_smoke_test
+)
+
+add_executable(
+    logging_runtime_smoke_test
+    logging_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    logging_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME logging_runtime_smoke_test
+    COMMAND logging_runtime_smoke_test
+)
+
+add_executable(
+    configuration_runtime_smoke_test
+    configuration_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    configuration_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME configuration_runtime_smoke_test
+    COMMAND configuration_runtime_smoke_test
+)
+
+add_executable(
+    diagnostics_runtime_smoke_test
+    diagnostics_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    diagnostics_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME diagnostics_runtime_smoke_test
+    COMMAND diagnostics_runtime_smoke_test
+)
+
+add_executable(
+    identity_runtime_smoke_test
+    identity_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    identity_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME identity_runtime_smoke_test
+    COMMAND identity_runtime_smoke_test
+)
+
+add_executable(
+    event_traceability_smoke_test
+    event_traceability_smoke_test.cpp
+)
+
+target_link_libraries(
+    event_traceability_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME event_traceability_smoke_test
+    COMMAND event_traceability_smoke_test
+)
+
+add_executable(
+    event_classification_smoke_test
+    event_classification_smoke_test.cpp
+)
+
+target_link_libraries(
+    event_classification_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME event_classification_smoke_test
+    COMMAND event_classification_smoke_test
+)
+
+add_executable(
+    event_routing_policy_smoke_test
+    event_routing_policy_smoke_test.cpp
+)
+
+target_link_libraries(
+    event_routing_policy_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME event_routing_policy_smoke_test
+    COMMAND event_routing_policy_smoke_test
+)
+
+add_executable(
+    event_delivery_semantics_smoke_test
+    event_delivery_semantics_smoke_test.cpp
+)
+
+target_link_libraries(
+    event_delivery_semantics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME event_delivery_semantics_smoke_test
+    COMMAND event_delivery_semantics_smoke_test
+)
+
+add_executable(
+    event_retry_policy_smoke_test
+    event_retry_policy_smoke_test.cpp
+)
+
+target_link_libraries(
+    event_retry_policy_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME event_retry_policy_smoke_test
+    COMMAND event_retry_policy_smoke_test
+)
+
+add_executable(
+    dead_letter_runtime_smoke_test
+    dead_letter_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    dead_letter_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME dead_letter_runtime_smoke_test
+    COMMAND dead_letter_runtime_smoke_test
+)
+
+add_executable(
+    dead_letter_replay_smoke_test
+    dead_letter_replay_smoke_test.cpp
+)
+
+target_link_libraries(
+    dead_letter_replay_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME dead_letter_replay_smoke_test
+    COMMAND dead_letter_replay_smoke_test
+)
+
+add_executable(
+    stable_subscription_identity_smoke_test
+    stable_subscription_identity_smoke_test.cpp
+)
+
+target_link_libraries(
+    stable_subscription_identity_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME stable_subscription_identity_smoke_test
+    COMMAND stable_subscription_identity_smoke_test
+)
+
+
+add_executable(
+    subscription_lifecycle_smoke_test
+    subscription_lifecycle_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_lifecycle_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_lifecycle_smoke_test
+    COMMAND subscription_lifecycle_smoke_test
+)
+
+add_executable(
+    subscription_configuration_smoke_test
+    subscription_configuration_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_configuration_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_configuration_smoke_test
+    COMMAND subscription_configuration_smoke_test
+)
+
+add_executable(
+    subscription_snapshot_smoke_test
+    subscription_snapshot_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_snapshot_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_snapshot_smoke_test
+    COMMAND subscription_snapshot_smoke_test
+)
+
+add_executable(
+    subscription_inventory_smoke_test
+    subscription_inventory_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_smoke_test
+    COMMAND subscription_inventory_smoke_test
+)
+
+add_executable(
+    subscription_inventory_query_smoke_test
+    subscription_inventory_query_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_query_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_query_smoke_test
+    COMMAND subscription_inventory_query_smoke_test
+)
+
+add_executable(
+    subscription_inventory_page_smoke_test
+    subscription_inventory_page_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_page_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_page_smoke_test
+    COMMAND subscription_inventory_page_smoke_test
+)
+
+add_executable(
+    subscription_inventory_sort_smoke_test
+    subscription_inventory_sort_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_sort_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_sort_smoke_test
+    COMMAND subscription_inventory_sort_smoke_test
+)
+
+add_executable(
+    subscription_inventory_multi_sort_smoke_test
+    subscription_inventory_multi_sort_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_multi_sort_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_multi_sort_smoke_test
+    COMMAND subscription_inventory_multi_sort_smoke_test
+)
+
+add_executable(
+    subscription_inventory_sort_normalization_smoke_test
+    subscription_inventory_sort_normalization_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_sort_normalization_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_sort_normalization_smoke_test
+    COMMAND subscription_inventory_sort_normalization_smoke_test
+)
+
+add_executable(
+    subscription_inventory_sort_diagnostics_smoke_test
+    subscription_inventory_sort_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_sort_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_sort_diagnostics_smoke_test
+    COMMAND subscription_inventory_sort_diagnostics_smoke_test
+)
+
+add_executable(
+    subscription_inventory_query_diagnostics_smoke_test
+    subscription_inventory_query_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_query_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_query_diagnostics_smoke_test
+    COMMAND subscription_inventory_query_diagnostics_smoke_test
+)
+
+add_executable(
+    subscription_inventory_execution_diagnostics_smoke_test
+    subscription_inventory_execution_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    subscription_inventory_execution_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME subscription_inventory_execution_diagnostics_smoke_test
+    COMMAND subscription_inventory_execution_diagnostics_smoke_test
+)
+
+add_executable(
+    service_registry_runtime_smoke_test
+    service_registry_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    service_registry_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME service_registry_runtime_smoke_test
+    COMMAND service_registry_runtime_smoke_test
+)
+
+add_executable(
+    service_dependency_runtime_smoke_test
+    service_dependency_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    service_dependency_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME service_dependency_runtime_smoke_test
+    COMMAND service_dependency_runtime_smoke_test
+)
+
+add_executable(
+    service_capability_runtime_smoke_test
+    service_capability_runtime_smoke_test.cpp
+)
+
+target_link_libraries(
+    service_capability_runtime_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME service_capability_runtime_smoke_test
+    COMMAND service_capability_runtime_smoke_test
+)
+
+add_executable(
+    runtime_message_bus_smoke_test
+    runtime_message_bus_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_message_bus_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_message_bus_smoke_test
+    COMMAND runtime_message_bus_smoke_test
+)
+
+add_executable(
+    runtime_message_request_response_smoke_test
+    runtime_message_request_response_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_message_request_response_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_message_request_response_smoke_test
+    COMMAND runtime_message_request_response_smoke_test
+)
+
+add_executable(
+    runtime_message_response_helper_smoke_test
+    runtime_message_response_helper_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_message_response_helper_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_message_response_helper_smoke_test
+    COMMAND runtime_message_response_helper_smoke_test
+)
+
+add_executable(
+    runtime_service_invocation_smoke_test
+    runtime_service_invocation_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_invocation_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_invocation_smoke_test
+    COMMAND runtime_service_invocation_smoke_test
+)
+
+add_executable(
+    runtime_service_message_gateway_smoke_test
+    runtime_service_message_gateway_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_message_gateway_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_message_gateway_smoke_test
+    COMMAND runtime_service_message_gateway_smoke_test
+)
+
+add_executable(
+    runtime_service_dispatcher_smoke_test
+    runtime_service_dispatcher_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_dispatcher_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_dispatcher_smoke_test
+    COMMAND runtime_service_dispatcher_smoke_test
+)
+
+add_executable(
+    runtime_service_routed_message_gateway_smoke_test
+    runtime_service_routed_message_gateway_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_routed_message_gateway_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_routed_message_gateway_smoke_test
+    COMMAND runtime_service_routed_message_gateway_smoke_test
+)
+
+add_executable(
+    runtime_service_endpoint_smoke_test
+    runtime_service_endpoint_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_endpoint_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_endpoint_smoke_test
+    COMMAND runtime_service_endpoint_smoke_test
+)
+
+add_executable(
+    runtime_service_capability_negotiation_smoke_test
+    runtime_service_capability_negotiation_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_capability_negotiation_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_capability_negotiation_smoke_test
+    COMMAND runtime_service_capability_negotiation_smoke_test
+)
+
+add_executable(
+    runtime_service_capability_invocation_smoke_test
+    runtime_service_capability_invocation_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_capability_invocation_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_capability_invocation_smoke_test
+    COMMAND runtime_service_capability_invocation_smoke_test
+)
+
+add_executable(
+    runtime_service_capability_invocation_policy_smoke_test
+    runtime_service_capability_invocation_policy_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_capability_invocation_policy_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_capability_invocation_policy_smoke_test
+    COMMAND runtime_service_capability_invocation_policy_smoke_test
+)
+
+add_executable(
+    runtime_service_capability_invocation_policy_protocol_smoke_test
+    runtime_service_capability_invocation_policy_protocol_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_capability_invocation_policy_protocol_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_capability_invocation_policy_protocol_smoke_test
+    COMMAND runtime_service_capability_invocation_policy_protocol_smoke_test
+)
+
+add_executable(
+    runtime_service_capability_provider_selection_policy_smoke_test
+    runtime_service_capability_provider_selection_policy_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_capability_provider_selection_policy_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_capability_provider_selection_policy_smoke_test
+    COMMAND runtime_service_capability_provider_selection_policy_smoke_test
+)
+
+add_executable(
+    runtime_service_capability_provider_selection_policy_protocol_smoke_test
+    runtime_service_capability_provider_selection_policy_protocol_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_capability_provider_selection_policy_protocol_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_capability_provider_selection_policy_protocol_smoke_test
+    COMMAND runtime_service_capability_provider_selection_policy_protocol_smoke_test
+)
+
+
+add_executable(
+    runtime_service_capability_provider_selection_policy_service_smoke_test
+    runtime_service_capability_provider_selection_policy_service_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_capability_provider_selection_policy_service_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_capability_provider_selection_policy_service_smoke_test
+    COMMAND runtime_service_capability_provider_selection_policy_service_smoke_test
+)
+
+add_executable(
+    runtime_service_capability_invocation_policy_service_smoke_test
+    runtime_service_capability_invocation_policy_service_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_service_capability_invocation_policy_service_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_service_capability_invocation_policy_service_smoke_test
+    COMMAND runtime_service_capability_invocation_policy_service_smoke_test
+)
+
+add_executable(
+    runtime_capability_policy_composition_smoke_test
+    runtime_capability_policy_composition_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_policy_composition_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_capability_policy_composition_smoke_test
+    COMMAND runtime_capability_policy_composition_smoke_test
+)
+
+add_executable(
+    runtime_capability_pipeline_diagnostics_smoke_test
+    runtime_capability_pipeline_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_pipeline_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_capability_pipeline_diagnostics_smoke_test
+    COMMAND runtime_capability_pipeline_diagnostics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_retention_smoke_test
+    runtime_capability_trace_retention_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_retention_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_capability_trace_retention_smoke_test
+    COMMAND runtime_capability_trace_retention_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_query_smoke_test
+    runtime_capability_trace_query_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_query_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_query_smoke_test
+    COMMAND
+        runtime_capability_trace_query_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_query_pagination_smoke_test
+    runtime_capability_trace_query_pagination_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_query_pagination_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_query_pagination_smoke_test
+    COMMAND
+        runtime_capability_trace_query_pagination_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_query_execution_diagnostics_smoke_test
+    runtime_capability_trace_query_execution_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_query_execution_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_query_execution_diagnostics_smoke_test
+    COMMAND
+        runtime_capability_trace_query_execution_diagnostics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_query_diagnostics_smoke_test
+    runtime_capability_trace_query_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_query_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_query_diagnostics_smoke_test
+    COMMAND
+        runtime_capability_trace_query_diagnostics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_query_summary_smoke_test
+    runtime_capability_trace_query_summary_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_query_summary_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_query_summary_smoke_test
+    COMMAND
+        runtime_capability_trace_query_summary_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_result_status_distribution_smoke_test
+    runtime_capability_trace_result_status_distribution_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_result_status_distribution_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_result_status_distribution_smoke_test
+    COMMAND
+        runtime_capability_trace_result_status_distribution_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_smoke_test
+    runtime_capability_trace_distribution_query_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_diagnostics_smoke_test
+    runtime_capability_trace_distribution_query_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_diagnostics_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_diagnostics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_statistics_smoke_test
+    runtime_capability_trace_distribution_query_statistics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_statistics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_statistics_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_statistics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_statistical_diagnostics_smoke_test
+    runtime_capability_trace_distribution_query_statistical_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_statistical_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_statistical_diagnostics_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_statistical_diagnostics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_percentile_smoke_test
+    runtime_capability_trace_distribution_query_percentile_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_percentile_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_percentile_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_percentile_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_quartile_diagnostics_smoke_test
+    runtime_capability_trace_distribution_query_quartile_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_quartile_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_quartile_diagnostics_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_quartile_diagnostics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_outlier_diagnostics_smoke_test
+    runtime_capability_trace_distribution_query_outlier_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_outlier_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_outlier_diagnostics_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_outlier_diagnostics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_skewness_diagnostics_smoke_test
+    runtime_capability_trace_distribution_query_skewness_diagnostics_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_skewness_diagnostics_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_skewness_diagnostics_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_skewness_diagnostics_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_shape_classification_smoke_test
+    runtime_capability_trace_distribution_query_shape_classification_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_shape_classification_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_shape_classification_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_shape_classification_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_shape_confidence_smoke_test
+    runtime_capability_trace_distribution_query_shape_confidence_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_shape_confidence_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_shape_confidence_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_shape_confidence_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_shape_explanation_smoke_test
+    runtime_capability_trace_distribution_query_shape_explanation_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_query_shape_explanation_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_shape_explanation_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_shape_explanation_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_query_shape_explanation_stability_smoke_test
+    runtime_capability_trace_distribution_query_shape_explanation_stability_smoke_test.cpp
+)
+
+
+/* quarantined test: runtime_capability_trace_distribution_query_shape_explanation_stability_report_smoke_test */
+target_link_libraries(
+    runtime_capability_trace_distribution_query_shape_explanation_stability_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_query_shape_explanation_stability_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_query_shape_explanation_stability_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_explanation_report_view_smoke_test
+    runtime_capability_trace_distribution_explanation_report_view_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_explanation_report_view_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_explanation_report_view_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_explanation_report_view_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_explanation_report_serialization_smoke_test
+    runtime_capability_trace_distribution_explanation_report_serialization_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_explanation_report_serialization_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_explanation_report_serialization_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_explanation_report_serialization_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_explanation_report_deserialization_smoke_test
+    runtime_capability_trace_distribution_explanation_report_deserialization_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_explanation_report_deserialization_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_explanation_report_deserialization_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_explanation_report_deserialization_smoke_test
+)
+
+add_executable(
+    runtime_capability_trace_distribution_explanation_report_persistence_smoke_test
+    runtime_capability_trace_distribution_explanation_report_persistence_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_explanation_report_persistence_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_explanation_report_persistence_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_explanation_report_persistence_smoke_test
+)
+
+
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_smoke_test */
+add_executable(
+    runtime_capability_trace_distribution_explanation_report_schema_version_detection_smoke_test
+    runtime_capability_trace_distribution_explanation_report_schema_version_detection_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_distribution_explanation_report_schema_version_detection_smoke_test
+    PRIVATE
+        sovereign_event_runtime
+)
+
+add_test(
+    NAME
+        runtime_capability_trace_distribution_explanation_report_schema_version_detection_smoke_test
+    COMMAND
+        runtime_capability_trace_distribution_explanation_report_schema_version_detection_smoke_test
+)
+
+
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatcher_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_registry_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_registry_backed_migration_dispatcher_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostics_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_serialization_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_deserialization_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_validation_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_validation_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_extension_continuation_validation_integration_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration_smoke_test */
+/* quarantined test: runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration_extension_smoke_test */
+# RT-170: stable capability-trace report descriptor API.
+add_executable(
+    runtime_capability_trace_report_descriptor_smoke_test
+    runtime_capability_trace_report_descriptor_smoke_test.cpp
+)
+
+target_link_libraries(
+    runtime_capability_trace_report_descriptor_smoke_test
+    PRIVATE
+    sovereign_event_runtime
+)
+
+add_test(
+    NAME runtime_capability_trace_report_descriptor_smoke_test
+    COMMAND runtime_capability_trace_report_descriptor_smoke_test
+)

@@ -1,0 +1,11 @@
+#pragma once
+
+namespace sovereign::runtime {
+
+struct RuntimeCapabilityTraceDistributionExplanationReportMigrationDispatchDiagnosticRecoveryVerificationIntegrationExtensionContinuationValidationIntegrationStabilityReportContinuationValidationIntegration {
+    static constexpr const char* name() {
+        return "runtime_capability_trace_distribution_explanation_report_migration_dispatch_diagnostic_recovery_verification_integration_extension_continuation_validation_integration_stability_report_continuation_validation_integration";
+    }
+};
+
+}

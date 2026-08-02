@@ -1,0 +1,32 @@
+# Specification coverage report
+Date: 2026-07-30
+Source: clean ZIP extract + multi-config verification
+
+## Gate results
+| Gate | Result |
+|------|--------|
+| Clean extract | PASS (418 files) |
+| Clean CMake configure | PASS |
+| Clean Debug build | PASS |
+| Clean Release build | PASS |
+| ASan build | PASS |
+| UBSan build | PASS |
+| Full CTest (Release) | PASS 33/33 |
+| ASan CTest sample | PASS 5/5 |
+| UBSan CTest sample | PASS 5/5 |
+| E2E operational acceptance | PASS |
+| Persistence after restart | PASS |
+
+## Capability coverage (inspect coverage)
+identity=complete governance=complete policy=complete
+memory=complete semantic=complete workspace=complete
+archive=complete sync_peer=complete goals=complete
+briefing=complete audit=complete domain_agents=complete
+daemon=complete cli=complete transparency=complete
+deferred_by_owner=http_api,desktop,hermes_bridge
+approved_v1_scope=100%
+
+## Evidence artifacts
+- verification-report/01-extract.txt … 10-execution-trace.txt
+- CTest logs in 07-*.txt
+- Observable STEP/TRACE log in 10-execution-trace.txt

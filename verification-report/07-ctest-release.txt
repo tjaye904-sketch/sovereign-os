@@ -1,0 +1,73 @@
+=== CTEST RELEASE ===
+Internal ctest changing into directory: /tmp/sov-rel
+Test project /tmp/sov-rel
+      Start  1: identity_service_smoke_test
+ 1/33 Test  #1: identity_service_smoke_test ..................   Passed    0.20 sec
+      Start  2: identity_persistence_smoke_test
+ 2/33 Test  #2: identity_persistence_smoke_test ..............   Passed    0.07 sec
+      Start  3: identity_acceptance_smoke_test
+ 3/33 Test  #3: identity_acceptance_smoke_test ...............   Passed    0.22 sec
+      Start  4: identity_governance_integration_smoke_test
+ 4/33 Test  #4: identity_governance_integration_smoke_test ...   Passed    0.07 sec
+      Start  5: governance_service_smoke_test
+ 5/33 Test  #5: governance_service_smoke_test ................   Passed    0.00 sec
+      Start  6: policy_engine_smoke_test
+ 6/33 Test  #6: policy_engine_smoke_test .....................   Passed    0.00 sec
+      Start  7: memory_engine_smoke_test
+ 7/33 Test  #7: memory_engine_smoke_test .....................   Passed    0.00 sec
+      Start  8: workspace_service_smoke_test
+ 8/33 Test  #8: workspace_service_smoke_test .................   Passed    0.00 sec
+      Start  9: archive_service_smoke_test
+ 9/33 Test  #9: archive_service_smoke_test ...................   Passed    0.01 sec
+      Start 10: sync_service_smoke_test
+10/33 Test #10: sync_service_smoke_test ......................   Passed    0.01 sec
+      Start 11: model_router_smoke_test
+11/33 Test #11: model_router_smoke_test ......................   Passed    0.01 sec
+      Start 12: cognitive_governance_smoke_test
+12/33 Test #12: cognitive_governance_smoke_test ..............   Passed    0.00 sec
+      Start 13: action_executor_smoke_test
+13/33 Test #13: action_executor_smoke_test ...................   Passed    0.00 sec
+      Start 14: sovereign_host_smoke_test
+14/33 Test #14: sovereign_host_smoke_test ....................   Passed    0.08 sec
+      Start 15: cli_parse_usage
+15/33 Test #15: cli_parse_usage ..............................   Passed    0.01 sec
+      Start 16: cli_parse_status
+16/33 Test #16: cli_parse_status .............................   Passed    0.02 sec
+      Start 17: daemon_parse_help
+17/33 Test #17: daemon_parse_help ............................   Passed    0.00 sec
+      Start 18: event_runtime_smoke_test
+18/33 Test #18: event_runtime_smoke_test .....................   Passed    0.00 sec
+      Start 19: scheduler_smoke_test
+19/33 Test #19: scheduler_smoke_test .........................   Passed    0.00 sec
+      Start 20: lifecycle_runtime_smoke_test
+20/33 Test #20: lifecycle_runtime_smoke_test .................   Passed    0.00 sec
+      Start 21: logging_runtime_smoke_test
+21/33 Test #21: logging_runtime_smoke_test ...................   Passed    0.00 sec
+      Start 22: diagnostics_runtime_smoke_test
+22/33 Test #22: diagnostics_runtime_smoke_test ...............   Passed    0.00 sec
+      Start 23: configuration_runtime_smoke_test
+23/33 Test #23: configuration_runtime_smoke_test .............   Passed    0.00 sec
+      Start 24: identity_runtime_smoke_test
+24/33 Test #24: identity_runtime_smoke_test ..................   Passed    0.00 sec
+      Start 25: dead_letter_runtime_smoke_test
+25/33 Test #25: dead_letter_runtime_smoke_test ...............   Passed    0.00 sec
+      Start 26: dead_letter_replay_smoke_test
+26/33 Test #26: dead_letter_replay_smoke_test ................   Passed    0.00 sec
+      Start 27: event_retry_policy_smoke_test
+27/33 Test #27: event_retry_policy_smoke_test ................   Passed    0.00 sec
+      Start 28: event_routing_policy_smoke_test
+28/33 Test #28: event_routing_policy_smoke_test ..............   Passed    0.00 sec
+      Start 29: event_classification_smoke_test
+29/33 Test #29: event_classification_smoke_test ..............   Passed    0.00 sec
+      Start 30: event_delivery_semantics_smoke_test
+30/33 Test #30: event_delivery_semantics_smoke_test ..........   Passed    0.00 sec
+      Start 31: event_traceability_smoke_test
+31/33 Test #31: event_traceability_smoke_test ................   Passed    0.00 sec
+      Start 32: service_runtime_smoke_test
+32/33 Test #32: service_runtime_smoke_test ...................   Passed    0.00 sec
+      Start 33: runtime_coordinator_smoke_test
+33/33 Test #33: runtime_coordinator_smoke_test ...............   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 33
+
+Total Test time (real) =   0.80 sec

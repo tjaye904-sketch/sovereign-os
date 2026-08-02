@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sovereign://schemas/decision.schema.json",
+  "title": "Sovereign Human Decision",
+  "type": "object",
+  "required": [
+    "decision_id",
+    "proposal_id",
+    "authority",
+    "decision",
+    "recorded_at",
+    "proposal_sha256"
+  ],
+  "properties": {
+    "decision_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority": {
+      "const": "sovereign-owner"
+    },
+    "decision": {
+      "enum": ["approved", "rejected", "revision_requested"]
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "proposal_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

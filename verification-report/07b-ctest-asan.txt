@@ -1,0 +1,17 @@
+=== ASAN CTEST sample ===
+Internal ctest changing into directory: /tmp/sov-asan2
+Test project /tmp/sov-asan2
+    Start  1: identity_service_smoke_test
+1/5 Test  #1: identity_service_smoke_test ......   Passed    0.28 sec
+    Start  5: governance_service_smoke_test
+2/5 Test  #5: governance_service_smoke_test ....   Passed    0.01 sec
+    Start  7: memory_engine_smoke_test
+3/5 Test  #7: memory_engine_smoke_test .........   Passed    0.01 sec
+    Start 15: cli_parse_usage
+4/5 Test #15: cli_parse_usage ..................   Passed    0.01 sec
+    Start 16: cli_parse_status
+5/5 Test #16: cli_parse_status .................   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 5
+
+Total Test time (real) =   0.33 sec

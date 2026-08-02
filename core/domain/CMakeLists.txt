@@ -1,0 +1,5 @@
+add_library(sovereign_domain STATIC domain_profile.cpp domain_tool_runner.cpp)
+target_include_directories(sovereign_domain PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_features(sovereign_domain PUBLIC cxx_std_23)
+target_link_libraries(sovereign_domain PUBLIC sovereign_memory sovereign_semantic)
+target_compile_options(sovereign_domain PRIVATE -Wall -Wextra -Wpedantic)

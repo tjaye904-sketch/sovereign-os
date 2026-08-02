@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sovereign://schemas/build-authority.schema.json",
+  "title": "Sovereign Build Authority Policy",
+  "type": "object",
+  "required": [
+    "policy_id",
+    "version",
+    "human_authority",
+    "agent_default_permissions",
+    "agent_prohibited_actions",
+    "repository_controls",
+    "execution_controls",
+    "integration_controls"
+  ],
+  "properties": {
+    "policy_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "human_authority": {
+      "type": "object",
+      "required": ["principal", "exclusive_actions"],
+      "properties": {
+        "principal": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exclusive_actions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "agent_default_permissions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "agent_prohibited_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "repository_controls": {
+      "type": "object"
+    },
+    "execution_controls": {
+      "type": "object"
+    },
+    "integration_controls": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}
