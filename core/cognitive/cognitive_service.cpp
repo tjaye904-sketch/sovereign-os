@@ -174,8 +174,6 @@ Result<ReflectionNote> CognitiveService::Reflect(
     return result;
 }
 
-} // namespace sovereign::cognitive
-
 Result<ExecutionPlan> CognitiveService::BuildPlan(
     const PrincipalId& requester,
     const std::string& goal)
@@ -234,3 +232,5 @@ Result<ExecutionPlan> CognitiveService::BuildPlan(
     result.value = std::move(plan);
     return result;
 }
+
+} // namespace sovereign::cognitive

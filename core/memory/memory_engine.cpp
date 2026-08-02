@@ -307,8 +307,6 @@ Result<std::vector<MemoryRecord>> MemoryEngine::Search(const std::string& query)
     return result;
 }
 
-} // namespace sovereign::memory
-
 double MemoryEngine::AgeScore(const MemoryRecord& r, std::uint64_t now_unix)
 {
     const std::uint64_t base = r.last_access_unix_seconds
@@ -411,3 +409,5 @@ Result<std::uint32_t> MemoryEngine::PruneBelow(double min_score)
     result.value = removed;
     return result;
 }
+
+} // namespace sovereign::memory
