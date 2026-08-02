@@ -20,6 +20,24 @@
         sovereign-daemon = pkgs.callPackage ./packages/sovereign-daemon.nix { };
       };
 
+      nixosConfigurations.sovereign-system = nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [
+          ./modules/sovereign-system.nix
+          {
+            nixpkgs.overlays = [
+              (final: prev: {
+                sovereign-cli = final.callPackage ./packages/sovereign-cli.nix { };
+                sovereign-daemon = final.callPackage ./packages/sovereign-daemon.nix { };
+              })
+            ];
+            # Minimal boot for installed system evaluation
+            boot.loader.grub.device = "nodev";
+            fileSystems."/" = { device = "/dev/disk/by-label/nixos"; fsType = "ext4"; };
+          }
+        ];
+      };
+
       nixosConfigurations.sovereign-iso = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [

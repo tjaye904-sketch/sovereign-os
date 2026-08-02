@@ -84,8 +84,8 @@ bool SovereignHost::Open()
     }
 
     models_ = std::make_unique<model_router::ModelRouter>(config_.ollama_base);
-    cognitive_ =
-        std::make_unique<cognitive::CognitiveService>(governance_, &memory_);
+    cognitive_ = std::make_unique<cognitive::CognitiveService>(
+        governance_, &memory_, models_.get(), config_.default_model);
     executor_ = std::make_unique<executor::ActionExecutor>(*cognitive_, &policy_);
     briefing_ = std::make_unique<briefing::BriefingService>(
         goals_, governance_, memory_, workspace_, audit_);

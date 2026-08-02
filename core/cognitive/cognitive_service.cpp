@@ -26,9 +26,13 @@ std::uint64_t CognitiveService::Now()
 
 CognitiveService::CognitiveService(
     sovereign::governance::GovernanceService& governance,
-    sovereign::memory::MemoryEngine* memory)
+    sovereign::memory::MemoryEngine* memory,
+    sovereign::model_router::ModelRouter* models,
+    std::string default_model)
     : governance_(governance)
     , memory_(memory)
+    , models_(models)
+    , default_model_(std::move(default_model))
 {
 }
 
@@ -217,8 +221,9 @@ Result<ExecutionPlan> CognitiveService::BuildPlan(
     const double len_factor = goal.size() < 20 ? 0.55 : (goal.size() < 80 ? 0.72 : 0.65);
     plan.confidence = len_factor;
     plan.uncertainty_notes =
-        "Heuristic plan without live model; confidence is an estimate. "
-        "Governed steps require human approval.";
+        "Heuristic plan; governed steps require human approval.";
+
+    EnrichPlanWithModel(plan);
 
     if (memory_)
     {
@@ -231,6 +236,96 @@ Result<ExecutionPlan> CognitiveService::BuildPlan(
     }
     result.value = std::move(plan);
     return result;
+}
+
+void CognitiveService::EnrichPlanWithModel(ExecutionPlan& plan) const
+{
+    if (!models_)
+        return;
+    auto health = models_->Health();
+    if (!health.Ok() || !health.value)
+        return;
+
+    sovereign::model_router::ChatRequest req;
+    req.model = default_model_;
+    req.temperature = 0.2;
+    req.num_predict = 400;
+    sovereign::model_router::ChatMessage sys;
+    sys.role = "system";
+    sys.content =
+        "You refine an execution plan for Sovereign OS. Reply with lines: "
+        "STEP: <action> | <detail> | gov=0|1 and one line CONF: <0.0-1.0> "
+        "and one line NOTE: <uncertainty>. Keep under 8 steps.";
+    sovereign::model_router::ChatMessage user;
+    user.role = "user";
+    user.content = "Goal: " + plan.goal + "\nCurrent steps:\n";
+    for (const auto& s : plan.steps)
+        user.content += "- " + s.action + ": " + s.detail + "\n";
+    req.messages = {sys, user};
+    auto resp = models_->Chat(req);
+    if (!resp.Ok() || !resp.value.ok || resp.value.content.empty())
+        return;
+
+    const std::string& text = resp.value.content;
+    std::vector<PlanStep> parsed;
+    for (std::size_t i = 0; i < text.size();)
+    {
+        auto nl = text.find('\n', i);
+        std::string line = text.substr(i, nl == std::string::npos ? std::string::npos : nl - i);
+        i = nl == std::string::npos ? text.size() : nl + 1;
+        while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
+            line.pop_back();
+        if (line.rfind("STEP:", 0) == 0)
+        {
+            PlanStep st;
+            auto body = line.substr(5);
+            while (!body.empty() && body[0] == ' ') body.erase(body.begin());
+            auto p1 = body.find('|');
+            if (p1 == std::string::npos)
+            {
+                st.action = "step";
+                st.detail = body;
+            }
+            else
+            {
+                st.action = body.substr(0, p1);
+                while (!st.action.empty() && st.action.back() == ' ') st.action.pop_back();
+                auto rest = body.substr(p1 + 1);
+                while (!rest.empty() && rest[0] == ' ') rest.erase(rest.begin());
+                auto p2 = rest.find('|');
+                if (p2 == std::string::npos)
+                    st.detail = rest;
+                else
+                {
+                    st.detail = rest.substr(0, p2);
+                    auto g = rest.substr(p2 + 1);
+                    st.requires_governance = g.find('1') != std::string::npos;
+                }
+            }
+            parsed.push_back(std::move(st));
+        }
+        else if (line.rfind("CONF:", 0) == 0)
+        {
+            try
+            {
+                plan.confidence = std::stod(line.substr(5));
+                if (plan.confidence < 0) plan.confidence = 0;
+                if (plan.confidence > 1) plan.confidence = 1;
+            }
+            catch (...)
+            {
+            }
+        }
+        else if (line.rfind("NOTE:", 0) == 0)
+        {
+            plan.uncertainty_notes = line.substr(5);
+            while (!plan.uncertainty_notes.empty() && plan.uncertainty_notes[0] == ' ')
+                plan.uncertainty_notes.erase(plan.uncertainty_notes.begin());
+        }
+    }
+    if (!parsed.empty())
+        plan.steps = std::move(parsed);
+    plan.uncertainty_notes += " [model-enriched]";
 }
 
 } // namespace sovereign::cognitive
