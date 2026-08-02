@@ -47,6 +47,7 @@ void PrintUsage()
         << "  sovereign-cli memory-add <tag> <body...>\n"
         << "  sovereign-cli memory-list [tag]\n"
         << "  sovereign-cli recommend <action> <summary>\n"
+        << "  sovereign-cli loop [--auto-approve] <goal...>\n"
         << "  sovereign-cli approve <decision-hex> <reason>\n"
         << "  sovereign-cli reject <decision-hex> <reason>\n"
         << "  sovereign-cli override <decision-hex> <reason>\n"
@@ -585,6 +586,140 @@ if (cmd == "audit-list")
                           << '\n';
             }
         }
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "loop" && argc >= 3)
+    {
+        // Governed cognitive loop: plan → recommend → [approve] → execute → reflect
+        // Usage: sovereign-cli loop [--auto-approve] <goal...>
+        bool auto_approve = false;
+        int argi = 2;
+        if (argi < argc && std::string(argv[argi]) == "--auto-approve")
+        {
+            auto_approve = true;
+            ++argi;
+        }
+        if (argi >= argc)
+        {
+            std::cerr << "usage: sovereign-cli loop [--auto-approve] <goal...>\n";
+            host.Close();
+            return 1;
+        }
+        std::string goal;
+        for (int i = argi; i < argc; ++i)
+        {
+            if (i > argi) goal.push_back(' ');
+            goal += argv[i];
+        }
+
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid; run login again\n";
+            host.Close();
+            return 1;
+        }
+        const sovereign::PrincipalId actor = session.value.principal_id;
+
+        std::cout << "=== loop: plan ===\n";
+        auto plan = host.Cognitive().BuildPlan(actor, goal);
+        if (!plan.Ok())
+        {
+            std::cerr << "plan failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "confidence=" << plan.value.confidence << '\n';
+        for (std::size_t i = 0; i < plan.value.steps.size(); ++i)
+            std::cout << "step" << i << " " << plan.value.steps[i].action
+                      << " gov=" << (plan.value.steps[i].requires_governance ? 1 : 0)
+                      << " " << plan.value.steps[i].detail << '\n';
+
+        const std::string action = "mature";
+        const std::string summary = goal;
+        std::cout << "=== loop: recommend ===\n";
+        auto rec = host.Cognitive().RecommendAction(actor, action, summary, "loop");
+        if (!rec.Ok())
+        {
+            std::cerr << "recommend failed\n";
+            host.Close();
+            return 1;
+        }
+        const auto decision_hex = ToHex(rec.value.governance_decision_id);
+        std::cout << "governance_decision_id=" << decision_hex << '\n';
+
+        if (!auto_approve)
+        {
+            std::cout << "=== loop: paused for human approval ===\n";
+            std::cout << "next:\n  sovereign-cli approve " << decision_hex
+                      << " \"approved via loop\"\n  sovereign-cli execute " << action
+                      << " " << decision_hex << "\n";
+            sovereign::audit::AuditEntry e;
+            e.category = "cognitive";
+            e.action = "loop_paused";
+            e.actor = actor;
+            e.subject = decision_hex;
+            e.detail = goal;
+            static_cast<void>(host.Audit().Append(e));
+            host.Close();
+            return 0;
+        }
+
+        std::cout << "=== loop: auto-approve ===\n";
+        sovereign::governance::DecisionId did{};
+        did.bytes = rec.value.governance_decision_id;
+        auto ap = host.Governance().Approve(actor, true, did, "loop --auto-approve");
+        if (!ap.Ok())
+        {
+            std::cerr << "approve failed error=" << static_cast<int>(ap.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "approved\n";
+
+        std::cout << "=== loop: execute ===\n";
+        host.Executor().RegisterHandler(action, [](const std::string& a) {
+            sovereign::executor::Result<std::string> r;
+            r.value = std::string("loop-executed:") + a;
+            return r;
+        });
+        auto ex = host.Executor().Execute(action, rec.value.governance_decision_id);
+        if (!ex.Ok())
+        {
+            std::cerr << "execute failed error=" << static_cast<int>(ex.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "executed ok detail=" << ex.value.detail << '\n';
+
+        std::cout << "=== loop: reflect ===\n";
+        auto ref = host.Cognitive().Reflect(
+            actor, goal, std::string("completed loop action=") + action +
+                             " detail=" + ex.value.detail);
+        if (ref.Ok())
+            std::cout << "reflection recorded\n";
+        else
+            std::cout << "reflection skipped\n";
+
+        sovereign::audit::AuditEntry e;
+        e.category = "cognitive";
+        e.action = "loop_complete";
+        e.actor = actor;
+        e.subject = decision_hex;
+        e.detail = goal;
+        static_cast<void>(host.Audit().Append(e));
         host.Close();
         return 0;
     }
