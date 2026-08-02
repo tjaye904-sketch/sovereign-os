@@ -27,8 +27,8 @@ struct PolicyDecision
 
 struct PolicyRule
 {
-    std::string action; // exact match; "*" = default
-    std::string min_role; // owner | operator | service | readonly
+    std::string action;
+    std::string min_role;
     PolicyEffect effect{PolicyEffect::Allow};
 };
 
@@ -44,6 +44,16 @@ struct Result
 {
     PolicyError error{PolicyError::Ok};
     T value{};
+    [[nodiscard]] bool Ok() const noexcept
+    {
+        return error == PolicyError::Ok;
+    }
+};
+
+template <>
+struct Result<void>
+{
+    PolicyError error{PolicyError::Ok};
     [[nodiscard]] bool Ok() const noexcept
     {
         return error == PolicyError::Ok;
