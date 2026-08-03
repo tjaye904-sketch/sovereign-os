@@ -18,9 +18,13 @@ endfunction()
 
 add_subdirectory(runtime)
 
+sovereign_add_smoke(service_orchestrator_smoke_test os_runtime sovereign_os_runtime)
+
+
 sovereign_add_smoke(identity_service_smoke_test identity sovereign_identity)
 sovereign_add_smoke(identity_persistence_smoke_test identity sovereign_identity)
 sovereign_add_smoke(identity_acceptance_smoke_test identity sovereign_identity)
+sovereign_add_smoke(identity_revocation_hardening_smoke_test identity sovereign_identity)
 sovereign_add_smoke(identity_governance_integration_smoke_test identity sovereign_identity sovereign_governance)
 sovereign_add_smoke(governance_service_smoke_test governance sovereign_governance)
 sovereign_add_smoke(policy_engine_smoke_test policy sovereign_policy)
