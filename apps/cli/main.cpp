@@ -424,6 +424,14 @@ int main(int argc, char** argv)
             return 1;
         }
         std::cout << "policy_version=" << host.Policy().Version() << '\n';
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "policy";
+            e.action = "rule_set";
+            e.subject = argv[2];
+            e.detail = std::string(argv[3]) + " " + argv[4];
+            static_cast<void>(host.Audit().Append(e));
+        }
         host.Close();
         return 0;
     }
@@ -474,6 +482,13 @@ int main(int argc, char** argv)
             return 1;
         }
         std::cout << "removed=" << r.value << '\n';
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "memory";
+            e.action = "prune";
+            e.detail = std::string("removed=") + std::to_string(r.value);
+            static_cast<void>(host.Audit().Append(e));
+        }
         host.Close();
         return 0;
     }
@@ -545,6 +560,14 @@ int main(int argc, char** argv)
         std::cout << "goal=" << r.value.goal << std::endl;
         std::cout << "confidence=" << r.value.confidence << std::endl;
         std::cout << "enrichment=" << r.value.enrichment_status << std::endl;
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "cognitive";
+            e.action = "plan";
+            e.detail = r.value.goal;
+            e.subject = r.value.enrichment_status;
+            static_cast<void>(host.Audit().Append(e));
+        }
         std::cout << "uncertainty=" << r.value.uncertainty_notes << '\n';
         for (std::size_t i = 0; i < r.value.steps.size(); ++i)
         {
@@ -886,6 +909,14 @@ if (cmd == "audit-list")
             return 1;
         }
         std::cout << "rejected\n";
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "governance";
+            e.action = "reject";
+            e.subject = argv[2];
+            e.detail = argv[3];
+            static_cast<void>(host.Audit().Append(e));
+        }
         host.Close();
         return 0;
     }
@@ -1057,6 +1088,13 @@ if (cmd == "audit-list")
             std::error_code ec;
             std::filesystem::remove(SessionFilePath(cfg.data_root), ec);
         }
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "identity";
+            e.action = "logout";
+            e.detail = "cli logout";
+            static_cast<void>(host.Audit().Append(e));
+        }
         std::cout << "logged_out\n";
         host.Close();
         return 0;
@@ -1203,6 +1241,13 @@ if (cmd == "audit-list")
             return 1;
         }
         std::cout << "credential_changed\n";
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "identity";
+            e.action = "change_credential";
+            e.detail = "credential rotated";
+            static_cast<void>(host.Audit().Append(e));
+        }
         host.Close();
         return 0;
     }
@@ -1468,6 +1513,14 @@ if (cmd == "audit-list")
             return 1;
         }
         std::cout << "executed ok detail=" << r.value.detail << '\n';
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "executor";
+            e.action = "execute";
+            e.subject = argv[3];
+            e.detail = std::string(argv[2]) + " " + r.value.detail;
+            static_cast<void>(host.Audit().Append(e));
+        }
         host.Close();
         return 0;
     }
