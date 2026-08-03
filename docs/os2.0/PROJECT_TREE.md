@@ -1,79 +1,123 @@
 # Sovereign project tree — AI / model context refresher
 
+**Updated:** 2026-08-03 (Milestone A.1–A.4 complete)  
 **Repo root (host):** `~/src/sovereign-os/sovereign-work`  
-**Data root (runtime):** `$SOVEREIGN_DATA_ROOT` or `~/.local/share/sovereign`  
+**Data root:** `$SOVEREIGN_DATA_ROOT` or `~/.local/share/sovereign`  
 **Git user:** tjaye904-sketch  
+
+---
 
 ## What Sovereign is
 
-Governance-first local cognitive OS: identity → policy → memory → models (Ollama) → agents → audit.  
-**v1 product scope:** complete (see `sovereign-cli inspect`).  
-**OS 2.0:** NixOS live ISO boots; full disk OS install and MFA still incomplete.
+Governance-first **local cognitive OS substrate**: identity → policy → memory → models (Ollama) → agents → audit.  
+Bootable **NixOS live ISO** exists; full disk install + MFA remain incomplete.
 
-## Layout (logical)
+| Scope | Status |
+|-------|--------|
+| Approved **v1 product** (CLI host) | ~95–100% |
+| **OS 2.0** (bootable installable OS) | ~40% |
+| Full life-OS vision | ~30–40% |
+
+---
+
+## Layout
 
 ```
 sovereign-work/
 ├── apps/
-│   ├── cli/main.cpp          # sovereign-cli (all user commands)
-│   └── daemon/main.cpp       # ServiceOrchestrator + agent tick
+│   ├── cli/main.cpp           # sovereign-cli (primary surface)
+│   ├── daemon/main.cpp        # ServiceOrchestrator + agent/audit ticks
+│   └── installer/             # sketch only — no silent disk writes
 ├── core/
-│   ├── identity/             # Owner/operator/service/machine, sessions, Argon2
-│   ├── governance/           # Pending decisions, approve/reject/override
-│   ├── policy/               # Versioned rules, dry-run
-│   ├── memory/               # Records, importance, aging, prune
-│   ├── cognitive/            # Plan, recommend, reflect (+ optional Ollama)
-│   ├── model_router/         # Ollama-only chat
-│   ├── audit/                # audit.dat + audit.chain
-│   ├── os_runtime/           # ServiceOrchestrator
-│   ├── product/              # SovereignHost composition root
-│   ├── diagnostics/          # inspect transparency report
-│   └── ... (workspace, agent, goals, semantic, domain, executor, sync, runtime)
-├── nix/
-│   ├── flake.nix             # ISO + packages
-│   └── modules/
-│       ├── sovereign-iso.nix # Live image
-│       └── sovereign-system.nix  # Installed system sketch
+│   ├── identity/              # owner/operator/service/machine, sessions, Argon2
+│   ├── governance/            # pending decisions, approve/reject/override
+│   ├── policy/                # versioned rules, dry-run
+│   ├── memory/                # importance, aging, rank, prune
+│   ├── cognitive/             # plan + enrichment_status, recommend, loop, reflect
+│   ├── model_router/          # Ollama-only; curl --max-time 25
+│   ├── audit/                 # append-only + hash chain
+│   ├── os_runtime/            # ServiceOrchestrator (product path)
+│   ├── product/               # SovereignHost composition root
+│   ├── diagnostics/           # inspect transparency report
+│   ├── agent/ goals/ briefing/ semantic/ domain/ workspace/
+│   ├── archive/ sync/ executor/
+│   └── runtime/               # EXPERIMENTAL event bus — QUARANTINED by default
+│       └── _quarantine_trace_bloat/
+├── nix/                       # flake ISO + sovereign-system module
 ├── scripts/
 │   ├── build-sovereign-nix-iso.sh
 │   ├── test-sovereign-iso-boot.sh
-│   └── iso/                  # first-boot helpers
-├── docs/os2.0/               # Phases, maturity matrix, this tree
-├── testing/                  # *_smoke_test.cpp + CTest
+│   ├── verify-revocation-cli.sh
+│   ├── verify-plan-enrichment.sh
+│   ├── verify-sensitive-audit.sh
+│   └── iso/
+├── testing/                   # CTest smokes (19 with event runtime OFF)
+├── docs/os2.0/                 # phases, maturity, this tree
 └── CMakeLists.txt
 ```
+
+---
+
+## Build flags
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DSOVEREIGN_BUILD_TESTS=ON \
+  -DSOVEREIGN_BUILD_EVENT_RUNTIME=OFF   # default: quarantined
+```
+
+- `SOVEREIGN_BUILD_EVENT_RUNTIME=ON` — experimental `core/runtime` + extra tests  
+- Product path does **not** link `sovereign_event_runtime`
+
+---
+
+## Milestone A hardening (done on main)
+
+| ID | Commit | Result |
+|----|--------|--------|
+| A.1 | `f520a3b` | Session/principal revoke verified |
+| A.2 | `09143a3` | Plan `enrichment=` + Ollama timeouts |
+| A.3 | `a049861` | Audit on sensitive CLI paths |
+| A.4 | `0173cff` | Event runtime quarantined (19 CTest) |
+| A.5 | *(this doc)* | PROJECT_TREE refresher |
+
+---
 
 ## Critical CLI surface
 
 ```
 bootstrap / login / logout / session-revoke
-service-create / machine-create / principal-suspend / principal-revoke
+operator-create / service-create / machine-create
+principal-suspend / principal-revoke / change-credential
 status / brief / inspect / audit-verify / audit-list
 policy-check / policy-dry-run / policy-version / policy-rule-set
-memory-add / memory-rank / memory-prune
-plan / loop [--auto-approve] / recommend / approve / execute
+memory-add / memory-rank / memory-prune / plan
+loop [--auto-approve] / recommend / approve / reject / execute
 ```
 
-## Proven gates (host)
+---
 
-- CMake Release + 33 CTest PASS  
-- E2E temp data_root scenario PASS (historical)  
-- ISO build + QEMU boot PASS  
-- loop pause + loop --auto-approve PASS  
+## Standing rules (owner)
 
-## Owner constraints
+1. Revoke ≠ disk wipe; only `$SOVEREIGN_DATA_ROOT`  
+2. Disk install = explicit device + CONFIRM (never via `loop --auto-approve`)  
+3. MFA (future) = step-up gate, not installer  
+4. Deferred: `http_api`, `desktop`, `hermes_bridge`  
+5. Local Ollama first  
 
-- All product work stays out of original ChatGPT zip; this is the sovereign-work tree  
-- Local Ollama; deferred: http_api, desktop, hermes_bridge  
-- No silent disk install; human names device  
+See: `RECOMMENDATIONS_MFA_DISK.md`, `QUARANTINE_RUNTIME.md`, `MATURITY_MATRIX.md`
+
+---
 
 ## How models should use this file
 
-On context load: read this + `MATURITY_MATRIX.md` + `DAILY_USE.md`.  
-Do not re-bootstrap design from zero; extend existing modules and keep governance gates.
+On context load, read in order:
 
-## Build flags
+1. `docs/os2.0/PROJECT_TREE.md` (this file)  
+2. `docs/os2.0/MATURITY_MATRIX.md`  
+3. `docs/os2.0/DAILY_USE.md`  
+4. `docs/os2.0/RECOMMENDATIONS_MFA_DISK.md`  
 
-- `SOVEREIGN_BUILD_TESTS=ON` — CTest smokes
-- `SOVEREIGN_BUILD_EVENT_RUNTIME=OFF` (default) — quarantines experimental `core/runtime` event stack
+Do **not** re-bootstrap design from zero. Extend existing modules; keep governance gates; quarantine does not mean delete.
 
+**Next after A.5:** Milestone B — non-destructive VM installer design (no host disk write until device named).
