@@ -241,45 +241,105 @@ Result<ExecutionPlan> CognitiveService::BuildPlan(
 void CognitiveService::EnrichPlanWithModel(ExecutionPlan& plan) const
 {
     if (!models_)
+    {
+        plan.enrichment_status = "no_router";
         return;
+    }
+
     auto health = models_->Health();
     if (!health.Ok() || !health.value)
+    {
+        plan.enrichment_status = "model_unavailable";
+        plan.uncertainty_notes += " [ollama unreachable]";
         return;
+    }
+
+    // Prefer configured model; fall back to first listed tag if chat fails
+    std::vector<std::string> candidates;
+    if (!default_model_.empty())
+        candidates.push_back(default_model_);
+    auto listed = models_->ListModels();
+    if (listed.Ok())
+    {
+        for (const auto& m : listed.value)
+        {
+            if (m.name.empty())
+                continue;
+            bool dup = false;
+            for (const auto& c : candidates)
+                if (c == m.name)
+                {
+                    dup = true;
+                    break;
+                }
+            if (!dup)
+                candidates.push_back(m.name);
+            if (candidates.size() >= 4)
+                break;
+        }
+    }
+    if (candidates.empty())
+        candidates.push_back("openclaw");
 
     sovereign::model_router::ChatRequest req;
-    req.model = default_model_;
     req.temperature = 0.2;
-    req.num_predict = 400;
+    req.num_predict = 500;
     sovereign::model_router::ChatMessage sys;
     sys.role = "system";
     sys.content =
-        "You refine an execution plan for Sovereign OS. Reply with lines: "
-        "STEP: <action> | <detail> | gov=0|1 and one line CONF: <0.0-1.0> "
-        "and one line NOTE: <uncertainty>. Keep under 8 steps.";
+        "You refine an execution plan for Sovereign OS. "
+        "Output ONLY lines in this exact format:\n"
+        "STEP: action | detail | gov=0\n"
+        "STEP: action | detail | gov=1\n"
+        "CONF: 0.75\n"
+        "NOTE: short uncertainty text\n"
+        "No markdown fences. Max 8 STEP lines.";
     sovereign::model_router::ChatMessage user;
     user.role = "user";
     user.content = "Goal: " + plan.goal + "\nCurrent steps:\n";
     for (const auto& s : plan.steps)
         user.content += "- " + s.action + ": " + s.detail + "\n";
     req.messages = {sys, user};
-    auto resp = models_->Chat(req);
-    if (!resp.Ok() || !resp.value.ok || resp.value.content.empty())
-        return;
 
-    const std::string& text = resp.value.content;
+    sovereign::model_router::ChatResponse response;
+    bool got = false;
+    for (const auto& model : candidates)
+    {
+        req.model = model;
+        auto resp = models_->Chat(req);
+        if (resp.Ok() && resp.value.ok && !resp.value.content.empty())
+        {
+            response = std::move(resp.value);
+            got = true;
+            break;
+        }
+    }
+    if (!got)
+    {
+        plan.enrichment_status = "model_unavailable";
+        plan.uncertainty_notes += " [model chat failed]";
+        return;
+    }
+
+    const std::string& text = response.content;
     std::vector<PlanStep> parsed;
     for (std::size_t i = 0; i < text.size();)
     {
         auto nl = text.find('\n', i);
-        std::string line = text.substr(i, nl == std::string::npos ? std::string::npos : nl - i);
+        std::string line =
+            text.substr(i, nl == std::string::npos ? std::string::npos : nl - i);
         i = nl == std::string::npos ? text.size() : nl + 1;
         while (!line.empty() && (line.back() == '\r' || line.back() == ' '))
             line.pop_back();
-        if (line.rfind("STEP:", 0) == 0)
+        // strip common markdown prefixes
+        while (!line.empty() && (line[0] == '`' || line[0] == '*' || line[0] == ' '))
+            line.erase(line.begin());
+        if (line.rfind("STEP:", 0) == 0 || line.rfind("step:", 0) == 0)
         {
             PlanStep st;
             auto body = line.substr(5);
-            while (!body.empty() && body[0] == ' ') body.erase(body.begin());
+            while (!body.empty() && body[0] == ' ')
+                body.erase(body.begin());
             auto p1 = body.find('|');
             if (p1 == std::string::npos)
             {
@@ -289,43 +349,61 @@ void CognitiveService::EnrichPlanWithModel(ExecutionPlan& plan) const
             else
             {
                 st.action = body.substr(0, p1);
-                while (!st.action.empty() && st.action.back() == ' ') st.action.pop_back();
+                while (!st.action.empty() && st.action.back() == ' ')
+                    st.action.pop_back();
                 auto rest = body.substr(p1 + 1);
-                while (!rest.empty() && rest[0] == ' ') rest.erase(rest.begin());
+                while (!rest.empty() && rest[0] == ' ')
+                    rest.erase(rest.begin());
                 auto p2 = rest.find('|');
                 if (p2 == std::string::npos)
                     st.detail = rest;
                 else
                 {
                     st.detail = rest.substr(0, p2);
+                    while (!st.detail.empty() && st.detail.back() == ' ')
+                        st.detail.pop_back();
                     auto g = rest.substr(p2 + 1);
-                    st.requires_governance = g.find('1') != std::string::npos;
+                    st.requires_governance =
+                        g.find('1') != std::string::npos ||
+                        g.find("gov=1") != std::string::npos;
                 }
             }
-            parsed.push_back(std::move(st));
+            if (!st.action.empty())
+                parsed.push_back(std::move(st));
         }
-        else if (line.rfind("CONF:", 0) == 0)
+        else if (line.rfind("CONF:", 0) == 0 || line.rfind("conf:", 0) == 0)
         {
             try
             {
                 plan.confidence = std::stod(line.substr(5));
-                if (plan.confidence < 0) plan.confidence = 0;
-                if (plan.confidence > 1) plan.confidence = 1;
+                if (plan.confidence < 0)
+                    plan.confidence = 0;
+                if (plan.confidence > 1)
+                    plan.confidence = 1;
             }
             catch (...)
             {
             }
         }
-        else if (line.rfind("NOTE:", 0) == 0)
+        else if (line.rfind("NOTE:", 0) == 0 || line.rfind("note:", 0) == 0)
         {
             plan.uncertainty_notes = line.substr(5);
-            while (!plan.uncertainty_notes.empty() && plan.uncertainty_notes[0] == ' ')
+            while (!plan.uncertainty_notes.empty() &&
+                   plan.uncertainty_notes[0] == ' ')
                 plan.uncertainty_notes.erase(plan.uncertainty_notes.begin());
         }
     }
-    if (!parsed.empty())
-        plan.steps = std::move(parsed);
-    plan.uncertainty_notes += " [model-enriched]";
+
+    if (parsed.empty())
+    {
+        plan.enrichment_status = "parse_failed";
+        plan.uncertainty_notes += " [model reply not parseable; heuristic steps kept]";
+        return;
+    }
+    plan.steps = std::move(parsed);
+    plan.enrichment_status = "model_enriched";
+    if (plan.uncertainty_notes.find("[model-enriched]") == std::string::npos)
+        plan.uncertainty_notes += " [model-enriched]";
 }
 
 } // namespace sovereign::cognitive

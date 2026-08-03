@@ -543,6 +543,7 @@ int main(int argc, char** argv)
         }
         std::cout << "goal=" << r.value.goal << '\n';
         std::cout << "confidence=" << r.value.confidence << '\n';
+        std::cout << "enrichment=" << r.value.enrichment_status << '\n';
         std::cout << "uncertainty=" << r.value.uncertainty_notes << '\n';
         for (std::size_t i = 0; i < r.value.steps.size(); ++i)
         {
@@ -645,6 +646,7 @@ if (cmd == "audit-list")
             return 1;
         }
         std::cout << "confidence=" << plan.value.confidence << '\n';
+        std::cout << "enrichment=" << plan.value.enrichment_status << '\n';
         for (std::size_t i = 0; i < plan.value.steps.size(); ++i)
             std::cout << "step" << i << " " << plan.value.steps[i].action
                       << " gov=" << (plan.value.steps[i].requires_governance ? 1 : 0)

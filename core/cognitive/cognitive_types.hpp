@@ -75,6 +75,8 @@ struct ExecutionPlan
     std::vector<PlanStep> steps;
     double confidence{0.0}; // 0..1
     std::string uncertainty_notes;
+    // heuristic | model_enriched | model_unavailable | parse_failed | no_router
+    std::string enrichment_status{"heuristic"};
     std::uint64_t created_unix_seconds{0};
 };
 
