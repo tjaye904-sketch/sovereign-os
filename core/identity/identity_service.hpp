@@ -23,7 +23,6 @@ public:
         const std::string& display_name,
         const std::string& secret);
 
-    // Phase III — service & machine identities (no interactive login secret required)
     Result<PrincipalId> CreateServicePrincipal(
         const SessionId& owner_session,
         const std::string& display_name);
@@ -62,29 +61,27 @@ public:
     Result<void> RevokeSession(const SessionId& session_id);
     Result<std::vector<Session>> ListSessions(const PrincipalId& id) const;
 
-    // IQ binding: credential change revokes all sessions for that principal.
     Result<void> ChangeCredential(
         const SessionId& session,
         const std::string& current_secret,
         const std::string& new_secret);
 
-private:
-    Result<Session> RequireActiveOwnerSession(const SessionId& session_id) const;
-
-    // Milestone C — MFA scaffolding (disabled until enrolled; login path unchanged)
+    // Milestone C — MFA scaffolding (public; login path unchanged until enrolled)
     struct MfaStatus
     {
         bool totp_enrolled{false};
         bool step_up_required_for_execute{false};
     };
     Result<MfaStatus> GetMfaStatus(const PrincipalId& id) const;
-    // Enrollment returns not-implemented until C.2 crypto
     Result<std::string> BeginTotpEnrollment(const SessionId& session);
     Result<void> ConfirmTotpEnrollment(const SessionId& session, const std::string& code);
     Result<Session> AuthenticateWithMfa(
         const std::string& display_name,
         const std::string& secret,
         const std::string& totp_code);
+
+private:
+    Result<Session> RequireActiveOwnerSession(const SessionId& session_id) const;
     static PrincipalId NewPrincipalId();
     static SessionId NewSessionId();
     static std::uint64_t NowUnixSeconds();
