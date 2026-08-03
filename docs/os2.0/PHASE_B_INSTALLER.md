@@ -57,3 +57,14 @@ bash scripts/run-sovereign-vm.sh      # QEMU window
 ```
 
 Evidence: `nix flake` exposes `packages.sovereign-vm`; build produces `run-*-vm`.
+
+## B.3 — First-boot identity
+
+- Script: `scripts/iso/sovereign-first-boot.sh`
+- systemd: `sovereign-first-boot.service` on `sovereign-system` (before daemon)
+- Auto-bootstrap **only** if `SOVEREIGN_BOOTSTRAP_OWNER` and `SOVEREIGN_BOOTSTRAP_SECRET` are set
+- Marker: `$SOVEREIGN_DATA_ROOT/.first-boot-complete`
+
+```bash
+bash scripts/verify-first-boot.sh ./build/apps/cli/sovereign-cli
+```
