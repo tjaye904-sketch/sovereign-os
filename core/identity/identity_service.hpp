@@ -70,6 +70,21 @@ public:
 
 private:
     Result<Session> RequireActiveOwnerSession(const SessionId& session_id) const;
+
+    // Milestone C — MFA scaffolding (disabled until enrolled; login path unchanged)
+    struct MfaStatus
+    {
+        bool totp_enrolled{false};
+        bool step_up_required_for_execute{false};
+    };
+    Result<MfaStatus> GetMfaStatus(const PrincipalId& id) const;
+    // Enrollment returns not-implemented until C.2 crypto
+    Result<std::string> BeginTotpEnrollment(const SessionId& session);
+    Result<void> ConfirmTotpEnrollment(const SessionId& session, const std::string& code);
+    Result<Session> AuthenticateWithMfa(
+        const std::string& display_name,
+        const std::string& secret,
+        const std::string& totp_code);
     static PrincipalId NewPrincipalId();
     static SessionId NewSessionId();
     static std::uint64_t NowUnixSeconds();

@@ -54,6 +54,7 @@ void PrintUsage()
         << "  sovereign-cli rule-set <action> <auto:0|1> <min-approve-role>\n"
         << "  sovereign-cli logout\n"
         << "  sovereign-cli session-revoke\n"
+        << "  sovereign-cli mfa-status\n"
         << "  sovereign-cli principal-suspend <principal-hex>\n"
         << "  sovereign-cli principal-revoke <principal-hex>\n"
         << "  sovereign-cli operator-create <name> <secret>\n"
@@ -968,6 +969,40 @@ if (cmd == "audit-list")
         return 0;
     }
 
+
+
+    if (cmd == "mfa-status")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid\n";
+            host.Close();
+            return 1;
+        }
+        auto st = host.Identity().GetMfaStatus(session.value.principal_id);
+        if (!st.Ok())
+        {
+            std::cerr << "mfa-status failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "totp_enrolled=" << (st.value.totp_enrolled ? "1" : "0")
+                  << " step_up_execute="
+                  << (st.value.step_up_required_for_execute ? "1" : "0")
+                  << '\n';
+        host.Close();
+        return 0;
+    }
 
     if (cmd == "session-revoke")
     {

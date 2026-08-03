@@ -503,4 +503,57 @@ Result<void> IdentityService::ChangeCredential(
     return store_.RevokeAllSessions(principal.value.id);
 }
 
+
+Result<IdentityService::MfaStatus> IdentityService::GetMfaStatus(
+    const PrincipalId& id) const
+{
+    Result<MfaStatus> result;
+    static_cast<void>(id);
+    // C.1: no durable MFA store yet — always not enrolled
+    result.value.totp_enrolled = false;
+    result.value.step_up_required_for_execute = false;
+    return result;
+}
+
+Result<std::string> IdentityService::BeginTotpEnrollment(const SessionId& session)
+{
+    Result<std::string> result;
+    auto s = ValidateSession(session);
+    if (!s.Ok())
+    {
+        result.error = s.error;
+        return result;
+    }
+    // C.2 will generate secret + provisioning URI
+    result.error = IdentityError::MfaNotEnrolled;
+    result.value = "mfa_enrollment_not_implemented_c2";
+    return result;
+}
+
+Result<void> IdentityService::ConfirmTotpEnrollment(
+    const SessionId& session, const std::string& code)
+{
+    Result<void> result;
+    static_cast<void>(code);
+    auto s = ValidateSession(session);
+    if (!s.Ok())
+    {
+        result.error = s.error;
+        return result;
+    }
+    result.error = IdentityError::MfaNotEnrolled;
+    return result;
+}
+
+Result<Session> IdentityService::AuthenticateWithMfa(
+    const std::string& display_name,
+    const std::string& secret,
+    const std::string& totp_code)
+{
+    // C.1: if MFA not enrolled, same as Authenticate (ignore code)
+    static_cast<void>(totp_code);
+    return Authenticate(display_name, secret);
+}
+
+
 } // namespace sovereign::identity

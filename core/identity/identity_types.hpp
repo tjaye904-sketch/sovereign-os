@@ -38,6 +38,13 @@ enum class SessionStatus : std::uint8_t
     Revoked = 3
 };
 
+enum class MfaFactorKind : std::uint8_t
+{
+    None = 0,
+    Totp = 1,
+    RecoveryCode = 2
+};
+
 enum class CredentialType : std::uint8_t
 {
     LocalSecret = 1,
@@ -85,7 +92,10 @@ enum class IdentityError : std::uint8_t
     AlreadyBootstrapped,
     InvalidArgument,
     StorageFailure,
-    Unauthorized
+    Unauthorized,
+    MfaRequired,
+    MfaNotEnrolled,
+    MfaInvalid
 };
 
 template <typename T>
