@@ -5,6 +5,7 @@ add_library(
     identity_store_memory.cpp
     identity_store_file.cpp
     identity_service.cpp
+    identity_totp.cpp
     identity_verifier.cpp
 )
 

@@ -1,4 +1,5 @@
 #include "identity_service.hpp"
+#include "identity_totp.hpp"
 #include "identity_verifier.hpp"
 
 #include <chrono>
@@ -508,10 +509,10 @@ Result<IdentityService::MfaStatus> IdentityService::GetMfaStatus(
     const PrincipalId& id) const
 {
     Result<MfaStatus> result;
-    static_cast<void>(id);
-    // C.1: no durable MFA store yet — always not enrolled
-    result.value.totp_enrolled = false;
-    result.value.step_up_required_for_execute = false;
+    auto v = store_.GetCredentialVerifier(id, CredentialType::TotpSecret);
+    result.value.totp_enrolled =
+        v.Ok() && !v.value.empty() && v.value.rfind("pending:", 0) != 0;
+    result.value.step_up_required_for_execute = result.value.totp_enrolled;
     return result;
 }
 
@@ -524,9 +525,20 @@ Result<std::string> IdentityService::BeginTotpEnrollment(const SessionId& sessio
         result.error = s.error;
         return result;
     }
-    // C.2 will generate secret + provisioning URI
-    result.error = IdentityError::MfaNotEnrolled;
-    result.value = "mfa_enrollment_not_implemented_c2";
+    auto secret = totp::RandomSecret(20);
+    auto b32 = totp::Base32Encode(secret);
+    // Stage pending secret as TotpSecret only after confirm — store under Local path:
+    // use a reserved verifier key via TotpSecret with "pending:" prefix
+    auto set = store_.SetCredentialVerifier(
+        s.value.principal_id, CredentialType::TotpSecret, std::string("pending:") + b32);
+    if (!set.Ok())
+    {
+        result.error = set.error;
+        return result;
+    }
+    auto p = store_.GetPrincipal(s.value.principal_id);
+    std::string name = p.Ok() ? p.value.display_name : "user";
+    result.value = totp::ProvisioningUri(b32, name);
     return result;
 }
 
@@ -534,14 +546,32 @@ Result<void> IdentityService::ConfirmTotpEnrollment(
     const SessionId& session, const std::string& code)
 {
     Result<void> result;
-    static_cast<void>(code);
     auto s = ValidateSession(session);
     if (!s.Ok())
     {
         result.error = s.error;
         return result;
     }
-    result.error = IdentityError::MfaNotEnrolled;
+    auto v = store_.GetCredentialVerifier(s.value.principal_id, CredentialType::TotpSecret);
+    if (!v.Ok() || v.value.rfind("pending:", 0) != 0)
+    {
+        result.error = IdentityError::MfaNotEnrolled;
+        return result;
+    }
+    const std::string b32 = v.value.substr(8);
+    const auto now = static_cast<std::int64_t>(NowUnixSeconds());
+    if (!totp::VerifyCode(b32, code, now))
+    {
+        result.error = IdentityError::MfaInvalid;
+        return result;
+    }
+    auto set = store_.SetCredentialVerifier(
+        s.value.principal_id, CredentialType::TotpSecret, b32);
+    if (!set.Ok())
+    {
+        result.error = set.error;
+        return result;
+    }
     return result;
 }
 
@@ -550,10 +580,24 @@ Result<Session> IdentityService::AuthenticateWithMfa(
     const std::string& secret,
     const std::string& totp_code)
 {
-    // C.1: if MFA not enrolled, same as Authenticate (ignore code)
-    static_cast<void>(totp_code);
-    return Authenticate(display_name, secret);
+    auto base = Authenticate(display_name, secret);
+    if (!base.Ok())
+        return base;
+    auto st = GetMfaStatus(base.value.principal_id);
+    if (!st.Ok() || !st.value.totp_enrolled)
+        return base; // MFA not required
+    auto v = store_.GetCredentialVerifier(base.value.principal_id, CredentialType::TotpSecret);
+    if (!v.Ok() || v.value.empty() || v.value.rfind("pending:", 0) == 0)
+        return base;
+    const auto now = static_cast<std::int64_t>(NowUnixSeconds());
+    if (!totp::VerifyCode(v.value, totp_code, now))
+    {
+        Result<Session> fail;
+        fail.error = IdentityError::MfaInvalid;
+        static_cast<void>(RevokeSession(base.value.id));
+        return fail;
+    }
+    return base;
 }
-
 
 } // namespace sovereign::identity

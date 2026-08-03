@@ -55,6 +55,8 @@ void PrintUsage()
         << "  sovereign-cli logout\n"
         << "  sovereign-cli session-revoke\n"
         << "  sovereign-cli mfa-status\n"
+        << "  sovereign-cli mfa-enroll-begin\n"
+        << "  sovereign-cli mfa-enroll-confirm <code>\n"
         << "  sovereign-cli principal-suspend <principal-hex>\n"
         << "  sovereign-cli principal-revoke <principal-hex>\n"
         << "  sovereign-cli operator-create <name> <secret>\n"
@@ -970,6 +972,55 @@ if (cmd == "audit-list")
     }
 
 
+
+
+    if (cmd == "mfa-enroll-begin")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().BeginTotpEnrollment(sid);
+        if (!r.Ok())
+        {
+            std::cerr << "mfa-enroll-begin failed error="
+                      << static_cast<int>(r.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "otpauth_uri=" << r.value << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "mfa-enroll-confirm" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().ConfirmTotpEnrollment(sid, argv[2]);
+        if (!r.Ok())
+        {
+            std::cerr << "mfa-enroll-confirm failed error="
+                      << static_cast<int>(r.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "totp_enrolled=1\n";
+        host.Close();
+        return 0;
+    }
 
     if (cmd == "mfa-status")
     {
