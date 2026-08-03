@@ -71,3 +71,9 @@ plan / loop [--auto-approve] / recommend / approve / execute
 
 On context load: read this + `MATURITY_MATRIX.md` + `DAILY_USE.md`.  
 Do not re-bootstrap design from zero; extend existing modules and keep governance gates.
+
+## Build flags
+
+- `SOVEREIGN_BUILD_TESTS=ON` — CTest smokes
+- `SOVEREIGN_BUILD_EVENT_RUNTIME=OFF` (default) — quarantines experimental `core/runtime` event stack
+

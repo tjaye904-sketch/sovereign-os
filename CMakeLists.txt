@@ -21,7 +21,12 @@ add_subdirectory(core/briefing)
 add_subdirectory(core/agent)
 add_subdirectory(core/semantic)
 add_subdirectory(core/domain)
-add_subdirectory(core/runtime)
+option(SOVEREIGN_BUILD_EVENT_RUNTIME
+    "Build experimental core/runtime event bus (not on v1 product path; quarantined by default)"
+    OFF)
+if(SOVEREIGN_BUILD_EVENT_RUNTIME)
+    add_subdirectory(core/runtime)
+endif()
 add_subdirectory(core/identity)
 add_subdirectory(core/governance)
 add_subdirectory(core/policy)

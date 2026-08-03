@@ -16,7 +16,9 @@ function(sovereign_add_smoke name src_dir)
     add_test(NAME ${name} COMMAND ${name})
 endfunction()
 
-add_subdirectory(runtime)
+if(SOVEREIGN_BUILD_EVENT_RUNTIME)
+    add_subdirectory(runtime)
+endif()
 
 sovereign_add_smoke(service_orchestrator_smoke_test os_runtime sovereign_os_runtime)
 
