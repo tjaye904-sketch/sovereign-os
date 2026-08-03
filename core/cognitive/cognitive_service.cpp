@@ -274,7 +274,7 @@ void CognitiveService::EnrichPlanWithModel(ExecutionPlan& plan) const
                 }
             if (!dup)
                 candidates.push_back(m.name);
-            if (candidates.size() >= 4)
+            if (candidates.size() >= 2)
                 break;
         }
     }

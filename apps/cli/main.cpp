@@ -534,6 +534,7 @@ int main(int argc, char** argv)
             if (i > 2) goal.push_back(' ');
             goal += argv[i];
         }
+        std::cout << "plan: building..." << std::endl;
         auto r = host.Cognitive().BuildPlan(actor, goal);
         if (!r.Ok())
         {
@@ -541,9 +542,9 @@ int main(int argc, char** argv)
             host.Close();
             return 1;
         }
-        std::cout << "goal=" << r.value.goal << '\n';
-        std::cout << "confidence=" << r.value.confidence << '\n';
-        std::cout << "enrichment=" << r.value.enrichment_status << '\n';
+        std::cout << "goal=" << r.value.goal << std::endl;
+        std::cout << "confidence=" << r.value.confidence << std::endl;
+        std::cout << "enrichment=" << r.value.enrichment_status << std::endl;
         std::cout << "uncertainty=" << r.value.uncertainty_notes << '\n';
         for (std::size_t i = 0; i < r.value.steps.size(); ++i)
         {

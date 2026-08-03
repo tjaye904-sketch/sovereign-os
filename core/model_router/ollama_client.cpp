@@ -27,7 +27,7 @@ std::string ShellEscape(const std::string& s)
 Result<std::string> RunCurl(const std::string& args)
 {
     Result<std::string> result;
-    const std::string cmd = "curl -sS --max-time 120 " + args + " 2>/dev/null";
+    const std::string cmd = "curl -sS --max-time 25 --connect-timeout 3 " + args + " 2>/dev/null";
     std::array<char, 4096> buffer{};
     std::string out;
     FILE* pipe = popen(cmd.c_str(), "r");
