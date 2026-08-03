@@ -14,11 +14,15 @@ int main()
     auto st = identity.GetMfaStatus(sess.value.principal_id);
     REQUIRE(st.Ok());
     REQUIRE(st.value.totp_enrolled == false);
-    // existing login path unchanged
     auto again = identity.AuthenticateWithMfa("owner", "secret", "000000");
-    REQUIRE(again.Ok());
+    REQUIRE(again.Ok()); // not enrolled → MFA optional
     auto begin = identity.BeginTotpEnrollment(sess.value.id);
-    REQUIRE(begin.error == IdentityError::MfaNotEnrolled);
+    REQUIRE(begin.Ok());
+    REQUIRE(begin.value.find("otpauth://totp/") == 0);
+    // still not enrolled until confirm
+    auto st2 = identity.GetMfaStatus(sess.value.principal_id);
+    REQUIRE(st2.Ok());
+    REQUIRE(st2.value.totp_enrolled == false);
     std::cout << "identity_mfa_scaffold_smoke_test: OK\n";
     return 0;
 }
