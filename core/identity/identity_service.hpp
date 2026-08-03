@@ -80,6 +80,12 @@ public:
         const std::string& secret,
         const std::string& totp_code);
 
+    // C.3 recovery + step-up
+    Result<std::vector<std::string>> GenerateRecoveryCodes(const SessionId& session);
+    Result<void> ConsumeRecoveryCode(const PrincipalId& id, const std::string& code);
+    Result<void> VerifyStepUp(
+        const SessionId& session, const std::string& totp_or_recovery);
+
 private:
     Result<Session> RequireActiveOwnerSession(const SessionId& session_id) const;
     static PrincipalId NewPrincipalId();

@@ -57,6 +57,8 @@ void PrintUsage()
         << "  sovereign-cli mfa-status\n"
         << "  sovereign-cli mfa-enroll-begin\n"
         << "  sovereign-cli mfa-enroll-confirm <code>\n"
+        << "  sovereign-cli mfa-recovery-generate\n"
+        << "  sovereign-cli execute <action> <decision-hex> [--mfa <code>]\n"
         << "  sovereign-cli principal-suspend <principal-hex>\n"
         << "  sovereign-cli principal-revoke <principal-hex>\n"
         << "  sovereign-cli operator-create <name> <secret>\n"
@@ -1022,6 +1024,31 @@ if (cmd == "audit-list")
         return 0;
     }
 
+
+    if (cmd == "mfa-recovery-generate")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().GenerateRecoveryCodes(sid);
+        if (!r.Ok())
+        {
+            std::cerr << "mfa-recovery-generate failed\n";
+            host.Close();
+            return 1;
+        }
+        for (const auto& c : r.value)
+            std::cout << "recovery_code=" << c << '\n';
+        host.Close();
+        return 0;
+    }
+
     if (cmd == "mfa-status")
     {
         std::array<std::uint8_t, 16> session_bytes{};
@@ -1584,7 +1611,43 @@ if (cmd == "audit-list")
             host.Close();
             return 1;
         }
-        // Register a safe local handler for this process
+        std::string mfa_code;
+        for (int i = 4; i + 1 < argc; ++i)
+        {
+            if (std::string(argv[i]) == "--mfa")
+                mfa_code = argv[i + 1];
+        }
+        // Step-up when MFA enrolled
+        {
+            std::array<std::uint8_t, 16> session_bytes{};
+            if (LoadSession(cfg.data_root, session_bytes))
+            {
+                sovereign::identity::SessionId sid{};
+                sid.bytes = session_bytes;
+                auto session = host.Identity().ValidateSession(sid);
+                if (session.Ok())
+                {
+                    auto st = host.Identity().GetMfaStatus(session.value.principal_id);
+                    if (st.Ok() && st.value.step_up_required_for_execute)
+                    {
+                        if (mfa_code.empty())
+                        {
+                            std::cerr << "mfa_required: pass --mfa <totp-or-recovery>\n";
+                            host.Close();
+                            return 1;
+                        }
+                        auto su = host.Identity().VerifyStepUp(sid, mfa_code);
+                        if (!su.Ok())
+                        {
+                            std::cerr << "mfa_step_up_failed error="
+                                      << static_cast<int>(su.error) << '\n';
+                            host.Close();
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
         host.Executor().RegisterHandler(argv[2], [](const std::string& action) {
             sovereign::executor::Result<std::string> r;
             r.value = std::string("executed:") + action;

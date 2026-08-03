@@ -600,4 +600,111 @@ Result<Session> IdentityService::AuthenticateWithMfa(
     return base;
 }
 
+
+Result<std::vector<std::string>> IdentityService::GenerateRecoveryCodes(
+    const SessionId& session)
+{
+    Result<std::vector<std::string>> result;
+    auto s = ValidateSession(session);
+    if (!s.Ok())
+    {
+        result.error = s.error;
+        return result;
+    }
+    std::vector<std::string> plain;
+    std::string store_blob;
+    for (int i = 0; i < 8; ++i)
+    {
+        auto raw = totp::RandomSecret(5);
+        std::string code = totp::Base32Encode(raw).substr(0, 10);
+        plain.push_back(code);
+        // store hashed form (reuse HashSecret if available via verifier path)
+        auto hashed = HashSecret(code);
+        if (!store_blob.empty())
+            store_blob.push_back(',');
+        store_blob += hashed;
+    }
+    auto set = store_.SetCredentialVerifier(
+        s.value.principal_id, CredentialType::RecoveryCodes, store_blob);
+    if (!set.Ok())
+    {
+        result.error = set.error;
+        return result;
+    }
+    result.value = std::move(plain);
+    return result;
+}
+
+Result<void> IdentityService::ConsumeRecoveryCode(
+    const PrincipalId& id, const std::string& code)
+{
+    Result<void> result;
+    auto v = store_.GetCredentialVerifier(id, CredentialType::RecoveryCodes);
+    if (!v.Ok() || v.value.empty())
+    {
+        result.error = IdentityError::MfaNotEnrolled;
+        return result;
+    }
+    const std::string target = HashSecret(code);
+    std::string rest;
+    bool found = false;
+    std::size_t start = 0;
+    while (start < v.value.size())
+    {
+        auto comma = v.value.find(',', start);
+        std::string part = v.value.substr(
+            start, comma == std::string::npos ? std::string::npos : comma - start);
+        if (!found && part == target)
+            found = true;
+        else
+        {
+            if (!rest.empty())
+                rest.push_back(',');
+            rest += part;
+        }
+        if (comma == std::string::npos)
+            break;
+        start = comma + 1;
+    }
+    if (!found)
+    {
+        result.error = IdentityError::MfaInvalid;
+        return result;
+    }
+    auto set = store_.SetCredentialVerifier(id, CredentialType::RecoveryCodes, rest);
+    if (!set.Ok())
+    {
+        result.error = set.error;
+        return result;
+    }
+    return result;
+}
+
+Result<void> IdentityService::VerifyStepUp(
+    const SessionId& session, const std::string& totp_or_recovery)
+{
+    Result<void> result;
+    auto s = ValidateSession(session);
+    if (!s.Ok())
+    {
+        result.error = s.error;
+        return result;
+    }
+    auto st = GetMfaStatus(s.value.principal_id);
+    if (!st.Ok() || !st.value.step_up_required_for_execute)
+        return result; // no step-up required
+    auto v = store_.GetCredentialVerifier(s.value.principal_id, CredentialType::TotpSecret);
+    if (v.Ok() && !v.value.empty() && v.value.rfind("pending:", 0) != 0)
+    {
+        const auto now = static_cast<std::int64_t>(NowUnixSeconds());
+        if (totp::VerifyCode(v.value, totp_or_recovery, now))
+            return result;
+    }
+    auto cons = ConsumeRecoveryCode(s.value.principal_id, totp_or_recovery);
+    if (cons.Ok())
+        return result;
+    result.error = IdentityError::MfaInvalid;
+    return result;
+}
+
 } // namespace sovereign::identity

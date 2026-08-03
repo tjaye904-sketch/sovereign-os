@@ -49,6 +49,7 @@ enum class CredentialType : std::uint8_t
 {
     LocalSecret = 1,
     TotpSecret = 2,
+    RecoveryCodes = 3,
     LocalToken = 2
 };
 
