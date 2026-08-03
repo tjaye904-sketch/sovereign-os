@@ -53,6 +53,9 @@ void PrintUsage()
         << "  sovereign-cli override <decision-hex> <reason>\n"
         << "  sovereign-cli rule-set <action> <auto:0|1> <min-approve-role>\n"
         << "  sovereign-cli logout\n"
+        << "  sovereign-cli session-revoke\n"
+        << "  sovereign-cli principal-suspend <principal-hex>\n"
+        << "  sovereign-cli principal-revoke <principal-hex>\n"
         << "  sovereign-cli operator-create <name> <secret>\n"
         << "  sovereign-cli roles <principal-hex>\n"
         << "  sovereign-cli decision-get <decision-hex>\n"
@@ -927,6 +930,115 @@ if (cmd == "audit-list")
             sovereign::governance::RoleFromString(argv[4]);
         host.Governance().SetRule(rule);
         std::cout << "rule_set action=" << rule.action << '\n';
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "session-revoke")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().RevokeSession(sid);
+        if (!r.Ok())
+        {
+            std::cerr << "session-revoke failed error="
+                      << static_cast<int>(r.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        // clear local session file
+        std::error_code ec;
+        std::filesystem::remove(SessionFilePath(cfg.data_root), ec);
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "session_revoke";
+        e.detail = "self-revoke via cli";
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "session_revoked\n";
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "principal-suspend" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+        auto r = host.Identity().SetPrincipalStatus(
+            sid, id, sovereign::identity::PrincipalStatus::Suspended);
+        if (!r.Ok())
+        {
+            std::cerr << "principal-suspend failed error="
+                      << static_cast<int>(r.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "principal_suspend";
+        e.subject = argv[2];
+        e.detail = "suspended via cli";
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "principal_suspended id=" << argv[2] << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "principal-revoke" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+        auto r = host.Identity().SetPrincipalStatus(
+            sid, id, sovereign::identity::PrincipalStatus::Revoked);
+        if (!r.Ok())
+        {
+            std::cerr << "principal-revoke failed error="
+                      << static_cast<int>(r.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "principal_revoke";
+        e.subject = argv[2];
+        e.detail = "revoked via cli";
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "principal_revoked id=" << argv[2] << '\n';
         host.Close();
         return 0;
     }
