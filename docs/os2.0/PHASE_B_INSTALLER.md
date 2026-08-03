@@ -47,3 +47,13 @@ bash scripts/iso/sovereign-install.sh --disk /dev/sdX --confirm DESTROY_DISK
 - No real partitioning  
 - No `nixos-install` execution  
 - No host disk modification  
+
+## B.2 — NixOS `build.vm` (no host disks)
+
+```bash
+bash scripts/build-sovereign-vm.sh    # long first build
+bash scripts/run-sovereign-vm.sh      # QEMU window
+# Inside VM: sovereign-cli status / bootstrap after first boot
+```
+
+Evidence: `nix flake` exposes `packages.sovereign-vm`; build produces `run-*-vm`.

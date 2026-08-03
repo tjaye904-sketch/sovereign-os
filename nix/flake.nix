@@ -18,6 +18,10 @@
         # CLI package alone (for host use / tests)
         sovereign-cli = pkgs.callPackage ./packages/sovereign-cli.nix { };
         sovereign-daemon = pkgs.callPackage ./packages/sovereign-daemon.nix { };
+
+        # Runnable QEMU VM (no host disk install) — Milestone B.2
+        sovereign-vm =
+          self.nixosConfigurations.sovereign-system.config.system.build.vm;
       };
 
       nixosConfigurations.sovereign-system = nixpkgs.lib.nixosSystem {

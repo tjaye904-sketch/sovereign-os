@@ -29,5 +29,7 @@
     };
   };
   services.openssh.enable = true;
+  services.getty.autologinUser = lib.mkDefault "sovereign";
+  documentation.enable = lib.mkDefault false;
   system.stateVersion = "24.11";
 }
