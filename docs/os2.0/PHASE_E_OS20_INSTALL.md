@@ -63,3 +63,28 @@ Inside the live guest (login `sovereign` / `sovereign`):
 4. Or use host-side `bash scripts/build-sovereign-vm.sh` for a prebuilt installed-style VM without manual install
 
 Gates: `bash scripts/verify-vm-boot-install-gates.sh`
+
+## E.3 — Installed-style boot + first-boot
+
+Two supported paths (both **no host disk wipe**):
+
+### A) NixOS `build.vm` (prebuilt installed config)
+
+```bash
+bash scripts/build-sovereign-vm.sh    # long first time
+bash scripts/run-sovereign-vm.sh
+# first-boot guidance via systemd oneshot / sovereign-first-boot
+# optional auto: SOVEREIGN_BOOTSTRAP_OWNER=owner SOVEREIGN_BOOTSTRAP_SECRET='...' 
+```
+
+### B) Live ISO install into qcow2 then boot disk
+
+```bash
+bash scripts/iso/sovereign-vm-boot-install.sh --vm-disk "$HOME/sov-vm/sovereign.qcow2"
+# inside guest: partition, nixos-install from flake sovereign-system
+# later: qemu -drive file=...qcow2 -boot c   (no -cdrom)
+```
+
+Gates: `bash scripts/verify-e3-installed-path.sh`
+
+E.3 does **not** require a successful multi-hour `build-sovereign-vm` to close — artifact + script presence + gates are enough. Full VM build remains recommended evidence.
