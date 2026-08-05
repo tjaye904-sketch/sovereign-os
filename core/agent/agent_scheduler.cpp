@@ -19,17 +19,49 @@ AgentError AgentScheduler::Open(const std::filesystem::path& d){
   std::filesystem::create_directories(directory_,ec); if(ec)return AgentError::StorageFailure;
   open_=true; return Load();}
 void AgentScheduler::Close() noexcept{std::lock_guard lock(mutex_); if(open_)(void)Save(); open_=false;}
-AgentError AgentScheduler::Load(){
-  jobs_.clear(); std::ifstream in(directory_/"jobs.dat"); std::string line;
-  while(std::getline(in,line)){ if(line.empty())continue;
-    std::vector<std::string> p; std::string cur;
-    for(size_t i=0;i<line.size();++i){
-      if(line[i]=='\\'&&i+1<line.size()){cur.push_back(line[i++]);cur.push_back(line[i]);}
-      else if(line[i]=='|'){p.push_back(cur);cur.clear();} else cur.push_back(line[i]);}
-    p.push_back(cur); if(p.size()<6)continue; ScheduledJob j;
-    if(!Unhex(p[0],j.id.bytes))continue; j.kind=static_cast<JobKind>(std::stoi(p[1]));
-    j.name=Unesc(p[2]); j.interval_seconds=std::stoull(p[3]); j.last_run_unix=std::stoull(p[4]);
-    j.enabled=std::stoi(p[5])!=0; jobs_.push_back(j);} return AgentError::Ok;}
+AgentError AgentScheduler::Load()
+{
+  jobs_.clear();
+  std::ifstream in(directory_ / "jobs.dat");
+  std::string line;
+  while (std::getline(in, line))
+  {
+    if (line.empty())
+      continue;
+    std::vector<std::string> parts;
+    std::string cur;
+    for (size_t i = 0; i < line.size(); ++i)
+    {
+      if (line[i] == '\' && i + 1 < line.size())
+      {
+        cur.push_back(line[i++]);
+        cur.push_back(line[i]);
+      }
+      else if (line[i] == '|')
+      {
+        parts.push_back(cur);
+        cur.clear();
+      }
+      else
+      {
+        cur.push_back(line[i]);
+      }
+    }
+    parts.push_back(cur);
+    if (parts.size() < 6)
+      continue;
+    ScheduledJob j;
+    if (!Unhex(parts[0], j.id.bytes))
+      continue;
+    j.kind = static_cast<JobKind>(std::stoi(parts[1]));
+    j.name = Unesc(parts[2]);
+    j.interval_seconds = std::stoull(parts[3]);
+    j.last_run_unix = std::stoull(parts[4]);
+    j.enabled = std::stoi(parts[5]) != 0;
+    jobs_.push_back(j);
+  }
+  return AgentError::Ok;
+}
 AgentError AgentScheduler::Save() const{
   std::ofstream out(directory_/"jobs.dat",std::ios::trunc); if(!out)return AgentError::StorageFailure;
   for(const auto& j:jobs_){
