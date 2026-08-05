@@ -41,3 +41,25 @@ bash scripts/verify-vm-disk-prep.sh
 - qcow2 created under home path only
 - Prep either partitions via guestfish or documents fallback without writing host block devices
 - CTest still green
+
+## E.2 — Boot live ISO + VM disk
+
+```bash
+# Optional: sudo apt install -y libguestfs-tools
+# bash scripts/iso/sovereign-vm-disk-prep.sh --vm-disk "$HOME/sov-vm/sovereign.qcow2" --confirm PARTITION_VM_DISK
+
+bash scripts/iso/sovereign-vm-boot-install.sh \
+  --vm-disk "$HOME/sov-vm/sovereign.qcow2"
+
+# nographic / CI-ish:
+# bash scripts/iso/sovereign-vm-boot-install.sh --vm-disk ... --nographic
+```
+
+Inside the live guest (login `sovereign` / `sovereign`):
+
+1. `lsblk` — find virtio disk (often `/dev/vda` or `/dev/vdb`)
+2. Partition + `mkfs.ext4 -L nixos` if not pre-prepped
+3. Mount and `nixos-install` using flake `sovereign-system` (E.2 continues in E.3 docs)
+4. Or use host-side `bash scripts/build-sovereign-vm.sh` for a prebuilt installed-style VM without manual install
+
+Gates: `bash scripts/verify-vm-boot-install-gates.sh`
