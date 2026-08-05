@@ -37,6 +37,7 @@ Target: OS 2.0 complete operating system. **Not 100% of all 26 phases.**
 | F.1 | Secure Boot / measured boot docs + probes | **Done (docs)** |
 | F.2 | Optional require-MFA login | **Done** |
 | F.3 | Package channel / flake pins | **Done (docs+verify)** |
+| F.4 | Worktree archive script | **Done** |
 
 ## Scope scores (honest)
 
