@@ -375,6 +375,16 @@ Result<Session> IdentityService::Authenticate(
         return result;
     }
 
+    if (config_.require_mfa_on_login)
+    {
+        auto st = GetMfaStatus(match->id);
+        if (st.Ok() && st.value.totp_enrolled)
+        {
+            result.error = IdentityError::MfaRequired;
+            return result;
+        }
+    }
+
     const auto now = NowUnixSeconds();
     Session session{
         .id = NewSessionId(),
