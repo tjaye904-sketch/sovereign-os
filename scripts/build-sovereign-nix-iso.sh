@@ -32,9 +32,22 @@ if [[ -z "${ISO_PATH}" ]]; then
 fi
 
 if [[ -n "${ISO_PATH}" ]]; then
-  cp -L "$ISO_PATH" "$OUT_DIR/Sovereign-OS-nix-amd64.iso"
-  ls -lh "$OUT_DIR/Sovereign-OS-nix-amd64.iso"
-  echo "[nix-iso] DONE: $OUT_DIR/Sovereign-OS-nix-amd64.iso"
+  mkdir -p "$OUT_DIR"
+  DEST="$OUT_DIR/Sovereign-OS-nix-amd64.iso"
+  # Prefer user-writable dest; fall back to $HOME if dist/ is not writable
+  if ! touch "$OUT_DIR/.write_test" 2>/dev/null; then
+    OUT_DIR="${HOME}/src/sovereign-os/dist"
+    mkdir -p "$OUT_DIR"
+    DEST="$OUT_DIR/Sovereign-OS-nix-amd64.iso"
+    echo "[nix-iso] dist/ not writable; using $DEST"
+  else
+    rm -f "$OUT_DIR/.write_test"
+  fi
+  rm -f "$DEST"
+  cp -L "$ISO_PATH" "$DEST"
+  chmod u+rw "$DEST" 2>/dev/null || true
+  ls -lh "$DEST"
+  echo "[nix-iso] DONE: $DEST"
 else
   echo "[nix-iso] build finished; listing result:"
   find -L "$OUT_DIR/sovereign-iso-result" -type f | head -40
