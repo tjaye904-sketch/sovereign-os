@@ -34,6 +34,7 @@ Target: OS 2.0 complete operating system. **Not 100% of all 26 phases.**
 | D.2 | ISO rebuild + boot PASS | **Done** |
 | E.1–E.3 | OS 2.0 VM disk / boot-install / installed path | **Done** |
 | E.4 | Host install gates (no wipe) | **Done (gated)** |
+| F.1 | Secure Boot / measured boot docs + probes | **Done (docs)** |
 
 ## Scope scores (honest)
 
