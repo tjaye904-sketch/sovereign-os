@@ -612,16 +612,16 @@ Result<std::vector<std::string>> IdentityService::GenerateRecoveryCodes(
         return result;
     }
     std::vector<std::string> plain;
+    // Newline-separated Argon2 verifiers (hashes contain commas; never split on ',')
     std::string store_blob;
     for (int i = 0; i < 8; ++i)
     {
         auto raw = totp::RandomSecret(5);
         std::string code = totp::Base32Encode(raw).substr(0, 10);
         plain.push_back(code);
-        // store hashed form (reuse HashSecret if available via verifier path)
         auto hashed = HashSecret(code);
         if (!store_blob.empty())
-            store_blob.push_back(',');
+            store_blob.push_back('\n');
         store_blob += hashed;
     }
     auto set = store_.SetCredentialVerifier(
@@ -645,26 +645,29 @@ Result<void> IdentityService::ConsumeRecoveryCode(
         result.error = IdentityError::MfaNotEnrolled;
         return result;
     }
-    const std::string target = HashSecret(code);
+    // Argon2 salts differ per hash — must VerifySecret, not re-hash and compare.
     std::string rest;
     bool found = false;
     std::size_t start = 0;
-    while (start < v.value.size())
+    while (start <= v.value.size())
     {
-        auto comma = v.value.find(',', start);
+        auto nl = v.value.find('\n', start);
         std::string part = v.value.substr(
-            start, comma == std::string::npos ? std::string::npos : comma - start);
-        if (!found && part == target)
-            found = true;
-        else
+            start, nl == std::string::npos ? std::string::npos : nl - start);
+        if (!part.empty())
         {
-            if (!rest.empty())
-                rest.push_back(',');
-            rest += part;
+            if (!found && VerifySecret(part, code))
+                found = true;
+            else
+            {
+                if (!rest.empty())
+                    rest.push_back('\n');
+                rest += part;
+            }
         }
-        if (comma == std::string::npos)
+        if (nl == std::string::npos)
             break;
-        start = comma + 1;
+        start = nl + 1;
     }
     if (!found)
     {
