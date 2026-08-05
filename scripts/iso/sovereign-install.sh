@@ -97,8 +97,9 @@ case "$MODE" in
       log "REFUSED: not a block device: $DISK"
       exit 2
     fi
-    log "B.1: host destructive install is designed but NOT executed"
+    log "E.4: host destructive install is DESIGNED but NOT executed in this release"
     log "Would destroy partition table on $DISK — aborting without write"
+    log "Future: nixos-install from flake sovereign-system after explicit dual confirm"
     exit 2
     ;;
   *)

@@ -32,13 +32,15 @@ Target: OS 2.0 complete operating system. **Not 100% of all 26 phases.**
 | Post-C.3 | Agent Load fix, orchestrator smoke | **Done** |
 | D.1 | Per-command wall timing | **Done** |
 | D.2 | ISO rebuild + boot PASS | **Done** |
+| E.1–E.3 | OS 2.0 VM disk / boot-install / installed path | **Done** |
+| E.4 | Host install gates (no wipe) | **Done (gated)** |
 
 ## Scope scores (honest)
 
 | Scope | Approx. |
 |-------|---------|
 | Approved **v1 product** (CLI host) | **~100%** (`inspect coverage`) |
-| **OS 2.0** (bootable installable OS) | **~50–55%** (live ISO high; host install still gated) |
+| **OS 2.0** (bootable installable OS) | **~55–60%** (live ISO + VM install path; host wipe still gated) |
 | Full life-OS vision | **~35–40%** |
 
 ## Explicit remaining (not claimed done)

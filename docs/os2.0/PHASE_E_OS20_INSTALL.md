@@ -88,3 +88,29 @@ bash scripts/iso/sovereign-vm-boot-install.sh --vm-disk "$HOME/sov-vm/sovereign.
 Gates: `bash scripts/verify-e3-installed-path.sh`
 
 E.3 does **not** require a successful multi-hour `build-sovereign-vm` to close — artifact + script presence + gates are enough. Full VM build remains recommended evidence.
+
+## E.4 — Host bare-metal (gated, not executed)
+
+Host path remains **fail-closed**:
+
+```bash
+# Always exits 2 without writing:
+bash scripts/iso/sovereign-install.sh --disk /dev/sdX --confirm DESTROY_DISK
+SOVEREIGN_INSTALL_ALLOW_HOST=1 bash scripts/iso/sovereign-install.sh \
+  --disk /dev/sdX --confirm DESTROY_DISK
+```
+
+When implemented later, required sequence will be:
+
+1. Live ISO boot on real hardware  
+2. Operator names exact device  
+3. `DESTROY_DISK` + `SOVEREIGN_INSTALL_ALLOW_HOST=1`  
+4. Typed device path confirmation  
+5. `nixos-install` from `nixosConfigurations.sovereign-system`  
+6. First-boot identity (no default production secret)
+
+**E.4 close-out:** gates verified; no host wipe performed.
+
+```bash
+bash scripts/verify-e4-host-gates.sh
+```
