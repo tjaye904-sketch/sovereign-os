@@ -165,6 +165,35 @@ bool LoadSession(
     return FromHex(hex, session_id);
 }
 
+
+struct CmdTimer
+{
+    std::filesystem::path data_root;
+    std::string cmd;
+    std::chrono::steady_clock::time_point t0{
+        std::chrono::steady_clock::now()};
+    bool active{true};
+
+    ~CmdTimer()
+    {
+        if (!active || cmd.empty() || cmd == "inspect")
+            return;
+        using namespace std::chrono;
+        const auto ms =
+            duration_cast<milliseconds>(steady_clock::now() - t0).count();
+        std::error_code ec;
+        const auto dir = data_root / "metrics";
+        std::filesystem::create_directories(dir, ec);
+        std::ofstream out(dir / "cmd_times.log", std::ios::app);
+        if (!out)
+            return;
+        const auto wall = duration_cast<seconds>(
+                              system_clock::now().time_since_epoch())
+                              .count();
+        out << wall << ' ' << cmd << ' ' << ms << '\n';
+    }
+};
+
 } // namespace
 
 int main(int argc, char** argv)
@@ -191,6 +220,7 @@ int main(int argc, char** argv)
     }
 
     const std::string cmd = argv[1];
+    CmdTimer cmd_timer{cfg.data_root, cmd};
 
     if (cmd == "status")
     {

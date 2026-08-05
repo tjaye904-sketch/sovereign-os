@@ -199,7 +199,28 @@ TransparencyReport TransparencyService::BuildSection(
                             .count();
         o << "  process_uptime_s=" << up << "\n";
         o << "  argon2=" << identity::DescribeArgon2Params() << "\n";
-        o << "  note=per-command wall times not yet sampled; uptime tracked\n";
+        {
+            const auto logp = host_.DataRoot() / "metrics" / "cmd_times.log";
+            std::ifstream in(logp);
+            std::vector<std::string> lines;
+            std::string line;
+            while (std::getline(in, line))
+            {
+                if (!line.empty())
+                    lines.push_back(line);
+            }
+            const std::size_t n = lines.size();
+            const std::size_t start = n > 12 ? n - 12 : 0;
+            if (n == 0)
+                o << "  cmd_samples=0 note=run any cli command to record wall_ms\n";
+            else
+            {
+                o << "  cmd_samples=" << n << " (last " << (n - start)
+                  << ")\n";
+                for (std::size_t i = start; i < n; ++i)
+                    o << "  cmd_wall " << lines[i] << "\n";
+            }
+        }
     }
 
     if (all || section == "errors")
