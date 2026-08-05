@@ -77,7 +77,7 @@ case "$MODE" in
     fi
     qemu-img create -f qcow2 "$VM_DISK" 40G
     log "Created empty VM disk: $VM_DISK"
-    log "B.1 stops here. B.2 will partition/install inside this image via QEMU."
+    log "Empty qcow2 ready. Next (OS 2.0 E.1): scripts/iso/sovereign-vm-disk-prep.sh --vm-disk ... --confirm PARTITION_VM_DISK"
     exit 0
     ;;
   host)
