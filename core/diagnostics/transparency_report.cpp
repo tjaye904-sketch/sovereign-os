@@ -1,3 +1,5 @@
+#include <fstream>
+#include <vector>
 #include "transparency_report.hpp"
 
 #include "domain_profile.hpp"
