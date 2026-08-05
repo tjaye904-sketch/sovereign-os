@@ -580,13 +580,18 @@ Result<Session> IdentityService::AuthenticateWithMfa(
     const std::string& secret,
     const std::string& totp_code)
 {
+    // Bypass login MFA gate so password can succeed; TOTP checked below.
+    const bool prev = config_.require_mfa_on_login;
+    config_.require_mfa_on_login = false;
     auto base = Authenticate(display_name, secret);
+    config_.require_mfa_on_login = prev;
     if (!base.Ok())
         return base;
     auto st = GetMfaStatus(base.value.principal_id);
     if (!st.Ok() || !st.value.totp_enrolled)
-        return base; // MFA not required
-    auto v = store_.GetCredentialVerifier(base.value.principal_id, CredentialType::TotpSecret);
+        return base;
+    auto v = store_.GetCredentialVerifier(
+        base.value.principal_id, CredentialType::TotpSecret);
     if (!v.Ok() || v.value.empty() || v.value.rfind("pending:", 0) == 0)
         return base;
     const auto now = static_cast<std::int64_t>(NowUnixSeconds());

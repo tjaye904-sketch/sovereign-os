@@ -41,7 +41,7 @@ void PrintUsage()
         << "  sovereign-cli bootstrap <name> <secret>\n"
         << "  sovereign-cli service-create <name>\n"
         << "  sovereign-cli machine-create <name>\n"
-        << "  sovereign-cli login <name> <secret>\n"
+        << "  sovereign-cli login <name> <secret> [totp]\n"
         << "  sovereign-cli workspace-create <name> <kind>\n"
         << "  sovereign-cli workspace-list\n"
         << "  sovereign-cli memory-add <tag> <body...>\n"
@@ -273,11 +273,18 @@ int main(int argc, char** argv)
 
     if (cmd == "login" && argc >= 4)
     {
-        auto r = host.Identity().Authenticate(argv[2], argv[3]);
+        sovereign::identity::Result<sovereign::identity::Session> r;
+        if (argc >= 5)
+            r = host.Identity().AuthenticateWithMfa(argv[2], argv[3], argv[4]);
+        else
+            r = host.Identity().Authenticate(argv[2], argv[3]);
         if (!r.Ok())
         {
-            std::cerr << "login failed error=" << static_cast<int>(r.error)
-                      << '\n';
+            if (r.error == sovereign::identity::IdentityError::MfaRequired)
+                std::cerr << "mfa_required: login <name> <secret> <totp-code>\n";
+            else
+                std::cerr << "login failed error=" << static_cast<int>(r.error)
+                          << '\n';
             host.Close();
             return 1;
         }
