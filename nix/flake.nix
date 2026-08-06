@@ -8,6 +8,7 @@
   outputs = { self, nixpkgs }:
     let
       system = "x86_64-linux";
+      lib = nixpkgs.lib;
       pkgs = import nixpkgs { inherit system; };
     in
     {
@@ -35,9 +36,16 @@
                 sovereign-daemon = final.callPackage ./packages/sovereign-daemon.nix { };
               })
             ];
-            # Minimal boot for installed system evaluation
-            boot.loader.grub.device = "nodev";
-            fileSystems."/" = { device = "/dev/disk/by-label/nixos"; fsType = "ext4"; };
+            # VM-safe defaults (system.build.vm supplies root image)
+            boot.loader.grub.device = lib.mkDefault "nodev";
+            boot.loader.grub.enable = lib.mkDefault true;
+            # Only force labeled root for real installs; VM variant overrides root
+            fileSystems."/" = lib.mkDefault {
+              device = "/dev/disk/by-label/nixos";
+              fsType = "ext4";
+            };
+            virtualisation.memorySize = lib.mkDefault 2048;
+            virtualisation.cores = lib.mkDefault 2;
           }
         ];
       };
