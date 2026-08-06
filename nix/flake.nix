@@ -44,7 +44,6 @@
               device = "/dev/disk/by-label/nixos";
               fsType = "ext4";
             };
-            virtualisation.memorySize = lib.mkDefault 2048;
           }
         ];
       };
