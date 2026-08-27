@@ -10,17 +10,23 @@
       system = "x86_64-linux";
       lib = nixpkgs.lib;
       pkgs = import nixpkgs { inherit system; };
+      sovOverlay = final: prev: {
+        sovereign-cli = final.callPackage ./packages/sovereign-cli.nix { };
+        sovereign-daemon = final.callPackage ./packages/sovereign-daemon.nix { };
+      };
     in
     {
       packages.${system} = {
-        # Build the live ISO image
         iso = self.nixosConfigurations.sovereign-iso.config.system.build.isoImage;
-
-        # CLI package alone (for host use / tests)
-        sovereign-cli = pkgs.callPackage ./packages/sovereign-cli.nix { };
-        sovereign-daemon = pkgs.callPackage ./packages/sovereign-daemon.nix { };
-
-        # Runnable QEMU VM (no host disk install) — Milestone B.2
+        sovereign-cli = (import nixpkgs {
+          inherit system;
+          overlays = [ sovOverlay ];
+        }).sovereign-cli;
+        sovereign-daemon = (import nixpkgs {
+          inherit system;
+          overlays = [ sovOverlay ];
+        }).sovereign-daemon;
+        # system.build.vm launcher
         sovereign-vm =
           self.nixosConfigurations.sovereign-system.config.system.build.vm;
       };
@@ -30,22 +36,15 @@
         modules = [
           ./modules/sovereign-system.nix
           {
-            nixpkgs.overlays = [
-              (final: prev: {
-                sovereign-cli = final.callPackage ./packages/sovereign-cli.nix { };
-                sovereign-daemon = final.callPackage ./packages/sovereign-daemon.nix { };
-              })
-            ];
-            # VM-safe defaults (system.build.vm supplies root image)
-            boot.loader.grub.device = lib.mkDefault "nodev";
-            boot.loader.grub.enable = lib.mkDefault true;
-            # Only force labeled root for real installs; VM variant overrides root
-            fileSystems."/" = lib.mkDefault {
-              device = "/dev/disk/by-label/nixos";
-              fsType = "ext4";
+            nixpkgs.overlays = [ sovOverlay ];
+            # Minimal so system.build.vm can supply its own root image
+            boot.loader.grub.device = "nodev";
+            boot.loader.grub.enable = true;
+            fileSystems."/" = {
+              device = "none";
+              fsType = "tmpfs";
+              options = [ "defaults" "mode=755" ];
             };
-            virtualisation.memorySize = lib.mkDefault 2048;
-            virtualisation.cores = lib.mkDefault 2;
           }
         ];
       };
@@ -56,17 +55,11 @@
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
           ./modules/sovereign-iso.nix
           {
-            nixpkgs.overlays = [
-              (final: prev: {
-                sovereign-cli = final.callPackage ./packages/sovereign-cli.nix { };
-                sovereign-daemon = final.callPackage ./packages/sovereign-daemon.nix { };
-              })
-            ];
+            nixpkgs.overlays = [ sovOverlay ];
           }
         ];
       };
 
-      # Convenience apps
       apps.${system}.build-iso = {
         type = "app";
         program = "${pkgs.writeShellScript "build-sovereign-iso" ''
