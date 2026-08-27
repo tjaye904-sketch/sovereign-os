@@ -18,17 +18,29 @@
     {
       packages.${system} = {
         iso = self.nixosConfigurations.sovereign-iso.config.system.build.isoImage;
+
         sovereign-cli = (import nixpkgs {
           inherit system;
           overlays = [ sovOverlay ];
         }).sovereign-cli;
+
         sovereign-daemon = (import nixpkgs {
           inherit system;
           overlays = [ sovOverlay ];
         }).sovereign-daemon;
-        # system.build.vm launcher
+
+        # Minimal VM (no Sovereign pkgs) — proves system.build.vm works
+        sovereign-vm-minimal =
+          self.nixosConfigurations.sovereign-vm-minimal.config.system.build.vm;
+
+        # Full system VM (packages on PATH; start daemon manually)
         sovereign-vm =
           self.nixosConfigurations.sovereign-system.config.system.build.vm;
+      };
+
+      nixosConfigurations.sovereign-vm-minimal = nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [ ./modules/sovereign-vm-minimal.nix ];
       };
 
       nixosConfigurations.sovereign-system = nixpkgs.lib.nixosSystem {
@@ -37,7 +49,6 @@
           ./modules/sovereign-system.nix
           {
             nixpkgs.overlays = [ sovOverlay ];
-            # Minimal so system.build.vm can supply its own root image
             boot.loader.grub.device = "nodev";
             boot.loader.grub.enable = true;
             fileSystems."/" = {
@@ -58,17 +69,6 @@
             nixpkgs.overlays = [ sovOverlay ];
           }
         ];
-      };
-
-      apps.${system}.build-iso = {
-        type = "app";
-        program = "${pkgs.writeShellScript "build-sovereign-iso" ''
-          set -euo pipefail
-          echo "Building Sovereign OS ISO via Nix..."
-          nix build path:${self}#iso -L
-          echo "ISO under: ./result/iso/"
-          ls -lh result/iso/ || ls -lh result/
-        ''}";
       };
     };
 }

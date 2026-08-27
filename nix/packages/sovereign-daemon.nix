@@ -1,15 +1,18 @@
-{ lib
-, stdenv
-, cmake
-, ninja
-, libargon2
-}:
+{ lib, stdenv, cmake, ninja, libargon2 }:
 
 stdenv.mkDerivation rec {
   pname = "sovereign-daemon";
   version = "0.2.0-os2";
 
-  src = ../../.;
+  src = builtins.path {
+    path = ../..;
+    name = "sovereign-src";
+    filter = path: type:
+      let b = baseNameOf path;
+      in b != "build" && b != ".git" && b != "dist"
+         && b != "result" && !(lib.hasPrefix "result-" b)
+         && b != "node_modules";
+  };
 
   nativeBuildInputs = [ cmake ninja ];
   buildInputs = [ libargon2 ];
@@ -22,12 +25,8 @@ stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
     mkdir -p $out/bin
-    if [ -x apps/daemon/sovereign-daemon ]; then
-      install -m755 apps/daemon/sovereign-daemon $out/bin/sovereign-daemon
-    else
-      DAEMON=$(find . -name sovereign-daemon -type f -executable | head -1)
-      install -m755 "$DAEMON" $out/bin/sovereign-daemon
-    fi
+    DAEMON=$(find . -name sovereign-daemon -type f -executable | head -1)
+    install -m755 "$DAEMON" $out/bin/sovereign-daemon
     runHook postInstall
   '';
 
