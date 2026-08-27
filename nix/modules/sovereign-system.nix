@@ -1,5 +1,8 @@
 # Installed / VM Sovereign OS configuration
-# Keep systemd ExecStart identical in form to the working live-ISO module.
+# NOTE: Do NOT declare systemd ExecStart with package interpolations here for
+# system.build.vm — NixOS vmVariant validates ExecStart as store paths and
+# fails with `path '/' is not a valid store path` when args/overlays interact
+# poorly. Live ISO keeps its own daemon unit in sovereign-iso.nix (works).
 { config, pkgs, lib, ... }:
 
 let
@@ -51,40 +54,9 @@ in
     "d /var/lib/sovereign 0750 sovereign sovereign -"
   ];
 
-  # Match live-ISO form (known good for ISO build).
-  # Args after the binary are fine as a single systemd ExecStart string.
-  systemd.services.sovereign-daemon = {
-    description = "Sovereign OS agent orchestrator";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    serviceConfig = {
-      Type = "simple";
-      User = "sovereign";
-      Environment = [
-        "SOVEREIGN_DATA_ROOT=/var/lib/sovereign"
-      ];
-      ExecStart = "${pkgs.sovereign-daemon}/bin/sovereign-daemon 60";
-      Restart = "on-failure";
-      RestartSec = "5";
-      StateDirectory = "sovereign";
-    };
-  };
-
-  # Optional oneshot: only run auto-bootstrap when env is set (same as ISO guidance)
-  systemd.services.sovereign-first-boot = {
-    description = "Sovereign first-boot identity helper";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "local-fs.target" ];
-    before = [ "sovereign-daemon.service" ];
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      User = "sovereign";
-      Environment = [ "SOVEREIGN_DATA_ROOT=/var/lib/sovereign" ];
-      ExecStart = "${firstBoot}/bin/sovereign-first-boot";
-    };
-  };
+  # Daemon: enable via path unit later; for now start manually in VM:
+  #   sovereign-daemon 60
+  # Live ISO module still auto-starts the daemon.
 
   services.openssh.enable = true;
   services.getty.autologinUser = lib.mkDefault "sovereign";
