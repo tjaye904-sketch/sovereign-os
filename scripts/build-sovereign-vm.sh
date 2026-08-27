@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Build NixOS QEMU VM. Tries minimal first, then full sovereign-system.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-TARGET="${1:-minimal}"   # minimal | full
+TARGET="${1:-minimal}"
 
 if ! command -v nix >/dev/null 2>&1; then
   echo "nix required" >&2
@@ -18,11 +17,8 @@ if [[ "$TARGET" == "full" ]]; then
   OUT="dist/sovereign-vm-result"
 fi
 
-echo "[vm] building path:${ROOT}/nix#${ATTR}"
-echo "[vm] this can take a long time on first run..."
-
-nix build "path:${ROOT}/nix#${ATTR}" -L --out-link "$OUT"
-
+echo "[vm] building path:${ROOT}#${ATTR}"
+nix build "path:${ROOT}#${ATTR}" -L --out-link "$OUT"
 echo "[vm] result: $OUT"
 find -L "$OUT" -maxdepth 4 -type f -name 'run-*-vm' 2>/dev/null | head
-echo "[vm] DONE — run via: bash scripts/run-sovereign-vm.sh ${TARGET}"
+echo "[vm] DONE — bash scripts/run-sovereign-vm.sh ${TARGET}"
