@@ -1,18 +1,10 @@
-{ lib, stdenv, cmake, ninja, libargon2 }:
+{ lib, stdenv, cmake, ninja, libargon2, src }:
 
 stdenv.mkDerivation rec {
   pname = "sovereign-daemon";
   version = "0.2.0-os2";
 
-  src = builtins.path {
-    path = ../..;
-    name = "sovereign-src";
-    filter = path: type:
-      let b = baseNameOf path;
-      in b != "build" && b != ".git" && b != "dist"
-         && b != "result" && !(lib.hasPrefix "result-" b)
-         && b != "node_modules";
-  };
+  inherit src;
 
   nativeBuildInputs = [ cmake ninja ];
   buildInputs = [ libargon2 ];
