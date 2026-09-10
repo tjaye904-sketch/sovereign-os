@@ -6,3 +6,17 @@ dist/*.iso
 *.o
 *.a
 .direnv/
+
+# Extra Cache and VM Bloat Protection
+__pycache__/
+*.pyc
+*.pyo
+*.qcow2
+*.bin
+*.so
+.venv/
+venv/
+
+# Agent worktrees
+../worktrees/
+worktrees/
