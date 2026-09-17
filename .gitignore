@@ -1,22 +1,47 @@
+# Build
 build/
 build-*/
-result
-result-*
-dist/*.iso
+cmake-build-*/
+/tmp/
 *.o
 *.a
-.direnv/
+*.so
+compile_commands.json
 
-# Extra Cache and VM Bloat Protection
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*~
+.DS_Store
+
+# Local runtime data
+.local/
+*.dat
+data_root/
+
+# ISO / dist artifacts (large)
+dist/*.iso
+dist/*.img
+/tmp/sovereign-iso-work/
+
+# Python
 __pycache__/
 *.pyc
-*.pyo
-*.qcow2
-*.bin
-*.so
-.venv/
-venv/
 
-# Agent worktrees
-../worktrees/
-worktrees/
+# Secrets (never commit)
+*.pem
+*.key
+.env
+.env.*
+
+# Large / generated (never commit)
+dist/
+*.qcow2
+result
+result-*
+.clinerules
+nano.*.save
+project_tree.txt
+sovereign-vm.qcow2
+nixos.qcow2

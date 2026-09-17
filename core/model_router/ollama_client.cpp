@@ -1,6 +1,8 @@
 #include "ollama_client.hpp"
 
 #include <array>
+#include <cstdlib>
+#include <string>
 #include <cstdio>
 #include <memory>
 #include <sstream>
@@ -27,7 +29,23 @@ std::string ShellEscape(const std::string& s)
 Result<std::string> RunCurl(const std::string& args)
 {
     Result<std::string> result;
-    const std::string cmd = "curl -sS --max-time 25 --connect-timeout 3 " + args + " 2>/dev/null";
+    // SOVEREIGN_OLLAMA_TIMEOUT_S: wall-clock seconds for curl --max-time (default 120).
+    // Cold models / QEMU NAT often exceed the old 25s default.
+    int max_time = 120;
+    if (const char* env = std::getenv("SOVEREIGN_OLLAMA_TIMEOUT_S"))
+    {
+        try
+        {
+            const int v = std::stoi(env);
+            if (v >= 5 && v <= 600)
+                max_time = v;
+        }
+        catch (...)
+        {
+        }
+    }
+    const std::string cmd = "curl -sS --max-time " + std::to_string(max_time)
+                          + " --connect-timeout 5 " + args + " 2>/dev/null";
     std::array<char, 4096> buffer{};
     std::string out;
     FILE* pipe = popen(cmd.c_str(), "r");
