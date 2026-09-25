@@ -1,0 +1,13 @@
+purpose_id: research.web_collect
+description: Open an allowlisted documentation URL, snapshot text, screenshot — operator visible
+require_headed: true
+max_risk_auto: low
+allowed_hosts:
+  - docs.python.org
+  - manpages.ubuntu.com
+  - www.tradingview.com
+allowed_tools:
+  - browser_open
+  - browser_snapshot
+  - browser_screenshot
+  - ping
