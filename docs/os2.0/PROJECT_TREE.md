@@ -1,104 +1,102 @@
-# Sovereign project tree — AI / model context refresher
+# Sovereign OS — Project Tree & Workflow Map
 
-**Updated:** 2026-08-05 (Milestones A–C + D.1/D.2 complete)  
-**Repo root (host):** `~/src/sovereign-os/sovereign-work`  
-**Data root:** `$SOVEREIGN_DATA_ROOT` or `~/.local/share/sovereign`  
-**Git user:** tjaye904-sketch  
+AI refresher + human map. Reflects **JARVIS-aligned completion pathway** (2026-11).
 
----
+## Repository layout (canonical product tree)
 
-## What Sovereign is
-
-Governance-first **local cognitive OS substrate**: identity → policy → memory → models (Ollama) → agents → audit.  
-**Bootable NixOS live ISO** builds and QEMU-boots (D.2). Host disk install remains **gated**. MFA enroll/recovery works; not mandatory on every login.
-
-| Scope | Status |
-|-------|--------|
-| Approved **v1 product** (CLI host) | ~100% |
-| **OS 2.0** (bootable installable OS) | ~50–55% |
-| Full life-OS vision | ~35–40% |
-
----
-
-## Layout
-
-```
+```text
 sovereign-work/
 ├── apps/
-│   ├── cli/main.cpp           # sovereign-cli (+ CmdTimer → metrics/cmd_times.log)
-│   ├── daemon/main.cpp        # ServiceOrchestrator + agent/audit ticks
-│   └── installer/             # sketch — no silent disk writes
+│   ├── cli/                 # sovereign-cli — primary operator CLI
+│   └── daemon/              # sovereign-daemon — Phase II orchestrator
 ├── core/
-│   ├── identity/              # Argon2, TOTP, recovery codes, step-up
-│   ├── governance/ policy/ memory/ cognitive/
-│   ├── model_router/          # Ollama; curl max-time 25s
-│   ├── audit/ os_runtime/ product/ diagnostics/
-│   ├── agent/ goals/ briefing/ semantic/ domain/ workspace/
-│   ├── archive/ sync/ executor/
-│   └── runtime/               # EXPERIMENTAL — SOVEREIGN_BUILD_EVENT_RUNTIME=OFF default
-├── nix/                       # flake ISO + sovereign-system + sovereign-vm
+│   ├── identity/            # principals, sessions, MFA, revocation
+│   ├── governance/          # decisions, approve/reject
+│   ├── policy/              # rules, version, dry-run
+│   ├── memory/              # records, rank, prune
+│   ├── semantic/            # embeddings / query
+│   ├── cognitive/           # plan, loop; WP-05 curiosity; WP-06 reflect
+│   ├── goals/               # goal store
+│   ├── workspace/           # workspaces + domains
+│   ├── audit/               # append-only audit
+│   ├── agent/               # scheduler ticks
+│   ├── model_router/        # Ollama client
+│   ├── executor/            # governed execute
+│   ├── product/             # SovereignHost composition
+│   ├── diagnostics/         # transparency / timing
+│   ├── os_runtime/          # ServiceOrchestrator
+│   └── …
+├── nix/                     # ISO/VM flakes (WP-13)
 ├── scripts/
-│   ├── build-sovereign-nix-iso.sh  test-sovereign-iso-boot.sh
-│   ├── build-sovereign-vm.sh run-sovereign-vm.sh
-│   ├── iso/sovereign-install.sh sovereign-first-boot.sh
-│   └── verify-*.sh
-├── testing/                   # 23 product smokes (event runtime OFF)
-├── dist/Sovereign-OS-nix-amd64.iso   # live image (rebuild as needed)
-└── docs/os2.0/                 # phases, MATURITY_MATRIX, this tree
+│   ├── iso/                 # install/boot helpers
+│   ├── sovereign-session-start.sh   # WP-01 host presence
+│   ├── verify-wp01-session.sh
+│   └── …
+├── docs/os2.0/
+│   ├── COMPLETION_PATHWAY.md        # sequential WP plan
+│   ├── PROJECT_TREE.md              # this file
+│   ├── ALIGNMENT_JARVIS.md
+│   ├── BLUEPRINT_AND_ALIGNMENT.md
+│   ├── HOST_AUTOMATION.md
+│   ├── MATURITY_MATRIX*.md
+│   └── EVIDENCE_WP*.md
+├── purposes/                # CU purpose YAML (WP-09)
+├── testing/                 # CTest smokes
+├── CMakeLists.txt
+├── flake.nix                # optional root flake
+└── README.md
 ```
 
----
+## Host-side operators (not always in git; install to ~/.local)
 
-## Build flags
-
-```bash
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
-  -DSOVEREIGN_BUILD_TESTS=ON \
-  -DSOVEREIGN_BUILD_EVENT_RUNTIME=OFF
+```text
+~/.local/bin/
+  sovereign-cli, sovereign-daemon
+  sovereign-hub-server, sovereign-hub-open
+  sovereign-cu, sovereign-cu-server
+  sovereign-sys, sovereign-sys-server
+  sovereign-inventory
+  sovereign-session-start          # WP-01
+~/.config/systemd/user/
+  sovereign-daemon.service
+  sovereign-hub.service
+  sovereign-sys.service
+  sovereign-computer-use.service
+~/.config/autostart/
+  sovereign-session.desktop        # WP-01
+~/.local/share/sovereign/          # data_root
 ```
 
----
+## Workflow plan → tree ownership
 
-## Milestone commits (selected)
+| WP | Primary paths | Outcome |
+|----|---------------|---------|
+| 00 | docs/os2.0/BASELINE_*.md | Freeze known state |
+| 01 | scripts/sovereign-session-start.sh, autostart, systemd | Reboot-proof presence |
+| 02 | hub status + CU health capability flags | Truthful online |
+| 03 | hub `/api/command` router; optional cli | Chat operates machine |
+| 04 | router + audit observe payloads | Act → observe |
+| 05 | core/cognitive/curiosity_* ; CLI `curious` | Gap → probe |
+| 06 | reflect → memory #learned | Evolve |
+| 07 | apps/cli loop phases 1–7 | Full cognitive cycle |
+| 08 | sys policy + inventory single source | One allowlist |
+| 09 | purposes/*.yaml | Mission packs |
+| 10 | desktop operator module | Type/focus native apps |
+| 11 | voice → same router | Hands-free intent |
+| 12 | docs DAILY_DRIVER, hardening | Cold-boot UX |
+| 13 | nix/, scripts/iso/ | Optional portable OS |
 
-| ID | Topic |
-|----|--------|
-| A.* | revoke, enrichment, audit, quarantine, tree |
-| B.* | installer gates, VM flake, first-boot |
-| C.* | MFA scaffold, TOTP, recovery/step-up |
-| Post-C.3 | agent Load fix, orchestrator smoke |
-| D.1 | `cmd_times.log` + inspect timing |
-| D.2 | ISO 1.4G + boot PASS |
+## Cognitive loop (target after WP-07)
 
----
-
-## Critical CLI surface
-
+```text
+curious → plan → govern → act → observe → reflect → evolve
 ```
-bootstrap login logout session-revoke mfa-status mfa-enroll-* mfa-recovery-generate
-status brief inspect audit-verify plan loop recommend approve reject execute [--mfa]
-policy-* memory-* service-create machine-create
-```
 
----
+## JARVIS rule
 
-## Standing rules
+If a change does not help **intent → visible governed work on the host**, it does not belong in WP-00–12.
 
-1. Revoke ≠ disk wipe  
-2. Disk install needs explicit device + CONFIRM (+ `SOVEREIGN_INSTALL_ALLOW_HOST=1`)  
-3. `loop --auto-approve` never calls installer  
-4. Deferred: http_api, desktop, hermes_bridge  
-5. Local Ollama first  
+## Status
 
-See: `MATURITY_MATRIX.md`, `RECOMMENDATIONS_MFA_DISK.md`, `D2_ISO_EVIDENCE.md`, `PHASE_C_MFA.md`
-
----
-
-## Model load order
-
-1. `docs/os2.0/PROJECT_TREE.md` (this file)  
-2. `docs/os2.0/MATURITY_MATRIX.md`  
-3. `docs/os2.0/DAILY_USE.md`  
-4. `docs/os2.0/D2_ISO_EVIDENCE.md`  
-
-Do not re-bootstrap design from zero. Extend modules; keep governance gates.
+Pathway authority: `docs/os2.0/COMPLETION_PATHWAY.md`  
+Last workflow update: 2026-11-04

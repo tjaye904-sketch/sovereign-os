@@ -1,0 +1,23 @@
+# EVIDENCE WP-01 — Session permanence
+
+## Spec
+After graphical login, daemon, hub, sys, and computer-use are reachable without manual `nohup`, and headed browser_open works.
+
+## Install
+- `scripts/sovereign-session-start.sh` → `~/.local/bin/sovereign-session-start`
+- `~/.config/autostart/sovereign-session.desktop`
+- linger enabled
+
+## Tests
+1. `sovereign-session-start` then `scripts/verify-wp01-session.sh`
+2. Reboot, login, wait 15s, re-run verify (twice)
+
+## Results
+| Run | Date | Pass/Fail | Notes |
+|-----|------|-----------|-------|
+| 1 | | | |
+| reboot 1 | | | |
+| reboot 2 | | | |
+
+## Commit
+`WP-01: session-start + autostart for reboot-proof operators`
