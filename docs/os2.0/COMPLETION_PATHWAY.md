@@ -24,8 +24,8 @@
 |----|------|--------|
 | 00 | Baseline freeze | in_progress |
 | 01 | Session permanence (reboot-proof) | not_started |
-| 02 | Truthful status | in_progress |
-| 03 | Chat → tool router | not_started |
+| 02 | Truthful status | done |
+| 03 | Chat → tool router | in_progress |
 | 04 | Observe after act | not_started |
 | 05 | Curiosity engine | not_started |
 | 06 | Reflect → evolve | not_started |
