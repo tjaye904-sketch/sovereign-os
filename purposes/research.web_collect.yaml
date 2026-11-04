@@ -1,13 +1,14 @@
-purpose_id: research.web_collect
-description: Open an allowlisted documentation URL, snapshot text, screenshot — operator visible
-require_headed: true
-max_risk_auto: low
-allowed_hosts:
-  - docs.python.org
-  - manpages.ubuntu.com
-  - www.tradingview.com
-allowed_tools:
-  - browser_open
-  - browser_snapshot
-  - browser_screenshot
-  - ping
+id: research.web_collect
+description: Open allowlisted docs URL, snapshot text, browser screenshot (headed)
+version: 1
+risk: low
+steps:
+  - action: browser_open
+    args:
+      url: "${url:-https://docs.python.org/3/}"
+  - action: browser_snapshot
+    args:
+      max_chars: 4000
+  - action: browser_screenshot
+    args:
+      name: purpose_research.web_collect.png

@@ -1,10 +1,10 @@
-purpose_id: ops.desktop_probe
-description: Launch a user app via xdg-open and capture desktop screenshot
-require_headed: true
-max_risk_auto: medium
-allowed_apps:
-  - xdg-open
-allowed_tools:
-  - app_open
-  - desktop_screenshot
-  - ping
+id: ops.desktop_probe
+description: List windows and capture desktop screenshot for observability
+version: 1
+risk: low
+steps:
+  - action: desktop_list_windows
+    args: {}
+  - action: desktop_screenshot
+    args:
+      name: purpose_ops.desktop_probe.png

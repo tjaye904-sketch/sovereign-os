@@ -1,0 +1,11 @@
+id: ops.system_monitor
+description: "Host app open: gnome-system-monitor (visible on desktop via sys if wired; CU notify fallback)"
+version: 1
+risk: low
+# CU-only pack: notify + list windows. Sys app_open is invoked via sovereign-tools separately.
+steps:
+  - action: notify
+    args:
+      message: "Sovereign purpose ops.system_monitor — open System Monitor from Mission Control or: sovereign-tools 'open system monitor'"
+  - action: desktop_list_windows
+    args: {}

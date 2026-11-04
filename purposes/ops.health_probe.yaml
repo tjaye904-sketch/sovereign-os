@@ -1,0 +1,9 @@
+id: ops.health_probe
+description: Ping computer-use and confirm stack reachability (no UI)
+version: 1
+risk: low
+steps:
+  - action: ping
+    args: {}
+  - action: purpose_list
+    args: {}

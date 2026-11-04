@@ -1,0 +1,14 @@
+id: research.wikipedia_brief
+description: Open Wikipedia (allowlisted), snapshot, screenshot
+version: 1
+risk: low
+steps:
+  - action: browser_open
+    args:
+      url: "${url:-https://en.wikipedia.org/wiki/Operating_system}"
+  - action: browser_snapshot
+    args:
+      max_chars: 3000
+  - action: browser_screenshot
+    args:
+      name: purpose_research.wikipedia_brief.png
