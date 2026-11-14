@@ -1,0 +1,7 @@
+```yaml
+scope: unknown
+current_build_design: Nix flake-based sovereign-vm configuration utilizing systemd services, qcow2 VM images with SSH persistence, ISO-style units, tmpfs root filesystem defaults, and pure package builds with src=self.
+known_policies_rules: unknown
+vision_summary: unknown
+source_of_truth_file_paths: unknown
+```

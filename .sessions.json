@@ -1,0 +1,23 @@
+{
+  "1789023350": {
+    "task": "implement policy engine validation",
+    "branch": "session/1789023350",
+    "worktree": "/home/tjaye904/src/sovereign-os/worktrees/1789023350",
+    "status": "aborted",
+    "last_gate": null
+  },
+  "1789024562": {
+    "task": "...",
+    "branch": "session/1789024562",
+    "worktree": "/home/tjaye904/src/sovereign-os/worktrees/1789024562",
+    "status": "open",
+    "last_gate": null
+  },
+  "1789024975": {
+    "task": "PIPELINE TEST \u2014 trivial change, not real work",
+    "branch": "session/1789024975",
+    "worktree": "/home/tjaye904/src/sovereign-os/worktrees/1789024975",
+    "status": "open",
+    "last_gate": null
+  }
+}

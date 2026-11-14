@@ -1,0 +1,24 @@
+
+```yaml
+commit_count: "58"
+test_count: "15"
+files_by_extension:
+  "(no ext)": 4
+  ".md": 72
+  ".sh": 36
+  ".txt": 42
+  ".yaml": 1
+  ".cpp": 188
+  ".hpp": 155
+  ".lock": 2
+  ".nix": 7
+  ".cfg": 2
+  ".py": 30
+  ".service": 2
+  ".target": 1
+  ".bak": 1
+  ".pyc": 30
+  ".json": 6
+recent_activity_summary: Recent commits address sovereign-vm flake build stability (qcow2 boot/SSH, systemd integration, ISO-style units, tmpfs root defaults, pure package src=self fixes), implement an optional MFA login gate (F.2), document Secure Boot/measured boot probes (F.1), add package channel docs with flake pin verification (F.3), and create a worktree archive script (F.4).
+completion_status: unknown
+```
