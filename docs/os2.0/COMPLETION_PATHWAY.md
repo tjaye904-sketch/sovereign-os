@@ -28,7 +28,7 @@
 | 03 | Chat → tool router | done |
 | 04 | Observe after act | not_started |
 | 05 | Curiosity engine | not_started |
-| 06 | Reflect → evolve | not_started |
+| 06 | Inventory enforce app_open | in_progress |
 | 07 | Full cognitive loop integration | not_started |
 | 08 | Unified allowlist (inventory = policy) | not_started |
 | 09 | Purpose library | not_started |
