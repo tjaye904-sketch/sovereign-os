@@ -20,7 +20,7 @@ sleep 1
 curl -sf http://127.0.0.1:8766/api/status | head -c 300; echo
 
 echo "--- login (best effort) ---"
-sovereign-cli login owner "${SOVEREIGN_OWNER_SECRET:-your-secret}" 2>/dev/null || \
+sovereign-cli login owner "${SOVEREIGN_OWNER_SECRET}" 2>/dev/null || \
   sovereign-cli login owner 'your-secret' 2>/dev/null || \
   echo "login skipped (set SOVEREIGN_OWNER_SECRET or login manually)"
 
