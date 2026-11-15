@@ -13,10 +13,10 @@ the architecture documents.
 ## Current Milestone
 
 **Completed:** Runtime Platform v1  
-**Active:** Identity Service (specification drafted)  
-**Next implementation:** Identity Service per `IDENTITY_SERVICE_SPEC.md`
-
-## Runtime Platform Status
+**Completed:** Desktop Operator Runtime v1  
+**Completed:** API Gateway v1  
+**Active:** Phase 5 interface expansion and application polish  
+**Next implementation:** Administrative interface and observability surfaces
 
 **Assessment:** Complete or near-complete for its currently defined scope.
 
@@ -55,20 +55,21 @@ product.
 | Capability invocation | Implemented | Runtime policy service present |
 | Provider selection | Implemented | Runtime-level capability provider selection |
 | Runtime identity primitives | Implemented | Not a product Identity Service |
-| Identity Service | Not implemented | Product-level service absent |
-| Governance Service | Not implemented | Product-level service absent |
-| Policy Engine | Not implemented | Runtime policy classes are not the full engine |
-| Memory Engine | Not implemented | Logging sink is not long-term semantic memory |
-| Workspace Service | Not implemented | No active product service located |
-| Archive Service | Not implemented | No active product service located |
-| Curiosity Engine | Not implemented | No active product service located |
-| Model Router | Not implemented | Provider selection is not the complete router |
-| Reasoning Engine | Not implemented | No active implementation located |
-| Reflection Engine | Not implemented | No active implementation located |
-| Decision Engine | Not implemented | Engineering workflow scripts are not this engine |
-| Synchronization Service | Not implemented | No active product service located |
-| API Gateway | Not implemented | No active gateway located |
-| Product applications | Not implemented | No active application layer located |
+| Identity Service | Implemented | Local identity, sessions, roles, persistence, MFA scaffold, governance integration |
+| Governance Service | Implemented | Request/approve/reject/override flows and audit-backed decisions |
+| Policy Engine | Implemented | Role + action restrictions and executor gating |
+| Memory Engine | Implemented | Durable records, tags, provenance, and store-backed retrieval |
+| Workspace Service | Implemented | Workspace lifecycle and scoped storage |
+| Archive Service | Implemented | Artifact storage and retention metadata |
+| Curiosity Engine | Implemented | Discovery queue + interest graph + proposal generation |
+| Model Router | Implemented | Ollama routing and model selection |
+| Desktop Operator Runtime | Implemented | Governance-checked desktop action flow with audit evidence |
+| Reasoning Engine | Planned | Not yet separate from cognition loop |
+| Reflection Engine | Planned | Not yet separate from cognition loop |
+| Decision Engine | Planned | Governance plus executor decisions remain primary decision path |
+| Synchronization Service | Implemented | Local sync and peer bundle service |
+| API Gateway | Implemented | Route-bound approval flow for external API requests |
+| Product applications | Implemented | CLI + daemon + host composition active |
 
 ## Repository Structure Observed
 

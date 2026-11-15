@@ -170,7 +170,14 @@ boundaries rather than bypassing them.
 
 ## Phase 5 — Interfaces and Applications
 
-**Status:** Planned
+**Status:** Mostly complete in current repo state
+
+Current repo evidence:
+
+- CLI surface is implemented and validated
+- Product host composition is in place
+- Governance-aware execution and memory access are active
+- Model router and cognitive services are wired in
 
 Potential deliverables:
 
@@ -181,6 +188,71 @@ Potential deliverables:
 - Developer SDK
 - Integration adapters
 - Observability interface
+
+## Phase 6 — Safe Autonomous Self-Evolution
+
+**Status:** Complete / active safety layer
+
+This phase extends the project from "observe and propose" into a governed, sandboxed improvement loop without live mutation of the canonical repo.
+
+### Required deliverables
+
+1. Isolated proposal generation for subsystem-level improvements.
+2. Dedicated sandbox clone of the active repository tree.
+3. Build and test validation entirely within the sandbox.
+4. Proposal evidence package containing summary, branch/worktree context, and validation logs.
+5. Human approval gate before any live integration occurs.
+6. Explicit rejection path with clear documented reasons.
+7. No mutation of the canonical tree unless a human authorizes the merge.
+
+### Evidence of completion
+
+- Proposal generation and validation pass in the sandbox.
+- Proof that the live repo remains unchanged during proposal creation.
+- Human approval required before ApplyApprovedProposal or integration.
+- Worktree or sandbox policy remains mandatory for all consequential edits.
+
+## Phase 7 — External Interface Authorization
+
+**Status:** Implemented for the v1 local product surface
+
+This phase defines the external boundary where requests from authenticated principals are transformed into governance decisions before execution.
+
+### Required deliverables
+
+1. External request object representing a user or system request.
+2. Principal-bound authentication before any external request is accepted.
+3. Governance decision generation for all external actions.
+4. Approval and rejection flow tied to the product governance service.
+5. No direct execution path that bypasses the approval gate.
+
+### Evidence of completion
+
+- External requests can be generated and approved through the host layer.
+- Decision IDs are recorded and validated with approval gating.
+- The CLI exposes the request/approve flow for external users.
+
+## Phase 8 — Desktop Operator Runtime
+
+**Status:** Complete
+
+This phase formalizes the AI-as-admin desktop model by creating a governed desktop-action boundary. The operator may request host actions such as snapshotting, focus, or app launch, but those actions remain gated behind approval, policy awareness, and audit-backed intent.
+
+### Required deliverables
+
+1. Desktop action request flow bound to identity and governance. — Complete
+2. Approval and rejection semantics for visible host-level actions. — Complete
+3. Safe allowlist for desktop actions that are valid under the operating model. — Complete
+4. Clear evidence packaging for desktop-intent execution. — Complete
+5. No direct host action path that bypasses governance approval. — Complete
+
+### Evidence of completion
+
+- Desktop requests can be created and approved through the host service layer.
+- Approved action decisions are validated before execution is considered eligible.
+- Action intent remains constrained to the operator-safe action set.
+- Headless and headed execution paths differ explicitly and write durable desktop evidence.
+- The desktop operator smoke test verifies the audit trail under the `desktop` category.
 
 ## Milestone Definition of Done
 

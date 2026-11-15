@@ -6,7 +6,7 @@ Unknown intents return `no_tool_match` + hint, not a pretend answer.
 
 ## Deliverables
 - `scripts/sovereign_tool_router.py` / `sovereign-tools` CLI
-- Pattern routes: browser_open, purpose_run, snapshot, windows, app_open, ping
+- Pattern routes: browser.open, purpose.run, browser.snapshot, desktop.list_windows, app.launch, ping
 - Policy still enforced by CU/sys services
 
 ## Tests

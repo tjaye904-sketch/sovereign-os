@@ -36,7 +36,7 @@
 | Briefing Service | ✓ | ✓ | ✓ | Implemented | System brief aggregator 2026-07-30 |
 | Audit Log | ✓ | ✓ | ✓ | Implemented | Append-only product audit 2026-07-30 |
 | CLI (sovereign-cli) | ✓ | ✓ | ✓ | Implemented | v1 surface; smoke-v1-complete |
-| API Gateway | ✓ | — | — | Deferred | Owner: CLI-only v1 |
+| API Gateway | ✓ | ✓ | ✓ | Implemented | Route-bound gateway with approval flow |
 | Desktop Application | ✓ | — | — | Deferred | Owner: CLI-only v1 |
 | Hermes bridge | ✓ | — | — | Deferred | Owner: separate |
 | Multi-device peer sync | ✓ | ✓ | ✓ | Implemented | peer-export/import folder bundles 2026-07-30 |

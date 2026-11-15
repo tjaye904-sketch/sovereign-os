@@ -7,9 +7,9 @@ BIN="${HOME}/.local/bin/sovereign-tools"
 echo "=== WP-03 verify ==="
 FAIL=0
 
-"$BIN" --dry-run "open python docs" | grep -q browser_open || { echo FAIL dry-run open; FAIL=1; }
-"$BIN" --dry-run "list windows" | grep -q desktop_list_windows || { echo FAIL dry-run windows; FAIL=1; }
-"$BIN" --dry-run "open system monitor" | grep -q app_open || { echo FAIL dry-run sys; FAIL=1; }
+"$BIN" --dry-run "open python docs" | grep -q '"action": "browser.open"' || { echo FAIL dry-run open; FAIL=1; }
+"$BIN" --dry-run "list windows" | grep -q '"action": "desktop.list_windows"' || { echo FAIL dry-run windows; FAIL=1; }
+"$BIN" --dry-run "open system monitor" | grep -q '"action": "app.launch"' || { echo FAIL dry-run sys; FAIL=1; }
 
 # Live only if CU up
 if curl -sf http://127.0.0.1:8765/health >/dev/null; then

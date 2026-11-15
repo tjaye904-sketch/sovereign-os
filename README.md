@@ -1,9 +1,35 @@
-# Sovereign (work sandbox)
+# Sovereign OS
 
-Local-first, human-governed product services on top of the Runtime Platform.
+Sovereign OS is an AI-native operating environment for a trusted local operator.
+It is designed to let an intelligent agent act with the initiative and context of
+an admin-level operator working at a desktop, while remaining bound by identity,
+policy, review, and approval controls.
 
-**This tree is the active engineering sandbox.** It is not a promotion of the
-original archive.
+This is not a chatbot wrapper. It is a local-first governance-controlled digital
+workspace that combines memory, planning, execution, and human oversight into one
+runtime.
+
+## Product thesis
+
+The intended experience is a Jarvis-like operating model:
+
+- the AI observes the system and understands state
+- the AI reasons across memory, goals, and workflows
+- the AI executes tasks using local tools and system services
+- the AI requests approval before consequential actions
+- the human remains the final authority over trust and risk
+
+In practical terms, Sovereign OS is an operating system for a digital operator:
+capable, persistent, auditable, and safe under human governance.
+
+## Core principles
+
+- Local-first operation and local ownership of data
+- Governance before action
+- Human authority over high-impact decisions
+- Safe, sandboxed mutation for autonomous improvement
+- Evidence-backed reasoning and decision trails
+- Model independence with clear service boundaries
 
 ## Quick host build (Ollama machine)
 
@@ -22,14 +48,19 @@ export SOVEREIGN_OLLAMA_MODEL=openclaw
 
 See `docs/project/HOST_BUILD.md` and `docs/project/OLLAMA_INTEGRATION.md`.
 
-## Layout
+## System layout
 
-- `core/identity` — Argon2id identity
-- `core/governance` / `core/policy` / `core/cognitive` / `core/executor`
-- `core/model_router` — local Ollama + tools
-- `core/product` — SovereignHost composition
-- `apps/cli` — sovereign-cli
+- `core/identity` — identity, principals, and session trust
+- `core/governance` / `core/policy` / `core/cognitive` / `core/executor` — governance and operator runtime
+- `core/model_router` — model selection and local tool routing
+- `core/product` — host composition and service orchestration
+- `apps/cli` — sovereign CLI surface
+- `tools/sovereign_mesh` — isolated, governed task execution model
 
 ## Governance rule
 
-Consequential actions: `recommend` → `approve` → `execute`.
+Consequential actions follow a clear control flow:
+
+recommend → approve → execute
+
+This keeps the system operationally capable without permitting uncontrolled autonomy.

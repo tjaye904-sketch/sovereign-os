@@ -1,9 +1,15 @@
 #pragma once
 
 #include "cognitive_types.hpp"
+#include "curiosity_engine.hpp"
+#include "decision_engine.hpp"
 #include "governance_service.hpp"
 #include "memory_engine.hpp"
 #include "model_router.hpp"
+#include "orchestration_engine.hpp"
+#include "planning_engine.hpp"
+#include "reasoning_engine.hpp"
+#include "reflection_engine.hpp"
 
 #include <string>
 #include <vector>
@@ -57,6 +63,12 @@ private:
 
     sovereign::governance::GovernanceService& governance_;
     sovereign::memory::MemoryEngine* memory_;
+    CuriosityEngine curiosity_engine_;
+    ReasoningEngine reasoning_engine_;
+    DecisionEngine decision_engine_;
+    ReflectionEngine reflection_engine_;
+    PlanningEngine planning_engine_;
+    OrchestrationEngine orchestration_engine_;
     sovereign::model_router::ModelRouter* models_;
     std::string default_model_;
 };

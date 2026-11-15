@@ -25,6 +25,44 @@ from typing import Any
 CU_URL = os.environ.get("SOVEREIGN_CU_URL", "http://127.0.0.1:8765")
 SYS_URL = os.environ.get("SOVEREIGN_SYS_URL", "http://127.0.0.1:8767")
 
+LEGACY_TO_CANONICAL_ACTIONS: dict[str, str] = {
+    "browser_open": "browser.open",
+    "browser_snapshot": "browser.snapshot",
+    "browser_screenshot": "browser.screenshot",
+    "desktop_snapshot": "desktop.snapshot",
+    "desktop_list_windows": "desktop.list_windows",
+    "desktop_screenshot": "desktop.snapshot",
+    "desktop_focus": "desktop.focus",
+    "desktop_input": "desktop.input",
+    "app_open": "app.launch",
+    "app_launch": "app.launch",
+    "purpose_list": "purpose.list",
+    "purpose_run": "purpose.run",
+    "sys_status": "sys.status",
+    "os_notify": "os.notify",
+    "os_files_open": "os.files_open",
+    "browser.open": "browser.open",
+    "browser.snapshot": "browser.snapshot",
+    "browser.screenshot": "browser.screenshot",
+    "desktop.snapshot": "desktop.snapshot",
+    "desktop.list_windows": "desktop.list_windows",
+    "desktop.focus": "desktop.focus",
+    "desktop.input": "desktop.input",
+    "app.launch": "app.launch",
+    "purpose.list": "purpose.list",
+    "purpose.run": "purpose.run",
+    "sys.status": "sys.status",
+    "os.notify": "os.notify",
+    "os.files_open": "os.files_open",
+}
+
+
+def canonical_action(action: str) -> str:
+    action = (action or "").strip()
+    if not action:
+        return action
+    return LEGACY_TO_CANONICAL_ACTIONS.get(action, action)
+
 
 def _post(base: str, action: str, args: dict[str, Any] | None = None, approved: bool = False) -> dict:
     body = json.dumps({"action": action, "args": args or {}, "approved": approved}).encode()
@@ -75,13 +113,13 @@ ROUTES: list[tuple[re.Pattern[str], str, str, Any]] = [
             re.I,
         ),
         "cu",
-        "browser_open",
+        "browser.open",
         lambda m: {"url": "https://docs.python.org/3/"},
     ),
     (
         re.compile(r"\b(purpose\s*list|list\s*purposes)\b", re.I),
         "cu",
-        "purpose_list",
+        "purpose.list",
         lambda m: {},
     ),
     (
@@ -90,7 +128,7 @@ ROUTES: list[tuple[re.Pattern[str], str, str, Any]] = [
             re.I,
         ),
         "cu",
-        "purpose_run",
+        "purpose.run",
         lambda m: {
             "purpose_id": m.group(2),
             "url": "https://docs.python.org/3/",
@@ -99,7 +137,7 @@ ROUTES: list[tuple[re.Pattern[str], str, str, Any]] = [
     (
         re.compile(r"\b(research|collect)\b.{0,40}\b(web|docs?|documentation)\b", re.I),
         "cu",
-        "purpose_run",
+        "purpose.run",
         lambda m: {
             "purpose_id": "research.web_collect",
             "url": "https://docs.python.org/3/",
@@ -108,26 +146,26 @@ ROUTES: list[tuple[re.Pattern[str], str, str, Any]] = [
     (
         re.compile(r"\b(snapshot|read\s*(the\s*)?page|page\s*text)\b", re.I),
         "cu",
-        "browser_snapshot",
+        "browser.snapshot",
         lambda m: {"max_chars": 3000},
-    ),
-    (
-        re.compile(r"\b(browser\s*)?screenshot\b", re.I),
-        "cu",
-        "browser_screenshot",
-        lambda m: {"name": "router_browser.png"},
     ),
     (
         re.compile(r"\b(list\s*windows|window\s*list|what\s*windows)\b", re.I),
         "cu",
-        "desktop_list_windows",
+        "desktop.list_windows",
         lambda m: {},
     ),
     (
         re.compile(r"\b(desktop\s*)?screenshot\b|\bscreen\s*shot\b", re.I),
         "cu",
-        "desktop_screenshot",
+        "desktop.snapshot",
         lambda m: {"name": "router_desktop.png"},
+    ),
+    (
+        re.compile(r"\b(browser\s*)?screenshot\b", re.I),
+        "cu",
+        "browser.screenshot",
+        lambda m: {"name": "router_browser.png"},
     ),
     (
         re.compile(
@@ -135,25 +173,25 @@ ROUTES: list[tuple[re.Pattern[str], str, str, Any]] = [
             re.I,
         ),
         "sys",
-        "app_open",
+        "app.launch",
         lambda m: {"target": "gnome-system-monitor"},
     ),
     (
         re.compile(r"\b(open|launch|start)\b.{0,40}\b(terminal|gnome-terminal)\b", re.I),
         "sys",
-        "app_open",
+        "app.launch",
         lambda m: {"target": "gnome-terminal"},
     ),
     (
         re.compile(r"\b(open|launch)\b.{0,40}\b(files|nautilus|file\s*manager)\b", re.I),
         "sys",
-        "app_open",
+        "app.launch",
         lambda m: {"target": "nautilus"},
     ),
     (
         re.compile(r"\b(sys\s*)?status\b|\bsystem\s*status\b", re.I),
         "sys",
-        "sys_status",
+        "sys.status",
         lambda m: {},
     ),
 ]
@@ -168,7 +206,7 @@ def plan(text: str) -> dict[str, Any] | None:
         if m:
             return {
                 "service": service,
-                "action": action,
+                "action": canonical_action(action),
                 "args": builder(m),
                 "matched": rx.pattern[:80],
             }
