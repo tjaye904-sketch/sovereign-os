@@ -48,6 +48,17 @@ export SOVEREIGN_OLLAMA_MODEL=openclaw
 
 See `docs/project/HOST_BUILD.md` and `docs/project/OLLAMA_INTEGRATION.md`.
 
+
+
+## Purpose stacks (C++ vs computer-use)
+
+Sovereign has two complementary purpose/automation paths:
+
+- **C++ `core/product/purpose_runtime` + `sovereign-cli purpose-list|purpose-run`** — in-process pack loading, allowlists, and governed evaluation inside the product host. Prefer this for policy-shaped packs and CLI/automation that must stay inside the C++ host boundary.
+- **Python computer-use (`sovereign-cu`, port 8765)** — headed browser/desktop tools, Playwright, Mission Control integration, and live on-screen automation on Pop!_OS. Prefer this when the operator must *see* windows and pages move.
+
+Do not assume the two share one allowlist file; keep CU host policy and C++ purpose packs aligned intentionally. Desktop operator (`xdg-open` / snapshots) is a third, thinner actuation path under governance — not a full window driver.
+
 ## System layout
 
 - `core/identity` — identity, principals, and session trust

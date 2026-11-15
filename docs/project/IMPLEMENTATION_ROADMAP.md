@@ -1,5 +1,7 @@
 # Sovereign Implementation Roadmap
 
+> **STATUS NOTE (2026-11):** Host operator path (inventory, CU/sys/hub, session) and C++ identity/governance/policy/memory/workspace/cognitive engines exist in-repo. Phase labels below distinguish *v1 code present* vs *product-depth / formal specs still open*.
+
 ## Roadmap Principle
 
 The runtime platform is the substrate.
@@ -34,11 +36,11 @@ runtime layer.
 
 ## Phase 2 — Core Platform Services
 
-**Status:** Next phase
+**Status:** v1 complete in tree — deepen (specs, threat models, formal schema)
 
 ### Milestone 2.1 — Identity Service
 
-**Status:** Not started
+**Status:** v1 complete (principals, sessions, MFA scaffold, revocation); deepen remaining
 
 Target responsibilities:
 
@@ -63,7 +65,7 @@ Required outputs:
 
 ### Milestone 2.2 — Governance Service
 
-**Status:** Not started
+**Status:** v1 complete (request/approve/reject/override + audit); deepen remaining
 
 Target responsibilities:
 
@@ -76,7 +78,7 @@ Target responsibilities:
 
 ### Milestone 2.3 — Policy Engine
 
-**Status:** Not started
+**Status:** v1 complete (versioning, dry-run, rule-set); deepen remaining
 
 Target responsibilities:
 
@@ -92,7 +94,7 @@ constitute the complete product Policy Engine.
 
 ### Milestone 2.4 — Memory Engine
 
-**Status:** Not started
+**Status:** v1 complete (append, search, rank, prune, provenance tags); deepen remaining
 
 Target responsibilities:
 
@@ -109,7 +111,7 @@ A runtime log sink must not be treated as completion of this milestone.
 
 ### Milestone 2.5 — Workspace Service
 
-**Status:** Not started
+**Status:** v1 complete (create/list/domain init); deepen remaining
 
 Target responsibilities:
 
@@ -123,7 +125,7 @@ Target responsibilities:
 
 ## Phase 3 — Knowledge and Integration Services
 
-**Status:** Planned
+**Status:** Partial — archive/sync/model_router present; curiosity engine present in cognitive layer
 
 Recommended order:
 
@@ -156,7 +158,7 @@ local-first ownership and governance.
 
 ## Phase 4 — Cognitive Services
 
-**Status:** Planned
+**Status:** v1 in tree (reasoning, decision, reflection, planning, orchestration, evolution sandbox) — wire honest model enrichment and product depth
 
 Recommended order:
 

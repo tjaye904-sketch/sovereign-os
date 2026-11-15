@@ -88,7 +88,13 @@ Result<ExecutionPlan> CognitiveService::BuildPlan(
     const PrincipalId& requester,
     const std::string& goal)
 {
-    return planning_engine_.BuildPlan(requester, goal);
+    // Heuristic skeleton from PlanningEngine, then honest router enrichment when available.
+    auto result = planning_engine_.BuildPlan(requester, goal);
+    if (result.Ok())
+    {
+        EnrichPlanWithModel(result.value);
+    }
+    return result;
 }
 
 void CognitiveService::EnrichPlanWithModel(ExecutionPlan& plan) const

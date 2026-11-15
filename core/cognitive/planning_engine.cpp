@@ -1,6 +1,7 @@
 #include "planning_engine.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <random>
 
@@ -28,10 +29,9 @@ std::uint64_t PlanningEngine::NowUnixSeconds()
 std::string PlanningEngine::NormalizeGoal(const std::string& value)
 {
     std::string out = value;
-    while (!out.empty() && (out.front() == ' ' || out.front() == '\n' || out.front() == '\r' || out.front() == '\t'))
-        out.erase(out.begin());
-    while (!out.empty() && (out.back() == ' ' || out.back() == '\n' || out.back() == '\r' || out.back() == '\t'))
-        out.pop_back();
+    const auto not_space = [](unsigned char ch) { return !std::isspace(ch); };
+    out.erase(out.begin(), std::find_if(out.begin(), out.end(), not_space));
+    out.erase(std::find_if(out.rbegin(), out.rend(), not_space).base(), out.end());
     return out;
 }
 
@@ -45,21 +45,22 @@ PlanningEngine::PlanningEngine(
 {
 }
 
+// Heuristic only — never claim model_enriched from a model *name*.
+// Live enrichment is CognitiveService::EnrichPlanWithModel (router required).
 void PlanningEngine::EnrichPlanWithModel(ExecutionPlan& plan) const
 {
     plan.enrichment_status = "heuristic";
-    if (!default_model_.empty())
-    {
-        plan.enrichment_status = "model_enriched";
-    }
     if (plan.goal.size() > 120)
     {
         plan.confidence = 0.58;
-        plan.uncertainty_notes = "Goal is broad; consider narrowing scope before execution.";
+        plan.uncertainty_notes =
+            "Goal is broad; consider narrowing scope before execution.";
         return;
     }
-    plan.confidence = 0.81;
-    plan.uncertainty_notes = "Plan is heuristic but governance-gated; execution still requires approval.";
+    plan.confidence = 0.74;
+    plan.uncertainty_notes =
+        "Heuristic plan; governed steps require human approval.";
+    (void)default_model_; // selection happens in CognitiveService when router is live
 }
 
 Result<ExecutionPlan> PlanningEngine::BuildPlan(
@@ -82,12 +83,14 @@ Result<ExecutionPlan> PlanningEngine::BuildPlan(
 
     PlanStep inspect;
     inspect.action = "inspect";
-    inspect.detail = "Review current state, constraints, and any relevant memory for: " + normalized;
+    inspect.detail =
+        "Review current state, constraints, and any relevant memory for: " + normalized;
     plan.steps.push_back(inspect);
 
     PlanStep policy;
     policy.action = "policy-dry-run";
-    policy.detail = "Evaluate expected actions against governance and policy before execution.";
+    policy.detail =
+        "Evaluate expected actions against governance and policy before execution.";
     plan.steps.push_back(policy);
 
     PlanStep recommend;
@@ -98,14 +101,10 @@ Result<ExecutionPlan> PlanningEngine::BuildPlan(
 
     PlanStep execute;
     execute.action = "execute";
-    execute.detail = "Execute only after the decision is approved and the action remains in scope.";
+    execute.detail =
+        "Execute only after the decision is approved and the action remains in scope.";
     execute.requires_governance = true;
     plan.steps.push_back(execute);
-
-    if (plan.steps.size() >= 4)
-    {
-        plan.confidence = 0.74;
-    }
 
     EnrichPlanWithModel(plan);
 
@@ -120,9 +119,9 @@ Result<ExecutionPlan> PlanningEngine::BuildPlan(
         static_cast<void>(memory_->Append(rec));
     }
 
-    if (governance_ != nullptr)
+    if (governance_ != nullptr && !plan.enrichment_status.empty())
     {
-        plan.enrichment_status = "governance_gated";
+        plan.uncertainty_notes += " [governance-gated]";
     }
 
     result.value = plan;
