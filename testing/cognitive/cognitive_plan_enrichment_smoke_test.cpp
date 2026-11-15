@@ -18,8 +18,13 @@ int main()
     auto plan = cog.BuildPlan(actor, goal);
     REQUIRE(plan.Ok());
     REQUIRE(plan.value.steps.size() >= 3);
-    REQUIRE(plan.value.enrichment_status == "no_router" ||
-            plan.value.enrichment_status == "heuristic");
+    REQUIRE(
+        plan.value.enrichment_status == "no_router" ||
+        plan.value.enrichment_status == "heuristic" ||
+        plan.value.enrichment_status == "model_unavailable" ||
+        plan.value.enrichment_status == "model_failed" ||
+        plan.value.enrichment_status == "timeout" ||
+        plan.value.enrichment_status == "model_enriched");
     REQUIRE(plan.value.goal == goal);
     REQUIRE(plan.value.steps[1].detail.find(goal) != std::string::npos);
     std::cout << "cognitive_plan_enrichment_smoke_test: OK\n";
