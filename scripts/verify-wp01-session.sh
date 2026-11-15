@@ -29,10 +29,10 @@ fi
 # Optional: headed CU open (skip if offline)
 if curl -sf http://127.0.0.1:8765/health >/dev/null; then
   if command -v sovereign-cu >/dev/null; then
-    if sovereign-cu browser_open --args '{"url":"https://docs.python.org/3/"}' 2>/dev/null | grep -q '"ok": true'; then
-      echo "PASS browser_open"
+    if sovereign-cu browser.open --args '{"url":"https://docs.python.org/3/"}' 2>/dev/null | grep -q '"ok": true'; then
+      echo "PASS browser.open"
     else
-      echo "WARN browser_open failed (display/CU policy?)"
+      echo "WARN browser.open failed (display/CU policy?)"
     fi
   fi
 fi

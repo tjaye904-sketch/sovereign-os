@@ -5,6 +5,7 @@
 #include "domain_tool_runner.hpp"
 #include "identity_verifier.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <filesystem>
@@ -62,6 +63,8 @@ void PrintUsage()
         << "  sovereign-cli principal-suspend <principal-hex>\n"
         << "  sovereign-cli principal-revoke <principal-hex>\n"
         << "  sovereign-cli operator-create <name> <secret>\n"
+        << "  sovereign-cli role-add <principal-hex> <role>\n"
+        << "  sovereign-cli role-remove <principal-hex> <role>\n"
         << "  sovereign-cli roles <principal-hex>\n"
         << "  sovereign-cli decision-get <decision-hex>\n"
         << "  sovereign-cli change-credential <old> <new>\n"
@@ -94,12 +97,20 @@ void PrintUsage()
         << "  sovereign-cli project-summary [--save] [dir]\n"
         << "  sovereign-cli review-diff [--save] <diff-file>\n"
         << "  sovereign-cli policy-check <role> <action>\n"
+        << "  sovereign-cli purpose-list\n"
+        << "  sovereign-cli purpose-run <purpose-id> [target] [summary...]\n"
         << "  sovereign-cli memory-rank\n"
         << "  sovereign-cli memory-prune <min-score>\n"
+        << "  sovereign-cli curious <topic...>\n"
+        << "  sovereign-cli evolve [--limit N] [path]\n"
+        << "  sovereign-cli sandbox-propose [--limit N] [path]\n"
+        << "  sovereign-cli sandbox-approve <proposal-id> <approver>\n"
         << "  sovereign-cli plan <goal...>\n"
         << "  sovereign-cli policy-dry-run <role> <action>\n"
         << "  sovereign-cli policy-version\n"
         << "  sovereign-cli policy-rule-set <action> <min-role> <allow|deny>\n"
+        << "  sovereign-cli external-request <action> <summary...>\n"
+        << "  sovereign-cli external-approve <decision-hex> <reason...>\n"
         << "  sovereign-cli audit-verify\n"
         << "  sovereign-cli chat-tools <prompt...>\n"
         << "  sovereign-cli execute <action> <decision-hex>\n"
@@ -116,6 +127,54 @@ std::string ToHex(const std::array<std::uint8_t, 16>& b)
         o[i * 2 + 1] = k[b[i] & 0xF];
     }
     return o;
+}
+
+std::string JsonEscape(const std::string& input)
+{
+    std::string out;
+    out.reserve(input.size());
+    for (char ch : input)
+    {
+        switch (ch)
+        {
+            case '\\':
+                out += "\\\\";
+                break;
+            case '"':
+                out += "\\\"";
+                break;
+            case '\n':
+                out += "\\n";
+                break;
+            case '\r':
+                out += "\\r";
+                break;
+            case '\t':
+                out += "\\t";
+                break;
+            default:
+                if (static_cast<unsigned char>(ch) < 0x20)
+                {
+                    char buf[7];
+                    std::snprintf(buf, sizeof(buf), "\\u%04x",
+                                  static_cast<unsigned int>(static_cast<unsigned char>(ch)));
+                    out += buf;
+                }
+                else
+                {
+                    out += ch;
+                }
+                break;
+        }
+    }
+    return out;
+}
+
+template <typename T>
+void PrintIdentityFailure(const std::string& action, const sovereign::identity::Result<T>& result)
+{
+    std::cerr << action << " failed: "
+              << sovereign::identity::IdentityErrorToString(result.error) << '\n';
 }
 
 bool FromHex(const std::string& h, std::array<std::uint8_t, 16>& b)
@@ -224,24 +283,107 @@ int main(int argc, char** argv)
 
     if (cmd == "status")
     {
+        const bool json = (argc >= 3 && std::string(argv[2]) == "--json");
+        const auto models = host.Models().Health();
+        const auto ws = host.Workspace().List();
+        const auto ollama = (models.Ok() && models.value) ? "up" : "down";
+        const auto workspaces = (ws.Ok() ? ws.value.size() : 0);
+        const auto argon2 = sovereign::identity::DescribeArgon2Params();
+        const auto embed_model = std::string(
+            std::getenv("SOVEREIGN_EMBED_MODEL") && std::getenv("SOVEREIGN_EMBED_MODEL")[0]
+                ? std::getenv("SOVEREIGN_EMBED_MODEL")
+                : "nomic-embed-text (fallback hash-v1)");
+
+        if (json)
+        {
+            std::cout << "{\n"
+                      << "  \"ok\": true,\n"
+                      << "  \"data_root\": \"" << JsonEscape(host.DataRoot().string()) << "\",\n"
+                      << "  \"ollama\": \"" << JsonEscape(ollama) << "\",\n"
+                      << "  \"workspaces\": " << workspaces << ",\n"
+                      << "  \"argon2\": \"" << JsonEscape(argon2) << "\",\n"
+                      << "  \"surface\": \"cli-only\",\n"
+                      << "  \"sync\": \"peer-bundle\",\n"
+                      << "  \"hermes\": \"separate\",\n"
+                      << "  \"model\": \"" << JsonEscape(host.DefaultModel()) << "\",\n"
+                      << "  \"embed_model\": \"" << JsonEscape(embed_model) << "\"\n"
+                      << "}\n";
+            host.Close();
+            return 0;
+        }
+
         std::cout << "data_root=" << host.DataRoot() << '\n';
-        auto models = host.Models().Health();
-        std::cout << "ollama="
-                  << (models.Ok() && models.value ? "up" : "down") << '\n';
-        auto ws = host.Workspace().List();
-        std::cout << "workspaces="
-                  << (ws.Ok() ? ws.value.size() : 0) << '\n';
-        std::cout << "argon2=" << sovereign::identity::DescribeArgon2Params()
-                  << '\n';
+        std::cout << "ollama=" << ollama << '\n';
+        std::cout << "workspaces=" << workspaces << '\n';
+        std::cout << "argon2=" << argon2 << '\n';
         std::cout << "surface=cli-only\n";
         std::cout << "sync=peer-bundle\n";
         std::cout << "hermes=separate\n";
         std::cout << "model=" << host.DefaultModel() << '\n';
+        std::cout << "embed_model=" << embed_model << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "purpose-list")
+    {
+        const auto& packs = host.Purpose().BuiltinPacks();
+        if (packs.empty())
         {
-            const char* em = std::getenv("SOVEREIGN_EMBED_MODEL");
-            std::cout << "embed_model="
-                      << (em && em[0] ? em : "nomic-embed-text (fallback hash-v1)")
-                      << '\n';
+            std::cout << "no_purposes\n";
+            host.Close();
+            return 0;
+        }
+        for (const auto& pack : packs)
+        {
+            std::cout << pack.id << " | " << pack.description << " | risk="
+                      << static_cast<int>(pack.risk) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "purpose-run" && argc >= 3)
+    {
+        std::string target;
+        std::string summary;
+        if (argc >= 4)
+        {
+            target = argv[3];
+        }
+        if (argc >= 5)
+        {
+            for (int i = 4; i < argc; ++i)
+            {
+                if (i > 4)
+                    summary.push_back(' ');
+                summary += argv[i];
+            }
+        }
+
+        const auto result = host.Purpose().Run(argv[2], target, summary);
+        if (!result.allowed)
+        {
+            std::cerr << "purpose_run_failed purpose=" << argv[2]
+                      << " reason=" << result.reason << '\n';
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "purpose_id=" << result.purpose_id << '\n';
+        std::cout << "allowed=1\n";
+        std::cout << "status=" << result.reason << '\n';
+        std::cout << "steps=" << result.steps.size() << '\n';
+        for (std::size_t i = 0; i < result.steps.size(); ++i)
+        {
+            const auto& step = result.steps[i];
+            std::cout << "step" << (i + 1) << " action=" << step.action;
+            if (!step.target.empty())
+                std::cout << " target=" << step.target;
+            std::cout << " allowed=" << (step.allowed ? "1" : "0");
+            if (!step.reason.empty())
+                std::cout << " reason=" << step.reason;
+            std::cout << '\n';
         }
         host.Close();
         return 0;
@@ -252,8 +394,7 @@ int main(int argc, char** argv)
         auto r = host.Identity().BootstrapOwner(argv[2], argv[3]);
         if (!r.Ok())
         {
-            std::cerr << "bootstrap failed error=" << static_cast<int>(r.error)
-                      << '\n';
+            PrintIdentityFailure("bootstrap", r);
             host.Close();
             return 1;
         }
@@ -283,8 +424,7 @@ int main(int argc, char** argv)
             if (r.error == sovereign::identity::IdentityError::MfaRequired)
                 std::cerr << "mfa_required: login <name> <secret> <totp-code>\n";
             else
-                std::cerr << "login failed error=" << static_cast<int>(r.error)
-                          << '\n';
+                PrintIdentityFailure("login", r);
             host.Close();
             return 1;
         }
@@ -573,6 +713,254 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    if (cmd == "curious" && argc >= 3)
+    {
+        std::string topic;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2)
+                topic.push_back(' ');
+            topic += argv[i];
+        }
+
+        sovereign::PrincipalId actor{};
+        auto proposal = host.Curiosity().Propose(actor, topic, {});
+        if (!proposal.Ok())
+        {
+            std::cerr << "curious failed\n";
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "curiosity topic=" << proposal.value.topic << '\n';
+        std::cout << "questions=" << proposal.value.questions.size() << '\n';
+        for (std::size_t i = 0; i < proposal.value.questions.size(); ++i)
+        {
+            std::cout << "q" << i + 1 << ": " << proposal.value.questions[i] << '\n';
+        }
+
+        const auto queue = host.Curiosity().DiscoveryQueueSnapshot();
+        std::cout << "queue_size=" << queue.size() << '\n';
+        if (!queue.empty())
+        {
+            std::cout << "next_queue=" << queue.front().topic << " priority=" << queue.front().priority << '\n';
+        }
+
+        const auto graph = host.Curiosity().InterestGraph(3);
+        std::cout << "interest_top=" << graph.size() << '\n';
+        for (std::size_t i = 0; i < graph.size(); ++i)
+        {
+            std::cout << "interest" << i + 1 << "=" << graph[i].topic
+                      << " score=" << graph[i].score << " mentions=" << graph[i].mentions << '\n';
+        }
+
+        sovereign::audit::AuditEntry e;
+        e.category = "cognitive";
+        e.action = "curiosity";
+        e.detail = topic;
+        e.subject = std::to_string(proposal.value.questions.size());
+        static_cast<void>(host.Audit().Append(e));
+
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "evolve")
+    {
+        std::filesystem::path root = std::filesystem::current_path();
+        std::size_t limit = 5;
+
+        for (int i = 2; i < argc; ++i)
+        {
+            const std::string arg = argv[i];
+            if (arg == "--limit" && i + 1 < argc)
+            {
+                limit = static_cast<std::size_t>(std::stoul(argv[++i]));
+                continue;
+            }
+            root = std::filesystem::path(arg);
+        }
+
+        auto candidates = host.Evolution().ScanSystem(root, limit);
+        if (candidates.empty())
+        {
+            std::cout << "no_evolution_candidates\n";
+            host.Close();
+            return 0;
+        }
+
+        std::cout << "evolution_candidates=" << candidates.size() << '\n';
+        for (std::size_t i = 0; i < candidates.size(); ++i)
+        {
+            const auto& c = candidates[i];
+            std::cout << "candidate" << i + 1 << " subsystem=" << c.subsystem
+                      << " priority=" << c.priority << " path=" << c.file_path << '\n';
+            std::cout << "  title=" << c.title << '\n';
+            std::cout << "  summary=" << c.summary << '\n';
+        }
+
+        sovereign::audit::AuditEntry e;
+        e.category = "cognitive";
+        e.action = "evolution_scan";
+        e.detail = root.string();
+        e.subject = std::to_string(candidates.size());
+        static_cast<void>(host.Audit().Append(e));
+
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "sandbox-propose")
+    {
+        std::filesystem::path root = std::filesystem::current_path();
+        std::size_t limit = 5;
+        for (int i = 2; i < argc; ++i)
+        {
+            const std::string arg = argv[i];
+            if (arg == "--limit" && i + 1 < argc)
+            {
+                limit = static_cast<std::size_t>(std::stoul(argv[++i]));
+                continue;
+            }
+            root = std::filesystem::path(arg);
+        }
+
+        auto sandbox = host.SandboxEvolution();
+        auto proposal = sandbox.CreateProposal(limit);
+        std::cout << "proposal_id=" << proposal.id << '\n';
+        std::cout << "status=" << static_cast<int>(proposal.status) << '\n';
+        std::cout << "sandbox_root=" << proposal.sandbox_root.string() << '\n';
+        std::cout << "title=" << proposal.title << '\n';
+        std::cout << "summary=" << proposal.summary << '\n';
+        std::cout << "validation_command=" << proposal.validation_command << '\n';
+
+        sovereign::audit::AuditEntry e;
+        e.category = "cognitive";
+        e.action = "sandbox_proposal_created";
+        e.detail = proposal.title;
+        e.subject = proposal.id;
+        static_cast<void>(host.Audit().Append(e));
+
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "sandbox-approve")
+    {
+        if (argc < 4)
+        {
+            std::cerr << "usage: sovereign-cli sandbox-approve <proposal-id> <approver>\n";
+            host.Close();
+            return 1;
+        }
+
+        const std::string proposal_id = argv[2];
+        const std::string approver = argv[3];
+        auto sandbox = host.SandboxEvolution();
+        auto proposals = sandbox.PendingProposals();
+        const auto it = std::find_if(
+            proposals.begin(), proposals.end(),
+            [&](const auto& item) { return item.id == proposal_id; });
+        if (it == proposals.end())
+        {
+            std::cerr << "sandbox proposal not found: " << proposal_id << '\n';
+            host.Close();
+            return 1;
+        }
+
+        const auto proposal = *it;
+        if (!sandbox.ValidateProposal(proposal) || !sandbox.ApproveProposal(proposal_id, approver))
+        {
+            std::cerr << "sandbox approval failed for proposal " << proposal_id << '\n';
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "sandbox_approved proposal_id=" << proposal_id << " approver=" << approver << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "external-request" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid; run login again\n";
+            host.Close();
+            return 1;
+        }
+
+        std::string action = argv[2];
+        std::string summary;
+        for (int i = 3; i < argc; ++i)
+        {
+            if (i > 3)
+                summary.push_back(' ');
+            summary += argv[i];
+        }
+
+        std::string decision_hex;
+        if (!host.External().Request(session.value.principal_id, action, summary, "cli:external-request", decision_hex))
+        {
+            std::cerr << "external request failed\n";
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "decision_hex=" << decision_hex << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "external-approve" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid; run login again\n";
+            host.Close();
+            return 1;
+        }
+
+        std::string reason;
+        for (int i = 3; i < argc; ++i)
+        {
+            if (i > 3)
+                reason.push_back(' ');
+            reason += argv[i];
+        }
+
+        if (!host.External().Approve(session.value.principal_id, argv[2], reason))
+        {
+            std::cerr << "external approval failed\n";
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "external approved\n";
+        host.Close();
+        return 0;
+    }
+
     if (cmd == "plan" && argc >= 3)
     {
         std::array<std::uint8_t, 16> session_bytes{};
@@ -622,7 +1010,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-if (cmd == "audit-list")
+    if (cmd == "audit-list")
     {
         if (argc >= 3)
         {
@@ -1051,8 +1439,7 @@ if (cmd == "audit-list")
         auto r = host.Identity().ConfirmTotpEnrollment(sid, argv[2]);
         if (!r.Ok())
         {
-            std::cerr << "mfa-enroll-confirm failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("mfa-enroll-confirm", r);
             host.Close();
             return 1;
         }
@@ -1076,7 +1463,7 @@ if (cmd == "audit-list")
         auto r = host.Identity().GenerateRecoveryCodes(sid);
         if (!r.Ok())
         {
-            std::cerr << "mfa-recovery-generate failed\n";
+            PrintIdentityFailure("mfa-recovery-generate", r);
             host.Close();
             return 1;
         }
@@ -1133,8 +1520,7 @@ if (cmd == "audit-list")
         auto r = host.Identity().RevokeSession(sid);
         if (!r.Ok())
         {
-            std::cerr << "session-revoke failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("session-revoke", r);
             host.Close();
             return 1;
         }
@@ -1173,8 +1559,7 @@ if (cmd == "audit-list")
             sid, id, sovereign::identity::PrincipalStatus::Suspended);
         if (!r.Ok())
         {
-            std::cerr << "principal-suspend failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("principal-suspend", r);
             host.Close();
             return 1;
         }
@@ -1211,8 +1596,7 @@ if (cmd == "audit-list")
             sid, id, sovereign::identity::PrincipalStatus::Revoked);
         if (!r.Ok())
         {
-            std::cerr << "principal-revoke failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("principal-revoke", r);
             host.Close();
             return 1;
         }
@@ -1264,8 +1648,7 @@ if (cmd == "audit-list")
         auto r = host.Identity().CreateOperator(sid, argv[2], argv[3]);
         if (!r.Ok())
         {
-            std::cerr << "operator-create failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("operator-create", r);
             host.Close();
             return 1;
         }
@@ -1289,8 +1672,7 @@ if (cmd == "audit-list")
         auto r = host.Identity().CreateServicePrincipal(sid, argv[2]);
         if (!r.Ok())
         {
-            std::cerr << "service-create failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("service-create", r);
             host.Close();
             return 1;
         }
@@ -1313,12 +1695,109 @@ if (cmd == "audit-list")
         auto r = host.Identity().CreateMachinePrincipal(sid, argv[2]);
         if (!r.Ok())
         {
-            std::cerr << "machine-create failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("machine-create", r);
             host.Close();
             return 1;
         }
         std::cout << "machine_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if ((cmd == "role-add" || cmd == "role-grant") && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+
+        const auto principal = host.Identity().GetPrincipal(id);
+        if (!principal.Ok())
+        {
+            std::cerr << "role-add failed: "
+                      << sovereign::identity::IdentityErrorToString(principal.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+
+        auto r = host.Identity().AssignRole(sid, id, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "role-add failed: "
+                      << sovereign::identity::IdentityErrorToString(r.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "role_add";
+        e.subject = argv[2];
+        e.detail = std::string("assigned role ") + argv[3];
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "role_added id=" << argv[2] << " role=" << argv[3] << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if ((cmd == "role-remove" || cmd == "role-revoke") && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+
+        const auto principal = host.Identity().GetPrincipal(id);
+        if (!principal.Ok())
+        {
+            std::cerr << "role-remove failed: "
+                      << sovereign::identity::IdentityErrorToString(principal.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+
+        auto r = host.Identity().RevokeRole(sid, id, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "role-remove failed: "
+                      << sovereign::identity::IdentityErrorToString(r.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "role_remove";
+        e.subject = argv[2];
+        e.detail = std::string("revoked role ") + argv[3];
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "role_removed id=" << argv[2] << " role=" << argv[3] << '\n';
         host.Close();
         return 0;
     }
@@ -1332,10 +1811,23 @@ if (cmd == "audit-list")
             host.Close();
             return 1;
         }
+
+        const auto principal = host.Identity().GetPrincipal(id);
+        if (!principal.Ok())
+        {
+            std::cerr << "roles failed: "
+                      << sovereign::identity::IdentityErrorToString(principal.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+
         auto r = host.Identity().GetRoles(id);
         if (!r.Ok())
         {
-            std::cerr << "roles failed\n";
+            std::cerr << "roles failed: "
+                      << sovereign::identity::IdentityErrorToString(r.error)
+                      << '\n';
             host.Close();
             return 1;
         }
@@ -1385,8 +1877,7 @@ if (cmd == "audit-list")
         auto r = host.Identity().ChangeCredential(sid, argv[2], argv[3]);
         if (!r.Ok())
         {
-            std::cerr << "change-credential failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("change-credential", r);
             host.Close();
             return 1;
         }
@@ -1416,8 +1907,7 @@ if (cmd == "audit-list")
         auto r = host.Identity().ListPrincipals(sid);
         if (!r.Ok())
         {
-            std::cerr << "principals failed error="
-                      << static_cast<int>(r.error) << '\n';
+            PrintIdentityFailure("principals", r);
             host.Close();
             return 1;
         }

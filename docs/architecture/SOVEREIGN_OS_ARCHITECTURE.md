@@ -1,263 +1,232 @@
-# Sovereign-OS Architecture Document
+# Sovereign OS Architecture
 
-**Version:** 1.0  
-**Date:** 2026-08-27  
-**Status:** Complete Codebase Review
+## 1. Purpose
 
----
+Sovereign OS is designed as an AI-native operating environment for a trusted local
+operator. The system allows an intelligent agent to act with desktop-level situational
+awareness and operational initiative while remaining under human authority and policy
+control.
 
-## 1. System Overview
+The design intent is not to create an unbounded autonomous system. The intent is to
+create a governed digital operator that can reason, plan, execute, learn, and improve
+inside clearly bounded safety constraints.
 
-Sovereign-OS is a C++20 cognitive operating system built as a modular, file-backed service architecture. The system provides identity management, goal tracking, semantic search, policy evaluation, agent scheduling, and workspace synchronization — all running locally without external dependencies.
+## 2. Product thesis
 
-### Design Principles
-- **Local-first**: All data persisted to local filesystem under `data_root/`
-- **Modular**: Each subsystem is an independent namespace with its own types and service class
-- **Error-safe**: Custom `Result<T>` / `Error` enum pattern per module (no exceptions)
-- **Thread-safe**: All services use `std::mutex` for internal state protection
-- **Zero external deps**: Only C++20 standard library
+The system is modeled as a Jarvis-like operator environment:
 
----
+- the AI observes the machine and its context
+- the AI understands tasks, goals, and memory
+- the AI acts through tools, shells, files, and workflows
+- the AI requests approval before consequential actions
+- the human remains the final authority over risk and execution
 
-## 2. Module Inventory & Completion Assessment
+This means Sovereign OS is best understood as an operating system for a digital admin,
+not merely a chat application attached to a codebase.
 
-### 2.1 Core Subsystems (all headers present)
+## 3. Design principles
 
-| # | Module | Header Files | Status | Notes |
-|---|--------|-------------|--------|-------|
-| 1 | **agent** | `agent_scheduler.hpp`, `agent_types.hpp` | Complete | Agent lifecycle, scheduling, roles |
-| 2 | **archive** | `archive_service.hpp` | Complete | Document add/remove/search/export |
-| 3 | **audit** | `audit_log.hpp`, `audit_types.hpp` | Complete | Append-only log with chain verification |
-| 4 | **briefing** | `briefing_service.hpp`, `briefing_types.hpp` | Complete | Session summaries, context packs |
-| 5 | **cognitive** | `cognitive_core.hpp`, `cognitive_service.hpp`, `cognitive_types.hpp` | Complete | Core cognitive loop, events, actions |
-| 6 | **executor** | `action_executor.hpp`, `executor.hpp` | Complete | Sync/async action execution with handlers |
-| 7 | **goals** | `goals_service.hpp`, `goals_types.hpp` | Complete | Goal CRUD with status/horizon/priority |
-| 8 | **governance** | `governance_service.hpp`, `governance_types.hpp` | Complete | Principal, role, permission, policy |
-| 9 | **identity** | `identity_service.hpp`, `identity_types.hpp` | Complete | Credential management, principal profiles |
-| 10 | **memory** | `memory_engine.hpp`, `memory_types.hpp` | Complete | Memory records with type/access/config |
-| 11 | **model_router** | `model_router.hpp`, `model_router_types.hpp` | Complete | Model endpoint selection and routing |
-| 12 | **policy** | `policy_engine.hpp`, `policy_types.hpp` | Complete | Policy rule evaluation with context |
-| 13 | **product** | `product.hpp`, `sovereign_host.hpp` | Complete | Main orchestrator (SovereignHost) |
-| 14 | **semantic** | `semantic_store.hpp`, `semantic_types.hpp` | Complete | Embedding-based semantic search |
-| 15 | **sync** | `sync_engine.hpp`, `sync_service.hpp` | Complete | Cross-workspace synchronization |
-| 16 | **tools** | `tool_registry.hpp`, `tool_types.hpp` | Complete | Tool registration and metadata |
-| 17 | **workspace** | `workspace_service.hpp`, `workspace_types.hpp` | Complete | Workspace lifecycle management |
+### Local-first operation
+The system is designed to operate primarily on the local machine, with ownership and
+control retained by the human operator.
 
-### 2.2 Shared Infrastructure
+### Human-governed authority
+Consequential actions are routed through explicit approval flows. The AI may recommend,
+prepare, and validate, but the final live decision remains governed.
 
-| Module | Files | Status | Notes |
-|--------|-------|--------|-------|
-**Types:** `CredentialType` (Password/PublicKey/Token), `PrincipalProfile` (name/email/roles/credentials/timestamps)
+### Trust and identity first
+Every action begins with a known principal, a validated session, and policy evaluation.
+Identity is a foundational substrate, not an afterthought.
 
-### 3.7 Memory (`sovereign::memory`)
+### Safe autonomy inside controlled boundaries
+Autonomous behavior is allowed when it remains within a safe, sandboxed, reviewable
+execution envelope.
 
-```
-MemoryEngine: Local memory storage engine
-├── Open(directory) / Close()
-├── Store(MemoryRecord) → Result<MemoryId>
-├── Retrieve(MemoryId) → Result<MemoryRecord>
-├── Search(query, MemoryType) → vector<ScoredMemory>
-├── Delete(MemoryId) → Result<void>
-└── List(MemoryType) → vector<MemoryRecord>
-```
+### Evidence-backed operations
+Decisions, approvals, and actions are recorded so they can be reviewed, audited, and
+reconstructed later.
 
-**Types:** `MemoryType` (ShortTerm/LongTerm/Ephemeral), `MemoryAccess` (Private/Shared/System), `MemoryConfig`, `MemoryRecord` (id/content/type/access/timestamps)
+## 4. Architectural model
 
-### 3.8 Model Router (`sovereign::model_router`)
+Sovereign OS is composed of layered runtime services rather than a single monolithic
+application. Each layer has a clear responsibility and interacts with adjacent layers
+through explicit interfaces.
 
-```
-ModelRouter: Routes cognitive requests to appropriate models
-├── Open(directory) / Close()
-├── RegisterEndpoint(ModelEndpoint) → Result<void>
-├── SelectEndpoint(ModelCapability, Context) → Result<ModelEndpoint>
-├── Invoke(endpoint, request) → Result<ModelResponse>
-├── ListEndpoints() → vector<ModelEndpoint>
-└── RemoveEndpoint(endpointId) → Result<void>
-```
+### 4.1 Runtime substrate
+This layer manages the active execution environment for the product itself: service
+startup, configuration, lifecycle, and the orchestration of the host runtime.
 
-**Types:** `ModelEndpoint` (url/capabilities/priority/health), `ModelCapability`, `ModelSelector`, `ModelError`, `ModelResult<T>`
+The host is the root composition point for the system and exposes the product service
+graph to the rest of the runtime.
 
-### 3.9 Policy Engine (`sovereign::policy`)
+### 4.2 Identity and trust layer
+This layer authenticates principals and validates sessions. It defines who is allowed to
+act, under which authority, and with what level of trust.
 
-```
-PolicyEngine: Evaluates policies against contexts
-├── Open(directory) / Close()
-├── AddPolicy(PolicyRule) → Result<void>
-├── Evaluate(ruleId, PolicyContext) → Result<PolicyResult>
-├── ListPolicies() → vector<PolicyRule>
-└── RemovePolicy(ruleId) → Result<void>
-```
+Responsibilities include:
 
-**Types:** `PolicyRule` (id/condition/action/effect/priority), `PolicyAction` (Allow/Deny/Log/Alert), `PolicyEffect`, `PolicyContext`, `PolicyError`, `PolicyResult`
+- principal identity management
+- session validation
+- role information and authorization context
+- trust evaluation for active operators
 
-### 3.10 Product (`sovereign::product`)
+### 4.3 Governance and policy layer
+This layer governs action eligibility. It translates permissions, rules, and risk levels
+into approval logic and execution constraints.
 
-```
-SovereignHost: Main orchestrator — bootstraps and coordinates all services
-├── Initialize(config) → Result<void>
-├── Start() → Result<void>
-├── Stop() → void
-├── GetService<T>() → T* (access to any registered service)
-└── HealthCheck() → SystemHealth
+Responsibilities include:
 
-Product: Configuration and metadata
-├── name, version, description
-├── data_root path
-└── services list
-```
+- policy evaluation
+- action risk classification
+- recommendation and approval flow
+- explicit blocking of unauthorized or unsafe operations
 
-### 3.11 Semantic Store (`sovereign::semantic`)
+### 4.4 Memory and semantic layer
+This layer provides persistent context and understanding over time.
 
-```
-SemanticStore: Embedding-based semantic search
-├── Open(directory) / Close()
-├── Upsert(text, tags, author) → Result<SemanticRecordId>
-├── Query(query, top_k) → vector<ScoredRecord>
-└── Size() → std::size_t
-```
+Responsibilities include:
 
-**Types:** `Embedding` (vector<float>), `SemanticRecord` (id/author/text/embedding/embed_model/tags/timestamps), `ScoredRecord`, `SemanticError`
+- stored project memory
+- semantic retrieval
+- knowledge graphs and long-lived context
+- historical understanding of user goals and system state
 
-### 3.12 Sync Engine (`sovereign::sync`)
+### 4.5 Cognitive layer
+This layer provides planning, discovery, and situation-aware reasoning. It is the part of
+Sovereign OS that recognizes missing context, proposes next steps, and drives intelligent
+execution.
 
-```
-SyncEngine: Cross-workspace synchronization
-├── Open(directory) / Close()
-├── Sync(workspaceId, target) → Result<SyncResult>
-├── GetStatus(workspaceId) → SyncStatus
-└── Cancel(workspaceId) → Result<void>
+Responsibilities include:
 
-SyncService: Higher-level sync orchestration
-├── RegisterWorkspace(workspace) → Result<void>
-├── UnregisterWorkspace(workspaceId) → Result<void>
-├── ListWorkspaces() → vector<WorkspaceInfo>
-└── HealthCheck() → SyncHealth
-```
+- goal formation and tracking
+- curiosity-driven discovery
+- task planning
+- proposal generation for improvement and investigation
 
-**Types:** `SyncStatus` (Idle/Syncing/Completed/Error), `SyncResult`, `SyncHealth`, `WorkspaceInfo`
+### 4.6 Execution and tool layer
+This layer translates decisions into actions across the local machine. It handles the
+operational interfaces that allow the AI to interact with code, files, tools, workflows,
+and execution environments.
 
-### 3.13 Tools (`sovereign::tools`)
+Responsibilities include:
 
-```
-ToolRegistry: Tool registration and discovery
-├── Register(ToolDefinition) → Result<void>
-├── Unregister(toolId) → Result<void>
-├── Get(toolId) → Result<ToolDefinition>
-├── List() → vector<ToolDefinition>
-└── Execute(toolId, params) → Result<ToolResult>
-```
+- shell and process execution
+- workspace operations
+- tool invocation
+- workflow orchestration
+- action execution under policy constraints
 
-**Types:** `ToolDefinition` (id/name/description/params/result_schema), `ToolCapability`, `ToolError`, `ToolResult`
+### 4.7 Sandbox and mutation safety layer
+This layer ensures that learning, experimentation, and self-improvement occur without
+corrupting the live system or canonical repository.
 
-### 3.14 Workspace (`sovereign::workspace`)
+Responsibilities include:
 
-```
-WorkspaceService: Workspace lifecycle management
-├── Open(directory) / Close()
-├── Create(WorkspaceConfig) → Result<WorkspaceId>
-├── Get(WorkspaceId) → Result<Workspace>
-├── ListActive() / ListAll() → vector<Workspace>
-├── SetStatus(WorkspaceId, WorkspaceStatus)
-└── Delete(WorkspaceId) → Result<void>
-```
+- isolated worktrees or proposal sandboxes
+- validation of changes in a controlled environment
+- evidence package generation
+- approval gate before live integration
 
-**Types:** `WorkspaceConfig` (name/description/path/bound_services), `WorkspaceStatus` (Active/Inactive/Archived), `Workspace` (id/config/status/timestamps)
+### 4.8 Audit and observability layer
+This layer records system history so action provenance remains reviewable.
 
-### 3.15 Audit Log (`sovereign::audit`)
+Responsibilities include:
 
-```
-AuditLog: Append-only integrity-preserving audit trail
-├── Open(directory) / Close()
-├── Append(AuditEntry) → Result<AuditEntryId>
-├── List(limit) → vector<AuditEntry>
-├── ListByCategory(category, limit) → vector<AuditEntry>
-├── VerifyChain() → Result<bool>  ← Phase XII integrity check
-└── ChainTip() → Result<std::string>
-```
+- audit entries for approvals and decisions
+- traceability for important actions
+- log integrity and historical reconstruction
+- operational observability and evidence capture
 
-**Types:** `AuditEntry` (id/entry_type/category/payload/timestamp/chain_hash), `AuditEntryType`, `AuditError`
+## 5. Core interaction model
 
-### 3.16 Briefing (`sovereign::briefing`)
+The operating flow is intentionally simple and enforceable:
 
-```
-BriefingService: Session briefing and context management
-├── Open(directory) / Close()
-├── CreateBriefing(BriefingConfig) → Result<BriefingId>
-├── Get(BriefingId) → Result<Briefing>
-├── AddEntry(BriefingId, BriefingEntry) → Result<void>
-├── ListActive() → vector<Briefing>
-└── CloseBriefing(BriefingId) → Result<void>
-```
+1. Identify the principal and validate the active session.
+2. Evaluate the action against policy and governance.
+3. Gather context from memory, semantic services, and runtime state.
+4. Form a recommendation or proposal with evidence.
+5. Require approval for high-impact actions.
+6. Execute only within allowed boundaries.
+7. Record the outcome for audit and future reasoning.
 
-**Types:** `BriefingConfig` (title/description/entries), `BriefingEntry` (type/content/timestamp), `BriefingStatus`, `BriefingError`
-**Types:** `BriefingConfig` (title/description/entries), `BriefingEntry` (type/content/timestamp), `BriefingStatus`, `BriefingError`
+This creates a closed loop of observation, recommendation, approval, execution, and
+learning without permitting unchecked autonomy.
 
----
+## 6. Runtime topology
 
-## 4. Data Flow Architecture
+The high-level runtime structure is:
 
-```
- SovereignHost (Main Orchestrator)
-        │
- ┌──────┴──────┐                    ┌─────────┐
- │ Cognitive    │◄────────────────►│ Agent   │
- │ Service      │   Events/Actions │ Scheduler│
- └──────┬──────┘                    └─────────┘
-        │
- ┌──────┴──────┐     ┌──────────────┐     ┌──────────────┐
- │  Executor    │────►│  Policy      │────►│ Governance   │
- │              │     │  Engine      │     │ Service      │
- └──────┬──────┘     └──────────────┘     └──────────────┘
-        │
- ┌──────┴──────┐     ┌──────────────┐     ┌──────────────┐
- │  Model       │     │  Memory      │     │  Semantic    │
- │  Router      │     │  Engine      │     │  Store       │
- └──────┬──────┘     └──────────────┘     └──────────────┘
-        │
- ┌──────┴──────┐     ┌──────────────┐     ┌──────────────┐
- │  Tools       │     │  Workspace   │     │   Sync       │
- │  Registry    │     │  Service     │     │  Engine      │
- └─────────────┘     └──────────────┘     └──────────────┘
-        │
- ┌──────┴──────┐     ┌──────────────┐
- │   Goals      │     │   Audit      │
- │  Service     │     │   Log        │
- └─────────────┘     └──────────────┘
-        │
- ┌──────┴──────┐     ┌──────────────┐
- │   Archive    │     │  Briefing    │
- │  Service     │     │  Service     │
- └─────────────┘     └──────────────┘
-```
+- SovereignHost as the composition root
+- identity, governance, policy, and memory as foundational services
+- cognitive services around planning and discovery
+- execution and workspace services for operational control
+- sandbox and audit layers surrounding sensitive or consequential actions
 
----
+The design intentionally separates:
 
-## 5. Shared Types
+- observation from action
+- recommendation from approval
+- policy from execution
+- mutation from validation
+- live state from isolated experimentation
 
-All modules share `PrincipalId` from `common/principal_id.hpp`:
-```cpp
-struct PrincipalId { std::array<std::uint8_t, 16> bytes{}; };
-```
+## 7. Security and governance posture
 
-Every module defines its own:
-- **Error enum** (`XxxError : std::uint8_t`) with `Ok = 0` as first value
-- **Result<T> template** with `error`, `value`, and `Ok()` method
-- **ID struct** (`XxxId`) as `std::array<std::uint8_t, 16>`
-- **ID struct** (`XxxId`) as `std::array<std::uint8_t, 16>`
+The product is intentionally conservative in its delivery model. It does not assume that
+an AI agent can safely act without supervision. Instead, it assumes that powerful
+capabilities require:
 
----
+- strong identity validation
+- explicit permission boundaries
+- approval for high-risk actions
+- isolated execution for experimentation
+- comprehensive audit retention
+- human accountability for consequence
 
-## 6. Completion Summary
+This is the central design feature that differentiates Sovereign OS from a generic app or
+assistant wrapper.
 
-### By Module (Header Files)
-| Category | Headers Present | Estimated Implementation | Completion |
-|----------|----------------|-------------------------|------------|
-| Agent | 2 | Stubs only | ~15% |
-| Cognitive | 3 | Stubs only | ~15% |
-| Executor | 2 | Stubs only | ~15% |
-| Goals | 2 | Stubs only | ~15% |
-| Governance | 2 | Stubs only | ~15% |
-| Identity | 2 | Stubs only | ~15% |
+## 8. Subsystem map
+
+The current architecture organizes work into core service domains:
+
+- identity
+- governance
+- policy
+- memory
+- semantic retrieval
+- cognitive reasoning
+- model routing
+- execution
+- workspace management
+- synchronization
+- audit and evidence
+- sandboxed self-evolution
+
+These domains are intended to collaborate through a common host runtime while remaining
+modular and independently reasoned about.
+
+## 9. Strategic direction
+
+The long-term target is a system that behaves like a capable digital operator in a safe,
+trusted environment:
+
+- proactive but bounded
+- context-aware but governed
+- persistent but reviewable
+- autonomous within scope, not beyond authority
+
+This model is aligned with the broader Sovereign OS vision: an AI operating environment
+that can genuinely assist with software work, project execution, system administration,
+and operational continuity while preserving human control.
+
+## 10. Summary
+
+Sovereign OS is an operating environment for an AI administrator and not simply a model
+interface. The architecture is intentionally built around trust, approval, evidence,
+memory, and controlled autonomy. That is what makes the system viable as a digital
+operator rather than a risky autonomous tool.
+
 | Memory | 2 | Stubs only | ~15% |
 | Model Router | 2 | Stubs only | ~15% |
 | Policy | 2 | Stubs only | ~15% |

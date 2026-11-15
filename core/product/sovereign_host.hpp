@@ -12,6 +12,9 @@
 #include "goals_service.hpp"
 #include "archive_service.hpp"
 #include "cognitive_service.hpp"
+#include "desktop_operator.hpp"
+#include "evolution_engine.hpp"
+#include "external_gateway.hpp"
 #include "governance_service.hpp"
 #include "identity_service.hpp"
 #include "identity_store_file.hpp"
@@ -19,6 +22,7 @@
 #include "model_router.hpp"
 #include "policy_engine.hpp"
 #include "peer_bundle.hpp"
+#include "purpose_runtime.hpp"
 #include "sync_service.hpp"
 #include "workspace_service.hpp"
 
@@ -59,6 +63,12 @@ public:
     archive::ArchiveService& Archive() noexcept { return archive_; }
     sync::SyncService& Sync() noexcept { return sync_; }
     model_router::ModelRouter& Models() noexcept { return *models_; }
+    cognitive::CuriosityEngine& Curiosity() noexcept { return *curiosity_; }
+    cognitive::EvolutionEngine& Evolution() noexcept { return *evolution_; }
+    cognitive::SandboxedEvolutionEngine& SandboxEvolution() noexcept { return *sandbox_evolution_; }
+    DesktopOperatorGateway& Desktop() noexcept { return *desktop_; }
+    ExternalInterfaceGateway& External() noexcept { return *external_; }
+    PurposeRuntime& Purpose() noexcept { return purpose_; }
     cognitive::CognitiveService& Cognitive() noexcept { return *cognitive_; }
     executor::ActionExecutor& Executor() noexcept { return *executor_; }
 
@@ -83,6 +93,12 @@ private:
     archive::ArchiveService archive_;
     sync::SyncService sync_;
     std::unique_ptr<model_router::ModelRouter> models_;
+    std::unique_ptr<cognitive::CuriosityEngine> curiosity_;
+    std::unique_ptr<cognitive::EvolutionEngine> evolution_;
+    std::unique_ptr<cognitive::SandboxedEvolutionEngine> sandbox_evolution_;
+    std::unique_ptr<DesktopOperatorGateway> desktop_;
+    std::unique_ptr<ExternalInterfaceGateway> external_;
+    PurposeRuntime purpose_{};
     std::unique_ptr<cognitive::CognitiveService> cognitive_;
     std::unique_ptr<executor::ActionExecutor> executor_;
     bool open_{false};

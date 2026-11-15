@@ -168,6 +168,47 @@ Begin Identity implementation plan step 1: data model + storage schema under
 the locked decisions. Acceptance tests from Section 10 should be written before
 or with the first substantial implementation surface.
 
+---
+
+## 2026-11-15 — Desktop Operator Runtime Audit-Safe Completion
+
+### Session Purpose
+
+Confirm the desktop operator milestone is complete and verify the missing audit
+trace and headless-safe execution boundary before continuing the roadmap.
+
+### Work Performed
+
+1. Hardened `DesktopOperatorGateway::ExecuteApprovedAction` to distinguish headed
+   desktop execution from safe headless execution.
+2. Ensured the action continues to require governance approval and an allowlist.
+3. Added durable evidence logging under the host data root when operating in
+   headless mode, rather than silently claiming a real desktop action.
+4. Added desktop audit entries for request, approval, rejection, and execution.
+5. Verified the desktop operator regression and the full repository test suite.
+
+### Validation
+
+Executed:
+
+- `cmake --build build -j2 --target sovereign_desktop_operator_smoke_test`
+- `ctest --test-dir build --output-on-failure -R sovereign_desktop_operator_smoke_test`
+- `cmake --build build -j2 && ctest --test-dir build --output-on-failure`
+
+Results:
+
+- Desktop smoke test: 1/1 passed
+- Full suite: 32/32 passed
+- 0 failed tests
+
+### Assessment
+
+The desktop operator runtime is now complete for the v1 safe host layer: governed,
+allowlisted, audit-backed, and explicit about headed vs. safe headless execution.
+This closes the roadmap gap recorded in the desktop operator milestone and
+allows the next product-service expansion to proceed without re-opening the
+same safety bug.
+
 
 
 ---

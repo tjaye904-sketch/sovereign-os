@@ -40,9 +40,20 @@ sovereign_add_smoke(archive_service_smoke_test archive sovereign_archive)
 sovereign_add_smoke(sync_service_smoke_test sync sovereign_sync)
 sovereign_add_smoke(model_router_smoke_test model_router sovereign_model_router)
 sovereign_add_smoke(cognitive_governance_smoke_test cognitive sovereign_cognitive)
+sovereign_add_smoke(cognitive_curiosity_smoke_test cognitive sovereign_cognitive)
+sovereign_add_smoke(cognitive_reasoning_engine_smoke_test cognitive sovereign_cognitive)
+sovereign_add_smoke(cognitive_evolution_smoke_test cognitive sovereign_cognitive)
+sovereign_add_smoke(cognitive_evolution_sandbox_smoke_test cognitive sovereign_cognitive)
+sovereign_add_smoke(cognitive_planning_engine_smoke_test cognitive sovereign_cognitive)
+sovereign_add_smoke(cognitive_orchestration_engine_smoke_test cognitive sovereign_cognitive)
 sovereign_add_smoke(cognitive_plan_enrichment_smoke_test cognitive sovereign_cognitive)
 sovereign_add_smoke(action_executor_smoke_test executor sovereign_executor)
+sovereign_add_smoke(cli_role_management_smoke_test product sovereign_product)
 sovereign_add_smoke(sovereign_host_smoke_test product sovereign_product)
+sovereign_add_smoke(sovereign_sandbox_evolution_smoke_test product sovereign_product)
+sovereign_add_smoke(sovereign_external_gateway_smoke_test product sovereign_product)
+sovereign_add_smoke(sovereign_desktop_operator_smoke_test product sovereign_product)
+sovereign_add_smoke(sovereign_purpose_runtime_smoke_test product sovereign_product)
 
 if(TARGET sovereign-cli)
     add_test(NAME cli_parse_usage COMMAND $<TARGET_FILE:sovereign-cli>)
@@ -52,6 +63,24 @@ if(TARGET sovereign-cli)
         COMMAND ${CMAKE_COMMAND} -E env
             "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-status"
             $<TARGET_FILE:sovereign-cli> status)
+    add_test(
+        NAME cli_status_json
+        COMMAND ${CMAKE_COMMAND} -E env
+            "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-status-json"
+            $<TARGET_FILE:sovereign-cli> status --json)
+    set_tests_properties(cli_status_json PROPERTIES PASS_REGULAR_EXPRESSION "\"surface\"|\"data_root\"|\"ok\":true")
+    add_test(
+        NAME cli_purpose_list
+        COMMAND ${CMAKE_COMMAND} -E env
+            "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-purpose-list"
+            $<TARGET_FILE:sovereign-cli> purpose-list)
+    set_tests_properties(cli_purpose_list PROPERTIES PASS_REGULAR_EXPRESSION "research\.web_collect|ops\.system_monitor")
+    add_test(
+        NAME cli_purpose_run
+        COMMAND ${CMAKE_COMMAND} -E env
+            "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-purpose-run"
+            $<TARGET_FILE:sovereign-cli> purpose-run research.web_collect https://docs.python.org/3/)
+    set_tests_properties(cli_purpose_run PROPERTIES PASS_REGULAR_EXPRESSION "purpose_id=research\.web_collect|allowed=1")
 endif()
 
 if(TARGET sovereign-daemon)

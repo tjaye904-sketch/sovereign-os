@@ -41,13 +41,40 @@ Per SPEC-IDENTITY-001 and locked IQ-1A…IQ-5D:
 - [x] Cognitive tight governance
 - [x] SovereignHost + sovereign-cli + smoke-v1-complete
 
-## Phase 5 — Integration hardening (active)
+## Phase 5 — Integration hardening (complete)
 
 - [x] Product AuditLog
 - [x] Policy gate on ActionExecutor
+- [x] Governance-aware cognitive and evolution loop
+- [x] Sandboxed self-evolution proposal + human approval gate
 - [ ] Optional runtime EventBus adapter for audit (non-blocking)
 - [ ] AssignRole / SetPrincipalStatus CLI
 
+## Phase 6 — Safe autonomous self-improvement (complete)
+
+- [x] Isolated repository copy for proposal testing
+- [x] Proposal validation outside the canonical repo
+- [x] Human approval required before active integration
+- [x] Evidence-first execution model for subsystem improvement
+- [x] Full merge-on-approval workflow gate in product lifecycle
+- [ ] Production telemetry and rollback record for sandboxed changes
+
+## Phase 7 — External interface authorization (complete)
+
+- [x] External request creation through the host product layer
+- [x] Governance-backed request approval and rejection flow
+- [x] CLI request/approval surface for authenticated principals
+- [ ] Full HTTP or network service adapter for remote external callers
+- [ ] Production audit and permission trace for externally initiated actions
+
+## Phase 8 — Desktop operator runtime (complete)
+
+- [x] Desktop action request flow bound to identity and governance
+- [x] Approval and rejection semantics for visible host-level actions
+- [x] Safe allowlist for desktop actions that are valid under the operating model
+- [x] Evidence package generation for desktop-intent approval flow
+- [x] Real host-OS adapter layer for full app launch / focus / screenshot execution on headed desktops
+- [x] Desktop-level audit trace for visible operator actions
 
 ## Explicit non-work
 

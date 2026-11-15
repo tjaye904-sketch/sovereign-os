@@ -50,7 +50,7 @@ enum class CredentialType : std::uint8_t
     LocalSecret = 1,
     TotpSecret = 2,
     RecoveryCodes = 3,
-    LocalToken = 2
+    LocalToken = 4
 };
 
 struct Principal
@@ -122,5 +122,46 @@ struct Result<void>
         return error == IdentityError::Ok;
     }
 };
+
+inline const char* IdentityErrorToString(IdentityError error) noexcept
+{
+    switch (error)
+    {
+        case IdentityError::Ok:
+            return "ok";
+        case IdentityError::NotFound:
+            return "principal_not_found";
+        case IdentityError::AlreadyExists:
+            return "already_exists";
+        case IdentityError::InvalidCredential:
+            return "invalid_credential";
+        case IdentityError::SessionExpired:
+            return "session_expired";
+        case IdentityError::SessionRevoked:
+            return "session_revoked";
+        case IdentityError::PrincipalSuspended:
+            return "principal_suspended";
+        case IdentityError::PrincipalRevoked:
+            return "principal_revoked";
+        case IdentityError::NotBootstrapped:
+            return "not_bootstrapped";
+        case IdentityError::AlreadyBootstrapped:
+            return "already_bootstrapped";
+        case IdentityError::InvalidArgument:
+            return "invalid_argument";
+        case IdentityError::StorageFailure:
+            return "storage_failure";
+        case IdentityError::Unauthorized:
+            return "unauthorized";
+        case IdentityError::MfaRequired:
+            return "mfa_required";
+        case IdentityError::MfaNotEnrolled:
+            return "mfa_not_enrolled";
+        case IdentityError::MfaInvalid:
+            return "mfa_invalid";
+        default:
+            return "unknown_error";
+    }
+}
 
 } // namespace sovereign::identity

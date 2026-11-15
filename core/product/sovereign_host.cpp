@@ -33,6 +33,9 @@ bool SovereignHost::Open()
         return false;
     }
 
+    purpose_.LoadFromDirectory(config_.data_root / "purposes");
+    purpose_.LoadFromDirectory(std::filesystem::current_path() / "purposes");
+
     if (semantic_.Open(config_.data_root / "semantic") != semantic::SemanticError::Ok)
     {
         return false;
@@ -84,6 +87,13 @@ bool SovereignHost::Open()
     }
 
     models_ = std::make_unique<model_router::ModelRouter>(config_.ollama_base);
+    curiosity_ = std::make_unique<cognitive::CuriosityEngine>(&memory_);
+    evolution_ = std::make_unique<cognitive::EvolutionEngine>(std::filesystem::current_path(), &memory_);
+    sandbox_evolution_ = std::make_unique<cognitive::SandboxedEvolutionEngine>(
+        std::filesystem::current_path(),
+        config_.data_root / "sandbox");
+    desktop_ = std::make_unique<DesktopOperatorGateway>(*this);
+    external_ = std::make_unique<ExternalInterfaceGateway>(*this);
     cognitive_ = std::make_unique<cognitive::CognitiveService>(
         governance_, &memory_, models_.get(), config_.default_model);
     executor_ = std::make_unique<executor::ActionExecutor>(*cognitive_, &policy_);

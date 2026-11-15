@@ -8,6 +8,15 @@ using namespace sovereign::identity;
 
 int main()
 {
+    REQUIRE(static_cast<int>(CredentialType::LocalSecret) !=
+            static_cast<int>(CredentialType::TotpSecret));
+    REQUIRE(static_cast<int>(CredentialType::TotpSecret) !=
+            static_cast<int>(CredentialType::RecoveryCodes));
+    REQUIRE(static_cast<int>(CredentialType::RecoveryCodes) !=
+            static_cast<int>(CredentialType::LocalToken));
+    REQUIRE(static_cast<int>(CredentialType::LocalToken) !=
+            static_cast<int>(CredentialType::LocalSecret));
+
     MemoryIdentityStore store;
     REQUIRE(store.Open({}) == IdentityError::Ok);
 
