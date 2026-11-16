@@ -104,6 +104,33 @@ std::string ExtractStringField(const std::string& json, const std::string& key)
     return out;
 }
 
+
+// Prefer assistant message content; fall back to thinking / response fields
+// (Qwen3 / "thinking" models often leave content empty or nest under message).
+std::string ExtractChatText(const std::string& json)
+{
+    // Walk every "content":"..." occurrence; keep the last non-empty (usually message body)
+    std::string best;
+    const std::string pat = "\"content\"";
+    std::size_t pos = 0;
+    while ((pos = json.find(pat, pos)) != std::string::npos)
+    {
+        auto s = ExtractStringField(json.substr(pos), "content");
+        if (!s.empty())
+            best = s;
+        pos += pat.size();
+    }
+    if (!best.empty())
+        return best;
+    for (const char* key : {"thinking", "response", "text"})
+    {
+        auto s = ExtractStringField(json, key);
+        if (!s.empty())
+            return s;
+    }
+    return {};
+}
+
 std::string BuildToolsJson(const std::vector<ToolDefinition>& tools)
 {
     if (tools.empty())
@@ -276,7 +303,9 @@ Result<ChatResponse> OllamaClient::Chat(const ChatRequest& request) const
     ChatResponse response;
     response.raw_json = raw.value;
     response.model = request.model;
-    response.content = ExtractStringField(raw.value, "content");
+    response.content = ExtractChatText(raw.value);
+    if (response.content.empty())
+        response.content = ExtractStringField(raw.value, "content");
     // Tool calls: look for "tool_calls" array entries with function name
     std::size_t pos = 0;
     while ((pos = raw.value.find("\"function\"", pos)) != std::string::npos)
