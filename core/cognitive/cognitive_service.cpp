@@ -88,12 +88,9 @@ Result<ExecutionPlan> CognitiveService::BuildPlan(
     const PrincipalId& requester,
     const std::string& goal)
 {
-    // Heuristic skeleton from PlanningEngine, then honest router enrichment when available.
     auto result = planning_engine_.BuildPlan(requester, goal);
     if (result.Ok())
-    {
         EnrichPlanWithModel(result.value);
-    }
     return result;
 }
 
@@ -142,7 +139,7 @@ void CognitiveService::EnrichPlanWithModel(ExecutionPlan& plan) const
 
     sovereign::model_router::ChatRequest req;
     req.temperature = 0.2;
-    req.num_predict = 500;
+    req.num_predict = 220;
     sovereign::model_router::ChatMessage sys;
     sys.role = "system";
     sys.content =
