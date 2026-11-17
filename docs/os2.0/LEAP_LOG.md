@@ -13,3 +13,8 @@
 
 ## NEXT
 - L1.1 Secret Manager MVP (do not start node fabric until L1.1–L1.3 per plan preference)
+
+- L1.2 Memory facets (tags + CLI + inspect counts)
+
+## NEXT
+- L1.3 Workspace Controller MVP

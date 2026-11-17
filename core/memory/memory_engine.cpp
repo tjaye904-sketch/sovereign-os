@@ -410,4 +410,47 @@ Result<std::uint32_t> MemoryEngine::PruneBelow(double min_score)
     return result;
 }
 
+
+Result<std::vector<MemoryRecord>> MemoryEngine::ListByFacet(const std::string& facet) const
+{
+    if (!IsKnownFacet(facet))
+    {
+        Result<std::vector<MemoryRecord>> r;
+        r.error = MemoryError::InvalidArgument;
+        return r;
+    }
+    return ListByTag(FacetTag(facet));
+}
+
+Result<std::vector<FacetCount>> MemoryEngine::CountByFacet() const
+{
+    std::lock_guard lock(mutex_);
+    Result<std::vector<FacetCount>> r;
+    if (!open_)
+    {
+        r.error = MemoryError::StorageFailure;
+        return r;
+    }
+    for (const char* f : kAllFacets)
+    {
+        FacetCount c;
+        c.facet = f;
+        const std::string tag = FacetTag(f);
+        for (const auto& rec : records_)
+        {
+            for (const auto& t : rec.tags)
+            {
+                if (t == tag)
+                {
+                    ++c.count;
+                    break;
+                }
+            }
+        }
+        r.value.push_back(std::move(c));
+    }
+    r.error = MemoryError::Ok;
+    return r;
+}
+
 } // namespace sovereign::memory

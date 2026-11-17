@@ -18,7 +18,7 @@ components:
   - { id: core.secrets, status: V, path: null, leap: L1.1 }
   - { id: core.workspace_controller, status: P, path: null, leap: L1.3 }
   - { id: core.capability_registry, status: P, path: null, leap: L1.4 }
-  - { id: core.memory.facets, status: P, path: null, leap: L1.2 }
+  - { id: core.memory.facets, status: V, path: null, leap: L1.2 }
   - { id: runtime.orchestrator, status: V, path: core/os_runtime }
   - { id: runtime.event, status: I, note: "quarantined OFF by default" }
   - { id: host.cli, status: V, path: apps/cli }

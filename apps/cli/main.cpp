@@ -1,3 +1,4 @@
+#include "memory_facets.hpp"
 #include "secret_manager.hpp"
 // Sovereign local CLI — in-process SovereignHost surface (not a network gateway).
 
@@ -101,6 +102,10 @@ void PrintUsage()
         << "  sovereign-cli purpose-list\n"
         << "  sovereign-cli purpose-run <purpose-id> [target] [summary...]\n"
         << "  sovereign-cli memory-rank\n"
+        << "  sovereign-cli memory-facet-add <facet> <tag> <body...>\n"
+        << "  sovereign-cli memory-facet-list [facet]\n"
+        << "  sovereign-cli memory-facet-counts\n"
+
         << "  sovereign-cli memory-prune <min-score>\n"
         << "  sovereign-cli curious <topic...>\n"
         << "  sovereign-cli evolve [--limit N] [path]\n"
@@ -741,6 +746,88 @@ int main(int argc, char** argv)
     }
 
     
+    
+    if (cmd == "memory-facet-add" || cmd == "memory-facet-list" || cmd == "memory-facet-counts")
+    {
+        if (cmd == "memory-facet-counts")
+        {
+            auto r = host.Memory().CountByFacet();
+            if (!r.Ok())
+            {
+                std::cerr << "memory-facet-counts failed\n";
+                return 1;
+            }
+            for (const auto& c : r.value)
+                std::cout << "facet=" << c.facet << " count=" << c.count << "\n";
+            return 0;
+        }
+        if (cmd == "memory-facet-list")
+        {
+            std::string facet = (argc >= 3) ? argv[2] : "";
+            if (facet.empty())
+            {
+                auto all = host.Memory().ListAll();
+                if (!all.Ok())
+                {
+                    std::cerr << "memory-facet-list failed\n";
+                    return 1;
+                }
+                for (const auto& rec : all.value)
+                {
+                    auto f = sovereign::memory::FacetFromTags(rec.tags);
+                    if (f.empty())
+                        continue;
+                    std::cout << "facet=" << f << " body=" << rec.body.substr(0, 120) << "\n";
+                }
+                return 0;
+            }
+            auto r = host.Memory().ListByFacet(facet);
+            if (!r.Ok())
+            {
+                std::cerr << "memory-facet-list failed (unknown facet?)\n";
+                return 1;
+            }
+            for (const auto& rec : r.value)
+                std::cout << "body=" << rec.body << "\n";
+            return 0;
+        }
+        if (cmd == "memory-facet-add")
+        {
+            if (argc < 5)
+            {
+                std::cerr << "usage: memory-facet-add <facet> <tag> <body...>\n";
+                std::cerr << "facets: constitutional working decision operational knowledge execution\n";
+                return 2;
+            }
+            std::string facet = argv[2];
+            if (!sovereign::memory::IsKnownFacet(facet))
+            {
+                std::cerr << "unknown facet\n";
+                return 2;
+            }
+            std::string tag = argv[3];
+            std::string body;
+            for (int i = 4; i < argc; ++i)
+            {
+                if (!body.empty())
+                    body.push_back(' ');
+                body += argv[i];
+            }
+            sovereign::memory::MemoryRecord rec;
+            rec.tags.push_back(sovereign::memory::FacetTag(facet));
+            rec.tags.push_back(tag);
+            rec.body = body;
+            auto r = host.Memory().Append(rec);
+            if (!r.Ok())
+            {
+                std::cerr << "memory-facet-add failed\n";
+                return 1;
+            }
+            std::cout << "facet=" << facet << " record stored\n";
+            return 0;
+        }
+    }
+
     if (cmd == "memory-rank")
     {
         auto r = host.Memory().Ranked(20);

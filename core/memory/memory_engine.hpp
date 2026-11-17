@@ -1,6 +1,7 @@
 #pragma once
 
 #include "memory_types.hpp"
+#include "memory_facets.hpp"
 
 #include <filesystem>
 #include <mutex>
@@ -18,6 +19,10 @@ public:
     Result<RecordId> Append(const MemoryRecord& record);
     Result<MemoryRecord> Get(const RecordId& id) const;
     Result<std::vector<MemoryRecord>> ListByTag(const std::string& tag) const;
+    // L1.2 — memory facets (constitutional / working / decision / …)
+    Result<std::vector<MemoryRecord>> ListByFacet(const std::string& facet) const;
+    Result<std::vector<FacetCount>> CountByFacet() const;
+
     Result<std::vector<MemoryRecord>> ListAll() const;
     Result<std::vector<MemoryRecord>> Search(const std::string& query) const;
 

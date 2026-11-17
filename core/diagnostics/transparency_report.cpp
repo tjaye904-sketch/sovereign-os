@@ -82,6 +82,17 @@ TransparencyReport TransparencyService::BuildSection(
         if (sem.Ok())
             o << "  semantic_records=" << sem.value << "\n";
         o << "  provenance=append-only memory + semantic embed_model + audit\n";
+        {
+            auto fc = host_.Memory().CountByFacet();
+            if (fc.Ok())
+            {
+                o << "  facet_counts";
+                for (const auto& c : fc.value)
+                    o << " " << c.facet << "=" << c.count;
+                o << "\n";
+            }
+        }
+
     }
 
     if (all || section == "model")
