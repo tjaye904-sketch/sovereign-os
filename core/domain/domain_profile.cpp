@@ -77,4 +77,26 @@ bool ActionDenied(const DomainProfile& profile, const std::string& action)
     return false;
 }
 
+
+// L0.2: blueprint workspace id list (status may be stub — see COMPONENT_REGISTRY.yaml)
+static const char* kWorkspaceNames16[] = {
+    "development",
+    "knowledge",
+    "business",
+    "finance",
+    "life",
+    "health",
+    "research",
+    "security",
+    "infrastructure",
+    "automation",
+    "robotics",
+    "communications",
+    "creative",
+    "intelligence",
+    "governance",
+    "federation",
+    nullptr
+};
+
 } // namespace sovereign::domain

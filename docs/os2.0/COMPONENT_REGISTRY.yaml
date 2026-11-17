@@ -1,0 +1,54 @@
+# Sovereign component registry — update status only after leap DoD
+# status: I=implemented V=verified G=integrated S=system-verified D=designed P=planned
+version: 1
+updated: "2026-11-17"
+profiles: [host-pop, nixos-sovereign]
+components:
+  - { id: core.identity, status: V, path: core/identity }
+  - { id: core.governance, status: V, path: core/governance }
+  - { id: core.policy, status: V, path: core/policy }
+  - { id: core.memory, status: V, path: core/memory }
+  - { id: core.semantic, status: V, path: core/semantic }
+  - { id: core.audit, status: V, path: core/audit }
+  - { id: core.model_router, status: V, path: core/model_router }
+  - { id: core.cognitive.planner, status: V, path: core/cognitive }
+  - { id: core.goals, status: V, path: core/goals }
+  - { id: core.agent_scheduler, status: V, path: core/agent }
+  - { id: core.workspace, status: I, path: core/workspace, note: "logical workspaces; controller MVP is L1.3" }
+  - { id: core.secrets, status: P, path: null, leap: L1.1 }
+  - { id: core.workspace_controller, status: P, path: null, leap: L1.3 }
+  - { id: core.capability_registry, status: P, path: null, leap: L1.4 }
+  - { id: core.memory.facets, status: P, path: null, leap: L1.2 }
+  - { id: runtime.orchestrator, status: V, path: core/os_runtime }
+  - { id: runtime.event, status: I, note: "quarantined OFF by default" }
+  - { id: host.cli, status: V, path: apps/cli }
+  - { id: host.daemon, status: V, path: apps/daemon }
+  - { id: host.computer_use, status: V }
+  - { id: host.mission_control, status: V }
+  - { id: host.sys, status: I }
+  - { id: federation.node_registry, status: P, leap: L2.1 }
+  - { id: federation.node_agent, status: P, leap: L2.2 }
+  - { id: federation.core_backup, status: P, leap: L5.1 }
+  - { id: nix.iso_lab, status: G, path: nix }
+  - { id: nix.node_image, status: P, leap: L6.2 }
+
+workspaces:
+  - { id: development, status: I, node_bound: false, leap_depth: L4.1 }
+  - { id: knowledge, status: I, node_bound: false, leap_depth: L4.2 }
+  - { id: business, status: I, node_bound: false }
+  - { id: finance, status: I, node_bound: false }
+  - { id: life, status: I, node_bound: false, note: "life management" }
+  - { id: health, status: I, node_bound: false }
+  - { id: research, status: D, node_bound: false, leap_depth: L4.4 }
+  - { id: security, status: P, node_bound: false, leap_depth: L4.3 }
+  - { id: infrastructure, status: I, node_bound: false }
+  - { id: automation, status: P, node_bound: false }
+  - { id: robotics, status: P, node_bound: false }
+  - { id: communications, status: P, node_bound: false }
+  - { id: creative, status: P, node_bound: false }
+  - { id: intelligence, status: P, node_bound: false }
+  - { id: governance, status: P, node_bound: false }
+  - { id: federation, status: P, node_bound: false }
+
+nodes: []   # populated from L2.1+
+bindings: []  # workspace_id -> node_id from L2.1+

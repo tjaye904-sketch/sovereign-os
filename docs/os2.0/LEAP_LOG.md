@@ -1,16 +1,15 @@
 # Leap log (append-only)
 
 ## DECISIONS
-- 2026-11-17: Adopt MASTER_BUILD_PLAN.md — workspace↔headless node; Sovereign Jarvis across federation; Core must persist beyond single node; dual profile host-pop / nixos-sovereign; sequential leaps only.
+- 2026-11-17: Adopt MASTER_BUILD_PLAN — workspace↔headless node; Sovereign Jarvis across federation; Core persists beyond single node; dual profile; sequential leaps only.
 
 ## COMPLETED
-- (pre-plan) Host maturity leaps, CU/purposes, Mission Control, CTest product suite, blueprint alignment doc seed — see git history.
+- L0.1 Master plan docs in repo (MASTER_BUILD_PLAN.md)
+- L0.2 COMPONENT_REGISTRY.yaml live; 16 workspace names registered; domain list helper
+- L0.3 PROFILES.md host-pop / nixos-sovereign
 
 ## IN_PROGRESS
-- none (adopt plan via L0.1)
+- none
 
 ## NEXT
-- L0.1 Master plan in repo
-- L0.2 Registry live
-- L0.3 Dual-profile doc
-- then L1.1 Secret Manager MVP
+- L1.1 Secret Manager MVP (do not start node fabric until L1.1–L1.3 per plan preference)
