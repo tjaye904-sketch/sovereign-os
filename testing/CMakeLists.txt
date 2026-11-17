@@ -88,3 +88,5 @@ if(TARGET sovereign-daemon)
     add_test(NAME daemon_parse_help COMMAND $<TARGET_FILE:sovereign-daemon> --help)
     set_tests_properties(daemon_parse_help PROPERTIES PASS_REGULAR_EXPRESSION "sovereign-daemon")
 endif()
+
+sovereign_add_smoke(secrets_manager_smoke_test secrets sovereign_secrets)

@@ -1,3 +1,4 @@
+#include "secret_manager.hpp"
 // Sovereign local CLI — in-process SovereignHost surface (not a network gateway).
 
 #include "sovereign_host.hpp"
@@ -112,6 +113,12 @@ void PrintUsage()
         << "  sovereign-cli external-request <action> <summary...>\n"
         << "  sovereign-cli external-approve <decision-hex> <reason...>\n"
         << "  sovereign-cli audit-verify\n"
+        << "  sovereign-cli secret-put <name> <value>\n"
+        << "  sovereign-cli secret-get <name>\n"
+        << "  sovereign-cli secret-list\n"
+        << "  sovereign-cli secret-exists <name>\n"
+        << "  sovereign-cli secret-delete <name>\n"
+
         << "  sovereign-cli chat-tools <prompt...>\n"
         << "  sovereign-cli execute <action> <decision-hex>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
@@ -616,6 +623,105 @@ int main(int argc, char** argv)
         }
         host.Close();
         return 0;
+    }
+
+    
+    if (cmd == "secret-put" || cmd == "secret-get" || cmd == "secret-list"
+        || cmd == "secret-exists" || cmd == "secret-delete")
+    {
+        sovereign::secrets::SecretManager secrets;
+        if (secrets.Open(host.DataRoot()) != sovereign::secrets::SecretError::Ok)
+        {
+            std::cerr << "secrets open failed\n";
+            return 1;
+        }
+        secrets.SetAuditHook([&](const std::string& action, const std::string& name) {
+            sovereign::audit::AuditEntry e;
+            e.category = "secrets";
+            e.action = action;
+            e.subject = name;
+            e.detail = "secret_manager";
+            (void)host.Audit().Append(e);
+        });
+        if (cmd == "secret-put")
+        {
+            if (argc < 4)
+            {
+                std::cerr << "usage: secret-put <name> <value>\n";
+                return 2;
+            }
+            auto r = secrets.Put(argv[2], argv[3]);
+            if (!r.Ok())
+            {
+                std::cerr << "secret-put failed\n";
+                return 1;
+            }
+            std::cout << "secret_stored name=" << argv[2] << "\n";
+            return 0;
+        }
+        if (cmd == "secret-get")
+        {
+            if (argc < 3)
+            {
+                std::cerr << "usage: secret-get <name>\n";
+                return 2;
+            }
+            auto r = secrets.Get(argv[2]);
+            if (!r.Ok())
+            {
+                std::cerr << "secret-get failed\n";
+                return 1;
+            }
+            std::cout << r.value << "\n";
+            return 0;
+        }
+        if (cmd == "secret-list")
+        {
+            auto r = secrets.List();
+            if (!r.Ok())
+            {
+                std::cerr << "secret-list failed\n";
+                return 1;
+            }
+            for (const auto& m : r.value)
+            {
+                std::cout << "name=" << m.name << " bytes=" << m.value_bytes
+                          << " updated=" << m.updated_unix << "\n";
+            }
+            return 0;
+        }
+        if (cmd == "secret-exists")
+        {
+            if (argc < 3)
+            {
+                std::cerr << "usage: secret-exists <name>\n";
+                return 2;
+            }
+            auto r = secrets.Exists(argv[2]);
+            if (!r.Ok())
+            {
+                std::cerr << "secret-exists failed\n";
+                return 1;
+            }
+            std::cout << "exists=" << (r.value ? 1 : 0) << "\n";
+            return 0;
+        }
+        if (cmd == "secret-delete")
+        {
+            if (argc < 3)
+            {
+                std::cerr << "usage: secret-delete <name>\n";
+                return 2;
+            }
+            auto r = secrets.Delete(argv[2]);
+            if (!r.Ok())
+            {
+                std::cerr << "secret-delete failed\n";
+                return 1;
+            }
+            std::cout << "secret_deleted name=" << argv[2] << "\n";
+            return 0;
+        }
     }
 
     if (cmd == "audit-verify")
