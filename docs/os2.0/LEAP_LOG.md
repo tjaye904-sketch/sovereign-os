@@ -18,3 +18,5 @@
 
 ## NEXT
 - L1.3 Workspace Controller MVP
+
+- 2026-11-18: Merged origin orchestration/cognitive; fixed api_gateway link; 41/41 CTest; editor state untracked
