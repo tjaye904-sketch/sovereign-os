@@ -228,4 +228,96 @@ Result<void> WorkspaceService::Archive(const WorkspaceId& id)
     return result;
 }
 
+
+const char* WorkspaceService::StatusName(WorkspaceStatus s)
+{
+    switch (s)
+    {
+    case WorkspaceStatus::Active: return "active";
+    case WorkspaceStatus::Archived: return "archived";
+    case WorkspaceStatus::Suspended: return "suspended";
+    }
+    return "unknown";
+}
+
+Result<void> WorkspaceService::Activate(const WorkspaceId& id)
+{
+    std::lock_guard lock(mutex_);
+    Result<void> result;
+    for (auto& w : workspaces_)
+    {
+        if (w.id == id)
+        {
+            if (w.status == WorkspaceStatus::Archived)
+            {
+                result.error = WorkspaceError::InvalidArgument;
+                return result;
+            }
+            w.status = WorkspaceStatus::Active;
+            if (Save() != WorkspaceError::Ok)
+            {
+                result.error = WorkspaceError::StorageFailure;
+                return result;
+            }
+            return result;
+        }
+    }
+    result.error = WorkspaceError::NotFound;
+    return result;
+}
+
+Result<void> WorkspaceService::Suspend(const WorkspaceId& id)
+{
+    std::lock_guard lock(mutex_);
+    Result<void> result;
+    for (auto& w : workspaces_)
+    {
+        if (w.id == id)
+        {
+            if (w.status == WorkspaceStatus::Archived)
+            {
+                result.error = WorkspaceError::InvalidArgument;
+                return result;
+            }
+            w.status = WorkspaceStatus::Suspended;
+            if (Save() != WorkspaceError::Ok)
+            {
+                result.error = WorkspaceError::StorageFailure;
+                return result;
+            }
+            return result;
+        }
+    }
+    result.error = WorkspaceError::NotFound;
+    return result;
+}
+
+Result<Workspace> WorkspaceService::FindByName(const std::string& name) const
+{
+    std::lock_guard lock(mutex_);
+    Result<Workspace> result;
+    for (const auto& w : workspaces_)
+    {
+        if (w.name == name)
+        {
+            result.value = w;
+            return result;
+        }
+    }
+    result.error = WorkspaceError::NotFound;
+    return result;
+}
+
+Result<std::vector<Workspace>> WorkspaceService::ListByStatus(WorkspaceStatus status) const
+{
+    std::lock_guard lock(mutex_);
+    Result<std::vector<Workspace>> result;
+    for (const auto& w : workspaces_)
+    {
+        if (w.status == status)
+            result.value.push_back(w);
+    }
+    return result;
+}
+
 } // namespace sovereign::workspace

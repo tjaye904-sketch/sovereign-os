@@ -19,6 +19,12 @@ public:
     Result<Workspace> Get(const WorkspaceId& id) const;
     Result<std::vector<Workspace>> List() const;
     Result<void> Archive(const WorkspaceId& id);
+    // L1.3 Workspace Controller MVP (logical lifecycle — no node/VM start)
+    Result<void> Activate(const WorkspaceId& id);
+    Result<void> Suspend(const WorkspaceId& id);
+    Result<Workspace> FindByName(const std::string& name) const;
+    Result<std::vector<Workspace>> ListByStatus(WorkspaceStatus status) const;
+    static const char* StatusName(WorkspaceStatus s);
 
 private:
     WorkspaceError Load();

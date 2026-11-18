@@ -21,7 +21,8 @@ inline bool operator==(const WorkspaceId& a, const WorkspaceId& b) noexcept
 enum class WorkspaceStatus : std::uint8_t
 {
     Active = 1,
-    Archived = 2
+    Archived = 2,
+    Suspended = 3  // L1.3 controller — logical pause (no VM yet)
 };
 
 struct Workspace

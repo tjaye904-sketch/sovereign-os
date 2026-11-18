@@ -91,3 +91,4 @@ endif()
 
 sovereign_add_smoke(secrets_manager_smoke_test secrets sovereign_secrets)
 sovereign_add_smoke(memory_facets_smoke_test memory sovereign_memory)
+sovereign_add_smoke(workspace_controller_smoke_test workspace sovereign_workspace)
