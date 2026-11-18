@@ -92,6 +92,7 @@ Result<ExecutionPlan> CognitiveService::BuildPlan(
     if (result.Ok())
         EnrichPlanWithModel(result.value);
     return result;
+    return planning_engine_.BuildPlan(requester, goal);
 }
 
 void CognitiveService::EnrichPlanWithModel(ExecutionPlan& plan) const

@@ -21,15 +21,8 @@ bool HasHeadedDesktop()
 
 bool IsHeadlessExecutionMode()
 {
-    // CTest / CI / operator preference: do not spawn blocking GUI browsers.
-    for (const char* key : {"SOVEREIGN_SYS_HEADLESS", "SOVEREIGN_CU_HEADLESS",
-                            "SOVEREIGN_DESKTOP_HEADLESS", "SOVEREIGN_TEST_HEADLESS"})
-    {
-        const char* mode = std::getenv(key);
-        if (mode != nullptr && mode[0] != '\0' && std::string(mode) != "0")
-            return true;
-    }
-    return false;
+    const char* mode = std::getenv("SOVEREIGN_SYS_HEADLESS");
+    return mode != nullptr && std::string(mode) == "1";
 }
 
 std::string CanonicalizeActionName(const std::string& value)

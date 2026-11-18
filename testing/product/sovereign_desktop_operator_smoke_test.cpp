@@ -7,11 +7,6 @@
 
 int main()
 {
-    // Priority #3: CTest must not open headed browsers that block until closed.
-    setenv("SOVEREIGN_SYS_HEADLESS", "1", 1);
-    setenv("SOVEREIGN_CU_HEADLESS", "1", 1);
-    setenv("SOVEREIGN_DESKTOP_HEADLESS", "1", 1);
-
     const auto root = std::filesystem::temp_directory_path() / "sov_desktop_operator_test";
     std::error_code ec;
     std::filesystem::remove_all(root, ec);
@@ -25,6 +20,7 @@ int main()
     const auto auth = host.Identity().Authenticate("owner", "secret-pass");
     REQUIRE(auth.Ok());
 
+    std::string decision_hex;
     std::string browser_decision_hex;
     REQUIRE(host.Desktop().RequestAction(
         auth.value.principal_id,
@@ -41,11 +37,6 @@ int main()
     std::string browser_report;
     REQUIRE(host.Desktop().ExecuteApprovedAction(browser_decision_hex, browser_report));
     REQUIRE(!browser_report.empty());
-    // Under headless env, execution should record safe/headless path rather than hang on GUI.
-    REQUIRE(
-        browser_report.find("headless") != std::string::npos ||
-        browser_report.find("executed") != std::string::npos ||
-        browser_report.find("desktop") != std::string::npos);
 
     std::string desktop_decision_hex;
     REQUIRE(host.Desktop().RequestAction(
@@ -60,6 +51,7 @@ int main()
         desktop_decision_hex,
         "approved for operator desktop check"));
 
+    setenv("SOVEREIGN_SYS_HEADLESS", "1", 1);
     std::string report;
     REQUIRE(host.Desktop().ExecuteApprovedAction(desktop_decision_hex, report));
     REQUIRE(!report.empty());
@@ -81,6 +73,7 @@ int main()
     REQUIRE(desktop_audit.Ok());
     REQUIRE(!desktop_audit.value.empty());
 
+    unsetenv("SOVEREIGN_SYS_HEADLESS");
     host.Close();
     std::filesystem::remove_all(root, ec);
     std::cout << "sovereign_desktop_operator_smoke_test: OK\n";

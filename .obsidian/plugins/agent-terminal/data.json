@@ -1,0 +1,80 @@
+{
+  "shellPath": "/bin/sh",
+  "cwdMode": "vaultRoot",
+  "customCwdPath": "",
+  "autoSyncCwd": false,
+  "quickCommands": [
+    {
+      "id": "claude",
+      "name": "Claude Code",
+      "command": "claude"
+    },
+    {
+      "id": "claude-continue",
+      "name": "Claude Code: continue last session",
+      "command": "claude --continue"
+    },
+    {
+      "id": "claude-skip-permissions",
+      "name": "Claude Code: skip permission prompts",
+      "command": "claude --dangerously-skip-permissions"
+    },
+    {
+      "id": "claude-continue-skip-permissions",
+      "name": "Claude Code: continue, skip permission prompts",
+      "command": "claude --continue --dangerously-skip-permissions"
+    },
+    {
+      "id": "agy",
+      "name": "Antigravity CLI",
+      "command": "agy"
+    },
+    {
+      "id": "agy-continue",
+      "name": "Antigravity CLI: continue last session",
+      "command": "agy --continue"
+    },
+    {
+      "id": "agy-skip-permissions",
+      "name": "Antigravity CLI: skip permission prompts",
+      "command": "agy --dangerously-skip-permissions"
+    },
+    {
+      "id": "agy-continue-skip-permissions",
+      "name": "Antigravity CLI: continue, skip permission prompts",
+      "command": "agy --continue --dangerously-skip-permissions"
+    },
+    {
+      "id": "ollama-claude",
+      "name": "Ollama: Claude Code",
+      "command": "ollama launch claude"
+    },
+    {
+      "id": "ollama-claude-continue",
+      "name": "Ollama: Claude Code, continue last session",
+      "command": "ollama launch claude -- --continue"
+    },
+    {
+      "id": "ollama-codex",
+      "name": "Ollama: Codex CLI",
+      "command": "ollama launch codex"
+    },
+    {
+      "id": "ollama-codex-continue",
+      "name": "Ollama: Codex CLI, resume last session",
+      "command": "ollama launch codex -- resume --last"
+    },
+    {
+      "id": "ollama-opencode",
+      "name": "Ollama: opencode",
+      "command": "ollama launch opencode"
+    },
+    {
+      "id": "ollama-opencode-continue",
+      "name": "Ollama: opencode, continue last session",
+      "command": "ollama launch opencode -- --continue"
+    }
+  ],
+  "quickCommandsFromVaultRoot": true,
+  "defaultQuickCommandId": ""
+}

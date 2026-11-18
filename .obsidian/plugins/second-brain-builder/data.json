@@ -1,0 +1,17 @@
+{
+  "claudePath": "claude",
+  "modelFlag": "",
+  "defaultModeId": "",
+  "lastModeId": "",
+  "lastSubfolder": "Deep Dives",
+  "customModes": [],
+  "enableLogging": true,
+  "aiProvider": "ollama",
+  "geminiPath": "gemini",
+  "geminiModel": "",
+  "codexPath": "codex",
+  "codexModel": "",
+  "ollamaUrl": "http://localhost:11434",
+  "ollamaModel": "nemotron-3-nano:4b",
+  "setupNoticeShown": true
+}

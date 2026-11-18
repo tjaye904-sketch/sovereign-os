@@ -499,22 +499,11 @@ bool SandboxedEvolutionEngine::ValidateProposal(const SandboxProposal& proposal)
     {
         return false;
     }
-
-    std::error_code ec;
-    bool equivalent = false;
-    if (!proposal.source_root.empty())
-    {
-        equivalent = std::filesystem::equivalent(proposal.sandbox_root, proposal.source_root, ec) && !ec;
-    }
-    if (equivalent)
+    if (std::filesystem::equivalent(proposal.sandbox_root, proposal.source_root))
     {
         return false;
     }
-
-    const auto has_project_root = std::filesystem::exists(proposal.sandbox_root / "CMakeLists.txt") ||
-        std::filesystem::exists(proposal.sandbox_root / "core") ||
-        std::filesystem::exists(proposal.sandbox_root / "apps");
-    if (!has_project_root)
+    if (!std::filesystem::exists(proposal.sandbox_root / "CMakeLists.txt"))
     {
         return false;
     }
@@ -532,7 +521,6 @@ bool SandboxedEvolutionEngine::ValidateProposal(const SandboxProposal& proposal)
             return true;
         }
     }
-
     return true;
 }
 

@@ -75,3 +75,5 @@ Consequential actions follow a clear control flow:
 recommend → approve → execute
 
 This keeps the system operationally capable without permitting uncontrolled autonomy.
+
+<!-- merge note 2026-11-18: also integrated origin/main orchestration/cognitive engines -->

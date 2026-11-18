@@ -166,3 +166,5 @@ Commands include identity, workspace, memory, governance recommend/approve/execu
 policy-check, archive-store, sync-export, chat/code-assist/project-summary/review-diff.
 
 Live Ollama requires host build; sandbox network cannot reach host Ollama.
+
+<!-- merge note 2026-11-18: also integrated origin/main orchestration/cognitive engines -->
