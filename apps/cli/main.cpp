@@ -144,8 +144,6 @@ void PrintUsage()
         << "  sovereign-cli node-bind <name> <workspace>\n"
         << "  sovereign-cli node-caps <name> <cap,cap,...>\n"
         << "  sovereign-cli node-events\n"
-        << "  sovereign-cli chat-tools <prompt...>\n"
-        << "  sovereign-cli execute <action> <decision-hex>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -515,18 +513,2740 @@ int main(int argc, char** argv)
             return host.Workspace().FindByName(key);
         };
         
-        << "  sovereign-cli capability-seed\n"
-        << "  sovereign-cli capability-list\n"
-        << "  sovereign-cli capability-enable <id>\n"
-        << "  sovereign-cli capability-disable <id>\n"
-        << "  sovereign-cli capability-check <id>\n"
-        << "  sovereign-cli node-register-local <name>\n"
-        << "  sovereign-cli node-register-peer <name> <endpoint>\n"
-        << "  sovereign-cli node-list\n"
-        << "  sovereign-cli node-heartbeat <name>\n"
-        << "  sovereign-cli node-bind <name> <workspace>\n"
-        << "  sovereign-cli node-caps <name> <cap,cap,...>\n"
-        << "  sovereign-cli node-events\n"
-        << "  sovereign-cli chat-tools <prompt...>\n"
-        << "  sovereign-cli execute <action> <decision-hex>\n"
-        << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
+    if (cmd == "capability-seed" || cmd == "capability-list" || cmd == "capability-enable"
+        || cmd == "capability-disable" || cmd == "capability-check")
+    {
+        sovereign::capability::CapabilityRegistry caps;
+        if (caps.Open(host.DataRoot()) != sovereign::capability::CapabilityError::Ok)
+        {
+            std::cerr << "capability open failed\n";
+            return 1;
+        }
+        
+    if (cmd.rfind("node-", 0) == 0)
+    {
+        sovereign::node::NodeRegistry nodes;
+        if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
+        {
+            std::cerr << "node open failed\n";
+            return 1;
+        }
+        if (cmd == "node-register-local")
+        {
+            if (argc < 3) { std::cerr << "usage: node-register-local <name>\n"; return 2; }
+            auto r = nodes.RegisterLocal(argv[2]);
+            if (!r.Ok()) { std::cerr << "register failed\n"; return 1; }
+            std::cout << "node_id=" << sovereign::node::NodeRegistry::IdHex(r.value) << "\n";
+            return 0;
+        }
+        if (cmd == "node-register-peer")
+        {
+            if (argc < 4) { std::cerr << "usage: node-register-peer <name> <endpoint>\n"; return 2; }
+            auto r = nodes.RegisterPeer(argv[2], argv[3]);
+            if (!r.Ok()) { std::cerr << "register failed\n"; return 1; }
+            std::cout << "node_id=" << sovereign::node::NodeRegistry::IdHex(r.value) << "\n";
+            return 0;
+        }
+        if (cmd == "node-list")
+        {
+            auto r = nodes.List();
+            if (!r.Ok()) { std::cerr << "list failed\n"; return 1; }
+            for (const auto& n : r.value)
+            {
+                std::cout << "name=" << n.name
+                          << " kind=" << sovereign::node::KindName(n.kind)
+                          << " health=" << sovereign::node::HealthName(n.health)
+                          << " ws=" << n.workspace_name
+                          << " caps=" << n.capabilities.size()
+                          << "\n";
+            }
+            return 0;
+        }
+        if (cmd == "node-heartbeat")
+        {
+            if (argc < 3) { std::cerr << "usage: node-heartbeat <name>\n"; return 2; }
+            auto f = nodes.FindByName(argv[2]);
+            if (!f.Ok()) { std::cerr << "not found\n"; return 1; }
+            auto r = nodes.Heartbeat(f.value.id);
+            if (!r.Ok()) { std::cerr << "heartbeat failed\n"; return 1; }
+            std::cout << "name=" << argv[2] << " health=healthy\n";
+            return 0;
+        }
+        if (cmd == "node-bind")
+        {
+            if (argc < 4) { std::cerr << "usage: node-bind <name> <workspace>\n"; return 2; }
+            auto f = nodes.FindByName(argv[2]);
+            if (!f.Ok()) { std::cerr << "not found\n"; return 1; }
+            auto r = nodes.BindWorkspace(f.value.id, argv[3]);
+            if (!r.Ok()) { std::cerr << "bind failed\n"; return 1; }
+            std::cout << "name=" << argv[2] << " workspace=" << argv[3] << "\n";
+            return 0;
+        }
+        if (cmd == "node-caps")
+        {
+            if (argc < 4) { std::cerr << "usage: node-caps <name> <cap,cap,...>\n"; return 2; }
+            auto f = nodes.FindByName(argv[2]);
+            if (!f.Ok()) { std::cerr << "not found\n"; return 1; }
+            std::vector<std::string> caps;
+            std::string s = argv[3];
+            std::string cur;
+            for (char c : s) {
+                if (c == ',') { if (!cur.empty()) caps.push_back(cur); cur.clear(); }
+                else cur.push_back(c);
+            }
+            if (!cur.empty()) caps.push_back(cur);
+            auto r = nodes.SetCapabilities(f.value.id, caps);
+            if (!r.Ok()) { std::cerr << "caps failed\n"; return 1; }
+            std::cout << "name=" << argv[2] << " caps=" << caps.size() << "\n";
+            return 0;
+        }
+        if (cmd == "node-events")
+        {
+            auto r = nodes.RecentEvents(30);
+            if (!r.Ok()) { std::cerr << "events failed\n"; return 1; }
+            for (const auto& e : r.value) std::cout << e << "\n";
+            return 0;
+        }
+        std::cerr << "unknown node command\n";
+        return 2;
+    }
+
+    if (cmd == "capability-seed")
+        {
+            auto r = caps.SeedDefaults();
+            if (!r.Ok()) { std::cerr << "seed failed\n"; return 1; }
+            std::cout << "seeded_added=" << r.value << "\n";
+            return 0;
+        }
+        if (cmd == "capability-list")
+        {
+            auto r = caps.List();
+            if (!r.Ok()) { std::cerr << "list failed\n"; return 1; }
+            if (r.value.empty())
+            {
+                auto s = caps.SeedDefaults();
+                (void)s;
+                r = caps.List();
+            }
+            for (const auto& c : r.value)
+            {
+                std::cout << "id=" << c.id
+                          << " enabled=" << (c.enabled ? 1 : 0)
+                          << " source=" << c.source
+                          << " desc=" << c.description << "\n";
+            }
+            return 0;
+        }
+        if (argc < 3) {
+            std::cerr << "usage: " << cmd << " <id>\n";
+            return 2;
+        }
+        std::string id = argv[2];
+        if (cmd == "capability-enable" || cmd == "capability-disable")
+        {
+            auto r = caps.SetEnabled(id, cmd == "capability-enable");
+            if (!r.Ok()) { std::cerr << "set failed\n"; return 1; }
+            std::cout << "id=" << id << " enabled=" << (cmd == "capability-enable" ? 1 : 0) << "\n";
+            return 0;
+        }
+        auto r = caps.IsEnabled(id);
+        if (!r.Ok()) { std::cerr << "check failed\n"; return 1; }
+        std::cout << "id=" << id << " enabled=" << (r.value ? 1 : 0) << "\n";
+        return 0;
+    }
+
+    if (cmd == "workspace-status")
+        {
+            if (argc >= 3)
+            {
+                auto r = resolve(argv[2]);
+                if (!r.Ok()) { std::cerr << "workspace not found\n"; return 1; }
+                std::cout << "name=" << r.value.name
+                          << " kind=" << r.value.kind
+                          << " status=" << sovereign::workspace::WorkspaceService::StatusName(r.value.status)
+                          << "\n";
+                return 0;
+            }
+            auto all = host.Workspace().List();
+            if (!all.Ok()) { std::cerr << "list failed\n"; return 1; }
+            for (const auto& w : all.value)
+            {
+                std::cout << "name=" << w.name
+                          << " kind=" << w.kind
+                          << " status=" << sovereign::workspace::WorkspaceService::StatusName(w.status)
+                          << "\n";
+            }
+            return 0;
+        }
+        if (argc < 3) {
+            std::cerr << "usage: " << cmd << " <name-or-hex>\n";
+            return 2;
+        }
+        auto r = resolve(argv[2]);
+        if (!r.Ok()) { std::cerr << "workspace not found\n"; return 1; }
+        sovereign::workspace::Result<void> op;
+        if (cmd == "workspace-activate")
+            op = host.Workspace().Activate(r.value.id);
+        else
+            op = host.Workspace().Suspend(r.value.id);
+        if (!op.Ok()) { std::cerr << cmd << " failed\n"; return 1; }
+        auto again = host.Workspace().Get(r.value.id);
+        std::cout << "name=" << r.value.name
+                  << " status=" << sovereign::workspace::WorkspaceService::StatusName(again.value.status)
+                  << "\n";
+        return 0;
+    }
+
+    if (cmd == "workspace-list")
+    {
+        auto r = host.Workspace().List();
+        if (!r.Ok())
+        {
+            host.Close();
+            return 1;
+        }
+        for (const auto& w : r.value)
+        {
+            std::cout << ToHex(w.id.bytes) << ' ' << w.name << ' ' << w.kind
+                      << ' ' << static_cast<int>(w.status) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "memory-add" && argc >= 4)
+    {
+        sovereign::memory::MemoryRecord rec;
+        rec.tags = {argv[2]};
+        std::string body;
+        for (int i = 3; i < argc; ++i)
+        {
+            if (i > 3)
+                body.push_back(' ');
+            body += argv[i];
+        }
+        rec.body = body;
+        auto r = host.Memory().Append(rec);
+        if (!r.Ok())
+        {
+            std::cerr << "memory-add failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "record_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "memory-list")
+    {
+        if (argc >= 3)
+        {
+            auto r = host.Memory().ListByTag(argv[2]);
+            if (!r.Ok())
+            {
+                std::cerr << "memory-list failed\n";
+                host.Close();
+                return 1;
+            }
+            for (const auto& rec : r.value)
+            {
+                std::cout << ToHex(rec.id.bytes) << ' ' << rec.body << '\n';
+            }
+        }
+        else
+        {
+            auto r = host.Memory().ListAll();
+            if (!r.Ok())
+            {
+                std::cerr << "memory-list failed\n";
+                host.Close();
+                return 1;
+            }
+            for (const auto& rec : r.value)
+            {
+                std::cout << ToHex(rec.id.bytes) << ' ';
+                for (std::size_t i = 0; i < rec.tags.size(); ++i)
+                {
+                    if (i)
+                        std::cout << ',';
+                    std::cout << rec.tags[i];
+                }
+                std::cout << ' ' << rec.body << '\n';
+            }
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "policy-check" && argc >= 4)
+    {
+        sovereign::PrincipalId id{};
+        std::vector<std::string> roles{argv[2]};
+        auto r = host.Policy().Evaluate(id, roles, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "policy-check failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "effect="
+                  << (r.value.effect == sovereign::policy::PolicyEffect::Allow
+                          ? "allow"
+                          : "deny")
+                  << " reason=" << r.value.reason
+                  << " version=" << r.value.policy_version
+                  << " dry_run=" << (r.value.dry_run ? "1" : "0") << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "policy-dry-run" && argc >= 4)
+    {
+        sovereign::PrincipalId id{};
+        std::vector<std::string> roles{argv[2]};
+        auto r = host.Policy().DryRun(id, roles, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "policy-dry-run failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "effect="
+                  << (r.value.effect == sovereign::policy::PolicyEffect::Allow
+                          ? "allow"
+                          : "deny")
+                  << " reason=" << r.value.reason
+                  << " version=" << r.value.policy_version
+                  << " dry_run=1\n";
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "policy-version")
+    {
+        std::cout << "policy_version=" << host.Policy().Version() << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "policy-rule-set" && argc >= 5)
+    {
+        sovereign::policy::PolicyRule rule;
+        rule.action = argv[2];
+        rule.min_role = argv[3];
+        rule.effect = (std::string(argv[4]) == "allow")
+                          ? sovereign::policy::PolicyEffect::Allow
+                          : sovereign::policy::PolicyEffect::Deny;
+        auto r = host.Policy().SetRule(rule);
+        if (!r.Ok())
+        {
+            std::cerr << "policy-rule-set failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "policy_version=" << host.Policy().Version() << '\n';
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "policy";
+            e.action = "rule_set";
+            e.subject = argv[2];
+            e.detail = std::string(argv[3]) + " " + argv[4];
+            static_cast<void>(host.Audit().Append(e));
+        }
+        host.Close();
+        return 0;
+    }
+
+    
+    if (cmd == "secret-put" || cmd == "secret-get" || cmd == "secret-list"
+        || cmd == "secret-exists" || cmd == "secret-delete")
+    {
+        sovereign::secrets::SecretManager secrets;
+        if (secrets.Open(host.DataRoot()) != sovereign::secrets::SecretError::Ok)
+        {
+            std::cerr << "secrets open failed\n";
+            return 1;
+        }
+        secrets.SetAuditHook([&](const std::string& action, const std::string& name) {
+            sovereign::audit::AuditEntry e;
+            e.category = "secrets";
+            e.action = action;
+            e.subject = name;
+            e.detail = "secret_manager";
+            (void)host.Audit().Append(e);
+        });
+        if (cmd == "secret-put")
+        {
+            if (argc < 4)
+            {
+                std::cerr << "usage: secret-put <name> <value>\n";
+                return 2;
+            }
+            auto r = secrets.Put(argv[2], argv[3]);
+            if (!r.Ok())
+            {
+                std::cerr << "secret-put failed\n";
+                return 1;
+            }
+            std::cout << "secret_stored name=" << argv[2] << "\n";
+            return 0;
+        }
+        if (cmd == "secret-get")
+        {
+            if (argc < 3)
+            {
+                std::cerr << "usage: secret-get <name>\n";
+                return 2;
+            }
+            auto r = secrets.Get(argv[2]);
+            if (!r.Ok())
+            {
+                std::cerr << "secret-get failed\n";
+                return 1;
+            }
+            std::cout << r.value << "\n";
+            return 0;
+        }
+        if (cmd == "secret-list")
+        {
+            auto r = secrets.List();
+            if (!r.Ok())
+            {
+                std::cerr << "secret-list failed\n";
+                return 1;
+            }
+            for (const auto& m : r.value)
+            {
+                std::cout << "name=" << m.name << " bytes=" << m.value_bytes
+                          << " updated=" << m.updated_unix << "\n";
+            }
+            return 0;
+        }
+        if (cmd == "secret-exists")
+        {
+            if (argc < 3)
+            {
+                std::cerr << "usage: secret-exists <name>\n";
+                return 2;
+            }
+            auto r = secrets.Exists(argv[2]);
+            if (!r.Ok())
+            {
+                std::cerr << "secret-exists failed\n";
+                return 1;
+            }
+            std::cout << "exists=" << (r.value ? 1 : 0) << "\n";
+            return 0;
+        }
+        if (cmd == "secret-delete")
+        {
+            if (argc < 3)
+            {
+                std::cerr << "usage: secret-delete <name>\n";
+                return 2;
+            }
+            auto r = secrets.Delete(argv[2]);
+            if (!r.Ok())
+            {
+                std::cerr << "secret-delete failed\n";
+                return 1;
+            }
+            std::cout << "secret_deleted name=" << argv[2] << "\n";
+            return 0;
+        }
+    }
+
+    if (cmd == "audit-verify")
+    {
+        auto r = host.Audit().VerifyChain();
+        if (!r.Ok())
+        {
+            std::cerr << "audit-verify failed\n";
+            host.Close();
+            return 1;
+        }
+        auto tip = host.Audit().ChainTip();
+        std::cout << "audit_chain_ok=" << (r.value ? "1" : "0")
+                  << " tip=" << (tip.Ok() ? tip.value : "?") << '\n';
+        host.Close();
+        return 0;
+    }
+
+    
+    
+    if (cmd == "memory-facet-add" || cmd == "memory-facet-list" || cmd == "memory-facet-counts")
+    {
+        if (cmd == "memory-facet-counts")
+        {
+            auto r = host.Memory().CountByFacet();
+            if (!r.Ok())
+            {
+                std::cerr << "memory-facet-counts failed\n";
+                return 1;
+            }
+            for (const auto& c : r.value)
+                std::cout << "facet=" << c.facet << " count=" << c.count << "\n";
+            return 0;
+        }
+        if (cmd == "memory-facet-list")
+        {
+            std::string facet = (argc >= 3) ? argv[2] : "";
+            if (facet.empty())
+            {
+                auto all = host.Memory().ListAll();
+                if (!all.Ok())
+                {
+                    std::cerr << "memory-facet-list failed\n";
+                    return 1;
+                }
+                for (const auto& rec : all.value)
+                {
+                    auto f = sovereign::memory::FacetFromTags(rec.tags);
+                    if (f.empty())
+                        continue;
+                    std::cout << "facet=" << f << " body=" << rec.body.substr(0, 120) << "\n";
+                }
+                return 0;
+            }
+            auto r = host.Memory().ListByFacet(facet);
+            if (!r.Ok())
+            {
+                std::cerr << "memory-facet-list failed (unknown facet?)\n";
+                return 1;
+            }
+            for (const auto& rec : r.value)
+                std::cout << "body=" << rec.body << "\n";
+            return 0;
+        }
+        if (cmd == "memory-facet-add")
+        {
+            if (argc < 5)
+            {
+                std::cerr << "usage: memory-facet-add <facet> <tag> <body...>\n";
+                std::cerr << "facets: constitutional working decision operational knowledge execution\n";
+                return 2;
+            }
+            std::string facet = argv[2];
+            if (!sovereign::memory::IsKnownFacet(facet))
+            {
+                std::cerr << "unknown facet\n";
+                return 2;
+            }
+            std::string tag = argv[3];
+            std::string body;
+            for (int i = 4; i < argc; ++i)
+            {
+                if (!body.empty())
+                    body.push_back(' ');
+                body += argv[i];
+            }
+            sovereign::memory::MemoryRecord rec;
+            rec.tags.push_back(sovereign::memory::FacetTag(facet));
+            rec.tags.push_back(tag);
+            rec.body = body;
+            auto r = host.Memory().Append(rec);
+            if (!r.Ok())
+            {
+                std::cerr << "memory-facet-add failed\n";
+                return 1;
+            }
+            std::cout << "facet=" << facet << " record stored\n";
+            return 0;
+        }
+    }
+
+    if (cmd == "memory-rank")
+    {
+        auto r = host.Memory().Ranked(20);
+        if (!r.Ok())
+        {
+            std::cerr << "memory-rank failed\n";
+            host.Close();
+            return 1;
+        }
+        for (const auto& s : r.value)
+        {
+            std::cout << "score=" << s.score << " importance=" << s.record.importance
+                      << " body=" << s.record.body.substr(0, 80) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "memory-prune" && argc >= 3)
+    {
+        double min_score = std::stod(argv[2]);
+        auto r = host.Memory().PruneBelow(min_score);
+        if (!r.Ok())
+        {
+            std::cerr << "memory-prune failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "removed=" << r.value << '\n';
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "memory";
+            e.action = "prune";
+            e.detail = std::string("removed=") + std::to_string(r.value);
+            static_cast<void>(host.Audit().Append(e));
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "memory-importance" && argc >= 4)
+    {
+        sovereign::memory::RecordId id{};
+        // accept hex id
+        auto hex = std::string(argv[2]);
+        if (hex.size() == 32)
+        {
+            auto n = [](char c) {
+                if (c >= '0' && c <= '9') return c - '0';
+                if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                return -1;
+            };
+            for (std::size_t i = 0; i < 16; ++i)
+            {
+                int hi = n(hex[i * 2]), lo = n(hex[i * 2 + 1]);
+                if (hi < 0 || lo < 0)
+                {
+                    std::cerr << "bad record id\n";
+                    host.Close();
+                    return 1;
+                }
+                id.bytes[i] = static_cast<std::uint8_t>((hi << 4) | lo);
+            }
+        }
+        double imp = std::stod(argv[3]);
+        auto r = host.Memory().SetImportance(id, imp);
+        if (!r.Ok())
+        {
+            std::cerr << "memory-importance failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "ok\n";
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "curious" && argc >= 3)
+    {
+        std::string topic;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2)
+                topic.push_back(' ');
+            topic += argv[i];
+        }
+
+        sovereign::PrincipalId actor{};
+        auto proposal = host.Curiosity().Propose(actor, topic, {});
+        if (!proposal.Ok())
+        {
+            std::cerr << "curious failed\n";
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "curiosity topic=" << proposal.value.topic << '\n';
+        std::cout << "questions=" << proposal.value.questions.size() << '\n';
+        for (std::size_t i = 0; i < proposal.value.questions.size(); ++i)
+        {
+            std::cout << "q" << i + 1 << ": " << proposal.value.questions[i] << '\n';
+        }
+
+        const auto queue = host.Curiosity().DiscoveryQueueSnapshot();
+        std::cout << "queue_size=" << queue.size() << '\n';
+        if (!queue.empty())
+        {
+            std::cout << "next_queue=" << queue.front().topic << " priority=" << queue.front().priority << '\n';
+        }
+
+        const auto graph = host.Curiosity().InterestGraph(3);
+        std::cout << "interest_top=" << graph.size() << '\n';
+        for (std::size_t i = 0; i < graph.size(); ++i)
+        {
+            std::cout << "interest" << i + 1 << "=" << graph[i].topic
+                      << " score=" << graph[i].score << " mentions=" << graph[i].mentions << '\n';
+        }
+
+        sovereign::audit::AuditEntry e;
+        e.category = "cognitive";
+        e.action = "curiosity";
+        e.detail = topic;
+        e.subject = std::to_string(proposal.value.questions.size());
+        static_cast<void>(host.Audit().Append(e));
+
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "evolve")
+    {
+        std::filesystem::path root = std::filesystem::current_path();
+        std::size_t limit = 5;
+
+        for (int i = 2; i < argc; ++i)
+        {
+            const std::string arg = argv[i];
+            if (arg == "--limit" && i + 1 < argc)
+            {
+                limit = static_cast<std::size_t>(std::stoul(argv[++i]));
+                continue;
+            }
+            root = std::filesystem::path(arg);
+        }
+
+        auto candidates = host.Evolution().ScanSystem(root, limit);
+        if (candidates.empty())
+        {
+            std::cout << "no_evolution_candidates\n";
+            host.Close();
+            return 0;
+        }
+
+        std::cout << "evolution_candidates=" << candidates.size() << '\n';
+        for (std::size_t i = 0; i < candidates.size(); ++i)
+        {
+            const auto& c = candidates[i];
+            std::cout << "candidate" << i + 1 << " subsystem=" << c.subsystem
+                      << " priority=" << c.priority << " path=" << c.file_path << '\n';
+            std::cout << "  title=" << c.title << '\n';
+            std::cout << "  summary=" << c.summary << '\n';
+        }
+
+        sovereign::audit::AuditEntry e;
+        e.category = "cognitive";
+        e.action = "evolution_scan";
+        e.detail = root.string();
+        e.subject = std::to_string(candidates.size());
+        static_cast<void>(host.Audit().Append(e));
+
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "sandbox-propose")
+    {
+        std::filesystem::path root = std::filesystem::current_path();
+        std::size_t limit = 5;
+        for (int i = 2; i < argc; ++i)
+        {
+            const std::string arg = argv[i];
+            if (arg == "--limit" && i + 1 < argc)
+            {
+                limit = static_cast<std::size_t>(std::stoul(argv[++i]));
+                continue;
+            }
+            root = std::filesystem::path(arg);
+        }
+
+        auto sandbox = host.SandboxEvolution();
+        auto proposal = sandbox.CreateProposal(limit);
+        std::cout << "proposal_id=" << proposal.id << '\n';
+        std::cout << "status=" << static_cast<int>(proposal.status) << '\n';
+        std::cout << "sandbox_root=" << proposal.sandbox_root.string() << '\n';
+        std::cout << "title=" << proposal.title << '\n';
+        std::cout << "summary=" << proposal.summary << '\n';
+        std::cout << "validation_command=" << proposal.validation_command << '\n';
+
+        sovereign::audit::AuditEntry e;
+        e.category = "cognitive";
+        e.action = "sandbox_proposal_created";
+        e.detail = proposal.title;
+        e.subject = proposal.id;
+        static_cast<void>(host.Audit().Append(e));
+
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "sandbox-approve")
+    {
+        if (argc < 4)
+        {
+            std::cerr << "usage: sovereign-cli sandbox-approve <proposal-id> <approver>\n";
+            host.Close();
+            return 1;
+        }
+
+        const std::string proposal_id = argv[2];
+        const std::string approver = argv[3];
+        auto sandbox = host.SandboxEvolution();
+        auto proposals = sandbox.PendingProposals();
+        const auto it = std::find_if(
+            proposals.begin(), proposals.end(),
+            [&](const auto& item) { return item.id == proposal_id; });
+        if (it == proposals.end())
+        {
+            std::cerr << "sandbox proposal not found: " << proposal_id << '\n';
+            host.Close();
+            return 1;
+        }
+
+        const auto proposal = *it;
+        if (!sandbox.ValidateProposal(proposal) || !sandbox.ApproveProposal(proposal_id, approver))
+        {
+            std::cerr << "sandbox approval failed for proposal " << proposal_id << '\n';
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "sandbox_approved proposal_id=" << proposal_id << " approver=" << approver << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "external-request" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid; run login again\n";
+            host.Close();
+            return 1;
+        }
+
+        std::string action = argv[2];
+        std::string summary;
+        for (int i = 3; i < argc; ++i)
+        {
+            if (i > 3)
+                summary.push_back(' ');
+            summary += argv[i];
+        }
+
+        std::string decision_hex;
+        if (!host.External().Request(session.value.principal_id, action, summary, "cli:external-request", decision_hex))
+        {
+            std::cerr << "external request failed\n";
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "decision_hex=" << decision_hex << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "external-approve" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid; run login again\n";
+            host.Close();
+            return 1;
+        }
+
+        std::string reason;
+        for (int i = 3; i < argc; ++i)
+        {
+            if (i > 3)
+                reason.push_back(' ');
+            reason += argv[i];
+        }
+
+        if (!host.External().Approve(session.value.principal_id, argv[2], reason))
+        {
+            std::cerr << "external approval failed\n";
+            host.Close();
+            return 1;
+        }
+
+        std::cout << "external approved\n";
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "plan" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::PrincipalId actor{};
+        // use session validation path via identity if available — store principal in session file?
+        // Fallback: nil principal is ok for plan heuristics
+        std::string goal;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2) goal.push_back(' ');
+            goal += argv[i];
+        }
+        std::cout << "plan: building..." << std::endl;
+        auto r = host.Cognitive().BuildPlan(actor, goal);
+        if (!r.Ok())
+        {
+            std::cerr << "plan failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "goal=" << r.value.goal << std::endl;
+        std::cout << "confidence=" << r.value.confidence << std::endl;
+        std::cout << "enrichment=" << r.value.enrichment_status << std::endl;
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "cognitive";
+            e.action = "plan";
+            e.detail = r.value.goal;
+            e.subject = r.value.enrichment_status;
+            static_cast<void>(host.Audit().Append(e));
+        }
+        std::cout << "uncertainty=" << r.value.uncertainty_notes << '\n';
+        for (std::size_t i = 0; i < r.value.steps.size(); ++i)
+        {
+            const auto& st = r.value.steps[i];
+            std::cout << "step" << i << " action=" << st.action
+                      << " gov=" << (st.requires_governance ? "1" : "0")
+                      << " detail=" << st.detail << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "audit-list")
+    {
+        if (argc >= 3)
+        {
+            auto r = host.Audit().ListByCategory(argv[2], 50);
+            if (!r.Ok())
+            {
+                std::cerr << "audit-list failed\n";
+                host.Close();
+                return 1;
+            }
+            for (const auto& e : r.value)
+            {
+                std::cout << e.unix_seconds << ' ' << e.category << ' '
+                          << e.action << ' ' << e.subject << ' ' << e.detail
+                          << '\n';
+            }
+        }
+        else
+        {
+            auto r = host.Audit().List(50);
+            if (!r.Ok())
+            {
+                std::cerr << "audit-list failed\n";
+                host.Close();
+                return 1;
+            }
+            for (const auto& e : r.value)
+            {
+                std::cout << e.unix_seconds << ' ' << e.category << ' '
+                          << e.action << ' ' << e.subject << ' ' << e.detail
+                          << '\n';
+            }
+        }
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "loop" && argc >= 3)
+    {
+        // Governed cognitive loop: plan → recommend → [approve] → execute → reflect
+        // Usage: sovereign-cli loop [--auto-approve] <goal...>
+        bool auto_approve = false;
+        int argi = 2;
+        if (argi < argc && std::string(argv[argi]) == "--auto-approve")
+        {
+            auto_approve = true;
+            ++argi;
+        }
+        if (argi >= argc)
+        {
+            std::cerr << "usage: sovereign-cli loop [--auto-approve] <goal...>\n";
+            host.Close();
+            return 1;
+        }
+        std::string goal;
+        for (int i = argi; i < argc; ++i)
+        {
+            if (i > argi) goal.push_back(' ');
+            goal += argv[i];
+        }
+
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid; run login again\n";
+            host.Close();
+            return 1;
+        }
+        const sovereign::PrincipalId actor = session.value.principal_id;
+
+        std::cout << "=== loop: plan ===\n";
+        auto plan = host.Cognitive().BuildPlan(actor, goal);
+        if (!plan.Ok())
+        {
+            std::cerr << "plan failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "confidence=" << plan.value.confidence << '\n';
+        std::cout << "enrichment=" << plan.value.enrichment_status << '\n';
+        for (std::size_t i = 0; i < plan.value.steps.size(); ++i)
+            std::cout << "step" << i << " " << plan.value.steps[i].action
+                      << " gov=" << (plan.value.steps[i].requires_governance ? 1 : 0)
+                      << " " << plan.value.steps[i].detail << '\n';
+
+        const std::string action = "mature";
+        const std::string summary = goal;
+        std::cout << "=== loop: recommend ===\n";
+        auto rec = host.Cognitive().RecommendAction(actor, action, summary, "loop");
+        if (!rec.Ok())
+        {
+            std::cerr << "recommend failed\n";
+            host.Close();
+            return 1;
+        }
+        const auto decision_hex = ToHex(rec.value.governance_decision_id);
+        std::cout << "governance_decision_id=" << decision_hex << '\n';
+
+        if (!auto_approve)
+        {
+            std::cout << "=== loop: paused for human approval ===\n";
+            std::cout << "next:\n  sovereign-cli approve " << decision_hex
+                      << " \"approved via loop\"\n  sovereign-cli execute " << action
+                      << " " << decision_hex << "\n";
+            sovereign::audit::AuditEntry e;
+            e.category = "cognitive";
+            e.action = "loop_paused";
+            e.actor = actor;
+            e.subject = decision_hex;
+            e.detail = goal;
+            static_cast<void>(host.Audit().Append(e));
+            host.Close();
+            return 0;
+        }
+
+        std::cout << "=== loop: auto-approve ===\n";
+        sovereign::governance::DecisionId did{};
+        did.bytes = rec.value.governance_decision_id;
+        auto ap = host.Governance().Approve(actor, true, did, "loop --auto-approve");
+        if (!ap.Ok())
+        {
+            std::cerr << "approve failed error=" << static_cast<int>(ap.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "approved\n";
+
+        std::cout << "=== loop: execute ===\n";
+        host.Executor().RegisterHandler(action, [](const std::string& a) {
+            sovereign::executor::Result<std::string> r;
+            r.value = std::string("loop-executed:") + a;
+            return r;
+        });
+        auto ex = host.Executor().Execute(action, rec.value.governance_decision_id);
+        if (!ex.Ok())
+        {
+            std::cerr << "execute failed error=" << static_cast<int>(ex.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "executed ok detail=" << ex.value.detail << '\n';
+
+        std::cout << "=== loop: reflect ===\n";
+        auto ref = host.Cognitive().Reflect(
+            actor, goal, std::string("completed loop action=") + action +
+                             " detail=" + ex.value.detail);
+        if (ref.Ok())
+            std::cout << "reflection recorded\n";
+        else
+            std::cout << "reflection skipped\n";
+
+        sovereign::audit::AuditEntry e;
+        e.category = "cognitive";
+        e.action = "loop_complete";
+        e.actor = actor;
+        e.subject = decision_hex;
+        e.detail = goal;
+        static_cast<void>(host.Audit().Append(e));
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "recommend" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid; run login again\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::PrincipalId actor = session.value.principal_id;
+        auto r = host.Cognitive().RecommendAction(
+            actor, argv[2], argv[3], "cli");
+        if (!r.Ok())
+        {
+            std::cerr << "recommend failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "governance_decision_id="
+                  << ToHex(r.value.governance_decision_id) << '\n';
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "pending-decisions")
+    {
+        auto r = host.Governance().ListPending();
+        if (!r.Ok())
+        {
+            std::cerr << "pending-decisions failed\n";
+            host.Close();
+            return 1;
+        }
+        for (const auto& d : r.value)
+        {
+            std::cout << ToHex(d.id.bytes) << ' ' << d.action << ' '
+                      << d.summary << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "archive-store" && argc >= 4)
+    {
+        sovereign::archive::Artifact a;
+        a.label = argv[2];
+        a.content_hash = argv[3];
+        auto r = host.Archive().Store(a);
+        if (!r.Ok())
+        {
+            std::cerr << "archive-store failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "artifact_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "sync-export" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        sovereign::PrincipalId actor{};
+        if (LoadSession(cfg.data_root, session_bytes))
+        {
+            sovereign::identity::SessionId sid{};
+            sid.bytes = session_bytes;
+            auto session = host.Identity().ValidateSession(sid);
+            if (session.Ok())
+                actor = session.value.principal_id;
+        }
+        auto r = host.Sync().RecordExport(actor, argv[2], argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "sync-export failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "sync_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "approve" && argc >= 4)
+    {
+        sovereign::governance::DecisionId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad decision id\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::governance::PrincipalId owner{};
+        owner.bytes[0] = 1;
+        auto r = host.Governance().Approve(owner, true, id, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "approve failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "approved\n";
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "governance";
+            e.action = "approve";
+            e.subject = argv[2];
+            e.detail = argv[3];
+            static_cast<void>(host.Audit().Append(e));
+            // Evidence pack: durable archive + memory + semantic
+            sovereign::archive::Artifact a;
+            a.label = std::string("governance-approve-") + argv[2];
+            a.content_hash = argv[2];
+            auto art = host.Archive().Store(a);
+            if (art.Ok())
+                std::cout << "evidence_artifact=" << ToHex(art.value.bytes)
+                          << '\n';
+            sovereign::memory::MemoryRecord rec;
+            rec.tags = {"governance", "approve", "evidence"};
+            rec.body = std::string("approved ") + argv[2] + " reason=" + argv[3];
+            static_cast<void>(host.Memory().Append(rec));
+            static_cast<void>(host.Semantic().Upsert(rec.body, rec.tags));
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "reject" && argc >= 4)
+    {
+        sovereign::governance::DecisionId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad decision id\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::governance::PrincipalId owner{};
+        owner.bytes[0] = 1;
+        auto r = host.Governance().Reject(owner, true, id, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "reject failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "rejected\n";
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "governance";
+            e.action = "reject";
+            e.subject = argv[2];
+            e.detail = argv[3];
+            static_cast<void>(host.Audit().Append(e));
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "override" && argc >= 4)
+    {
+        sovereign::governance::DecisionId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad decision id\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::governance::PrincipalId owner{};
+        owner.bytes[0] = 1;
+        auto r = host.Governance().Override(
+            owner, sovereign::governance::GovernanceRole::Owner, id, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "override failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "overridden\n";
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "governance";
+            e.action = "override";
+            e.subject = argv[2];
+            e.detail = argv[3];
+            static_cast<void>(host.Audit().Append(e));
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "rule-set" && argc >= 5)
+    {
+        sovereign::governance::GovernanceRule rule;
+        rule.action = argv[2];
+        rule.allow_auto_approval = std::string(argv[3]) == "1";
+        rule.minimum_auto_approve_role =
+            sovereign::governance::RoleFromString(argv[4]);
+        rule.minimum_approval_authority_role =
+            sovereign::governance::RoleFromString(argv[4]);
+        host.Governance().SetRule(rule);
+        std::cout << "rule_set action=" << rule.action << '\n';
+        host.Close();
+        return 0;
+    }
+
+
+
+
+    if (cmd == "mfa-enroll-begin")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().BeginTotpEnrollment(sid);
+        if (!r.Ok())
+        {
+            std::cerr << "mfa-enroll-begin failed error="
+                      << static_cast<int>(r.error) << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "otpauth_uri=" << r.value << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "mfa-enroll-confirm" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().ConfirmTotpEnrollment(sid, argv[2]);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("mfa-enroll-confirm", r);
+            host.Close();
+            return 1;
+        }
+        std::cout << "totp_enrolled=1\n";
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "mfa-recovery-generate")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().GenerateRecoveryCodes(sid);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("mfa-recovery-generate", r);
+            host.Close();
+            return 1;
+        }
+        for (const auto& c : r.value)
+            std::cout << "recovery_code=" << c << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "mfa-status")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto session = host.Identity().ValidateSession(sid);
+        if (!session.Ok())
+        {
+            std::cerr << "session invalid\n";
+            host.Close();
+            return 1;
+        }
+        auto st = host.Identity().GetMfaStatus(session.value.principal_id);
+        if (!st.Ok())
+        {
+            std::cerr << "mfa-status failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "totp_enrolled=" << (st.value.totp_enrolled ? "1" : "0")
+                  << " step_up_execute="
+                  << (st.value.step_up_required_for_execute ? "1" : "0")
+                  << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "session-revoke")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().RevokeSession(sid);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("session-revoke", r);
+            host.Close();
+            return 1;
+        }
+        // clear local session file
+        std::error_code ec;
+        std::filesystem::remove(SessionFilePath(cfg.data_root), ec);
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "session_revoke";
+        e.detail = "self-revoke via cli";
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "session_revoked\n";
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "principal-suspend" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+        auto r = host.Identity().SetPrincipalStatus(
+            sid, id, sovereign::identity::PrincipalStatus::Suspended);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("principal-suspend", r);
+            host.Close();
+            return 1;
+        }
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "principal_suspend";
+        e.subject = argv[2];
+        e.detail = "suspended via cli";
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "principal_suspended id=" << argv[2] << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "principal-revoke" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+        auto r = host.Identity().SetPrincipalStatus(
+            sid, id, sovereign::identity::PrincipalStatus::Revoked);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("principal-revoke", r);
+            host.Close();
+            return 1;
+        }
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "principal_revoke";
+        e.subject = argv[2];
+        e.detail = "revoked via cli";
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "principal_revoked id=" << argv[2] << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "logout")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (LoadSession(cfg.data_root, session_bytes))
+        {
+            sovereign::identity::SessionId sid{};
+            sid.bytes = session_bytes;
+            static_cast<void>(host.Identity().RevokeSession(sid));
+            std::error_code ec;
+            std::filesystem::remove(SessionFilePath(cfg.data_root), ec);
+        }
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "identity";
+            e.action = "logout";
+            e.detail = "cli logout";
+            static_cast<void>(host.Audit().Append(e));
+        }
+        std::cout << "logged_out\n";
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "operator-create" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().CreateOperator(sid, argv[2], argv[3]);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("operator-create", r);
+            host.Close();
+            return 1;
+        }
+        std::cout << "operator_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "service-create" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().CreateServicePrincipal(sid, argv[2]);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("service-create", r);
+            host.Close();
+            return 1;
+        }
+        std::cout << "service_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "machine-create" && argc >= 3)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().CreateMachinePrincipal(sid, argv[2]);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("machine-create", r);
+            host.Close();
+            return 1;
+        }
+        std::cout << "machine_id=" << ToHex(r.value.bytes) << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if ((cmd == "role-add" || cmd == "role-grant") && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+
+        const auto principal = host.Identity().GetPrincipal(id);
+        if (!principal.Ok())
+        {
+            std::cerr << "role-add failed: "
+                      << sovereign::identity::IdentityErrorToString(principal.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+
+        auto r = host.Identity().AssignRole(sid, id, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "role-add failed: "
+                      << sovereign::identity::IdentityErrorToString(r.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "role_add";
+        e.subject = argv[2];
+        e.detail = std::string("assigned role ") + argv[3];
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "role_added id=" << argv[2] << " role=" << argv[3] << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if ((cmd == "role-remove" || cmd == "role-revoke") && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+
+        const auto principal = host.Identity().GetPrincipal(id);
+        if (!principal.Ok())
+        {
+            std::cerr << "role-remove failed: "
+                      << sovereign::identity::IdentityErrorToString(principal.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+
+        auto r = host.Identity().RevokeRole(sid, id, argv[3]);
+        if (!r.Ok())
+        {
+            std::cerr << "role-remove failed: "
+                      << sovereign::identity::IdentityErrorToString(r.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+        sovereign::audit::AuditEntry e;
+        e.category = "identity";
+        e.action = "role_remove";
+        e.subject = argv[2];
+        e.detail = std::string("revoked role ") + argv[3];
+        static_cast<void>(host.Audit().Append(e));
+        std::cout << "role_removed id=" << argv[2] << " role=" << argv[3] << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "roles" && argc >= 3)
+    {
+        sovereign::PrincipalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad principal id\n";
+            host.Close();
+            return 1;
+        }
+
+        const auto principal = host.Identity().GetPrincipal(id);
+        if (!principal.Ok())
+        {
+            std::cerr << "roles failed: "
+                      << sovereign::identity::IdentityErrorToString(principal.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+
+        auto r = host.Identity().GetRoles(id);
+        if (!r.Ok())
+        {
+            std::cerr << "roles failed: "
+                      << sovereign::identity::IdentityErrorToString(r.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+        for (const auto& role : r.value)
+            std::cout << role << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "decision-get" && argc >= 3)
+    {
+        sovereign::governance::DecisionId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad decision id\n";
+            host.Close();
+            return 1;
+        }
+        auto r = host.Governance().Get(id);
+        if (!r.Ok())
+        {
+            std::cerr << "decision-get failed\n";
+            host.Close();
+            return 1;
+        }
+        const auto& d = r.value;
+        std::cout << "id=" << ToHex(d.id.bytes) << '\n';
+        std::cout << "action=" << d.action << '\n';
+        std::cout << "summary=" << d.summary << '\n';
+        std::cout << "status=" << static_cast<int>(d.status) << '\n';
+        std::cout << "evidence=" << d.evidence_ref << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "change-credential" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().ChangeCredential(sid, argv[2], argv[3]);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("change-credential", r);
+            host.Close();
+            return 1;
+        }
+        std::cout << "credential_changed\n";
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "identity";
+            e.action = "change_credential";
+            e.detail = "credential rotated";
+            static_cast<void>(host.Audit().Append(e));
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "principals")
+    {
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (!LoadSession(cfg.data_root, session_bytes))
+        {
+            std::cerr << "no session; run login first\n";
+            host.Close();
+            return 1;
+        }
+        sovereign::identity::SessionId sid{};
+        sid.bytes = session_bytes;
+        auto r = host.Identity().ListPrincipals(sid);
+        if (!r.Ok())
+        {
+            PrintIdentityFailure("principals", r);
+            host.Close();
+            return 1;
+        }
+        for (const auto& pr : r.value)
+        {
+            std::cout << ToHex(pr.id.bytes) << ' ' << pr.display_name << ' '
+                      << static_cast<int>(pr.kind) << ' '
+                      << static_cast<int>(pr.status) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "models")
+    {
+        auto r = host.Models().ListModels();
+        if (!r.Ok())
+        {
+            std::cerr << "models unavailable (is ollama running?)\n";
+            host.Close();
+            return 1;
+        }
+        for (const auto& m : r.value)
+        {
+            std::cout << m.name << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "code-assist" && argc >= 3)
+    {
+        std::vector<std::string> files;
+        std::string prompt;
+        bool saw_dd = false;
+        bool json_out = false;
+        bool save = false;
+        for (int i = 2; i < argc; ++i)
+        {
+            const std::string a = argv[i];
+            if (!saw_dd && a == "--")
+            {
+                saw_dd = true;
+                continue;
+            }
+            if (!saw_dd && a == "--json")
+            {
+                json_out = true;
+                continue;
+            }
+            if (!saw_dd && a == "--save")
+            {
+                save = true;
+                continue;
+            }
+            if (!saw_dd && a == "--file" && i + 1 < argc)
+            {
+                files.push_back(argv[++i]);
+                continue;
+            }
+            if (!saw_dd && a.rfind("--file=", 0) == 0)
+            {
+                files.push_back(a.substr(7));
+                continue;
+            }
+            if (!prompt.empty())
+                prompt.push_back(' ');
+            prompt += a;
+        }
+        if (prompt.empty())
+        {
+            std::cerr << "code-assist requires a prompt\n";
+            host.Close();
+            return 2;
+        }
+
+        std::ostringstream user;
+        user << prompt;
+        constexpr std::size_t kMaxFileBytes = 32 * 1024;
+        for (const auto& path : files)
+        {
+            std::ifstream in(path);
+            if (!in)
+            {
+                user << "\n\n[file missing: " << path << "]";
+                continue;
+            }
+            std::string body;
+            char buf[4096];
+            while (in && body.size() < kMaxFileBytes)
+            {
+                in.read(buf, sizeof(buf));
+                body.append(buf, static_cast<std::size_t>(in.gcount()));
+            }
+            if (body.size() >= kMaxFileBytes)
+                body += "\n...[truncated]";
+            user << "\n\n----- FILE: " << path << " -----\n" << body;
+        }
+
+        sovereign::model_router::ChatRequest req;
+        req.model = host.DefaultModel();
+        std::string system =
+            "You are Sovereign code-assist using openclaw. "
+            "Answer concisely. No system changes. Cite file paths when relevant.";
+        if (json_out)
+        {
+            system +=
+                " Respond with a single JSON object only, keys: "
+                "summary (string), findings (array of strings), "
+                "suggested_fixes (array of strings). No markdown.";
+        }
+        req.messages.push_back(sovereign::model_router::ChatMessage{
+            "system", system, {}, {}});
+        req.messages.push_back(sovereign::model_router::ChatMessage{
+            "user", user.str(), {}, {}});
+        auto r = host.Models().Chat(req);
+        if (!r.Ok() || !r.value.ok)
+        {
+            std::cerr << "code-assist failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << r.value.content << '\n';
+        if (save)
+        {
+            sovereign::memory::MemoryRecord rec;
+            rec.tags = {"code-assist"};
+            rec.body = r.value.content;
+            auto app = host.Memory().Append(rec);
+            if (app.Ok())
+                std::cout << "saved_record_id=" << ToHex(app.value.bytes) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if ((cmd == "chat" || cmd == "chat-tools") && argc >= 3)
+    {
+        std::string prompt;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2)
+                prompt.push_back(' ');
+            prompt += argv[i];
+        }
+        sovereign::model_router::ChatRequest req;
+        req.model = host.DefaultModel();
+        req.messages.push_back(
+            sovereign::model_router::ChatMessage{"user", prompt, {}, {}});
+        if (cmd == "chat-tools")
+        {
+            sovereign::model_router::ToolDefinition tool;
+            tool.name = "record_memory";
+            tool.description = "Store a short note in Sovereign memory";
+            tool.parameters_json =
+                "{\"type\":\"object\",\"properties\":{"
+                "\"tag\":{\"type\":\"string\"},"
+                "\"body\":{\"type\":\"string\"}},"
+                "\"required\":[\"tag\",\"body\"]}";
+            req.tools.push_back(tool);
+        }
+        auto r = host.Models().Chat(req);
+        if (!r.Ok() || !r.value.ok)
+        {
+            std::cerr << "chat failed error=" << static_cast<int>(r.error)
+                      << " detail=" << r.value.error << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "model=" << r.value.model << '\n';
+        std::cout << "content=" << r.value.content << '\n';
+        std::vector<sovereign::model_router::ChatMessage> follow =
+            req.messages;
+        follow.push_back(sovereign::model_router::ChatMessage{
+            "assistant", r.value.content, {}, {}});
+        bool any_tool = false;
+        for (const auto& tc : r.value.tool_calls)
+        {
+            std::cout << "tool_call name=" << tc.name
+                      << " args=" << tc.arguments_json << '\n';
+            std::string tool_result = "ok";
+            if (tc.name == "record_memory")
+            {
+                sovereign::memory::MemoryRecord rec;
+                rec.tags = {"ollama-tool"};
+                rec.body = tc.arguments_json.empty() ? prompt : tc.arguments_json;
+                auto app = host.Memory().Append(rec);
+                if (app.Ok())
+                {
+                    tool_result = std::string("stored:") + ToHex(app.value.bytes);
+                    std::cout << "tool_result record_id="
+                              << ToHex(app.value.bytes) << '\n';
+                }
+                else
+                {
+                    tool_result = "storage_failed";
+                }
+            }
+            sovereign::model_router::ChatMessage tr;
+            tr.role = "tool";
+            tr.content = tool_result;
+            tr.tool_name = tc.name;
+            tr.tool_call_id = tc.id;
+            follow.push_back(tr);
+            any_tool = true;
+        }
+        if (any_tool)
+        {
+            sovereign::model_router::ChatRequest req2;
+            req2.model = host.DefaultModel();
+            req2.messages = follow;
+            auto r2 = host.Models().Chat(req2);
+            if (r2.Ok() && r2.value.ok)
+            {
+                std::cout << "followup_content=" << r2.value.content << '\n';
+            }
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "execute" && argc >= 4)
+    {
+        std::array<std::uint8_t, 16> decision{};
+        if (!FromHex(argv[3], decision))
+        {
+            std::cerr << "bad decision id\n";
+            host.Close();
+            return 1;
+        }
+        std::string mfa_code;
+        for (int i = 4; i + 1 < argc; ++i)
+        {
+            if (std::string(argv[i]) == "--mfa")
+                mfa_code = argv[i + 1];
+        }
+        // Step-up when MFA enrolled
+        {
+            std::array<std::uint8_t, 16> session_bytes{};
+            if (LoadSession(cfg.data_root, session_bytes))
+            {
+                sovereign::identity::SessionId sid{};
+                sid.bytes = session_bytes;
+                auto session = host.Identity().ValidateSession(sid);
+                if (session.Ok())
+                {
+                    auto st = host.Identity().GetMfaStatus(session.value.principal_id);
+                    if (st.Ok() && st.value.step_up_required_for_execute)
+                    {
+                        if (mfa_code.empty())
+                        {
+                            std::cerr << "mfa_required: pass --mfa <totp-or-recovery>\n";
+                            host.Close();
+                            return 1;
+                        }
+                        auto su = host.Identity().VerifyStepUp(sid, mfa_code);
+                        if (!su.Ok())
+                        {
+                            std::cerr << "mfa_step_up_failed error="
+                                      << static_cast<int>(su.error) << '\n';
+                            host.Close();
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+        host.Executor().RegisterHandler(argv[2], [](const std::string& action) {
+            sovereign::executor::Result<std::string> r;
+            r.value = std::string("executed:") + action;
+            return r;
+        });
+        auto r = host.Executor().Execute(argv[2], decision);
+        if (!r.Ok())
+        {
+            std::cerr << "execute failed error=" << static_cast<int>(r.error)
+                      << '\n';
+            host.Close();
+            return 1;
+        }
+        std::cout << "executed ok detail=" << r.value.detail << '\n';
+        {
+            sovereign::audit::AuditEntry e;
+            e.category = "executor";
+            e.action = "execute";
+            e.subject = argv[3];
+            e.detail = std::string(argv[2]) + " " + r.value.detail;
+            static_cast<void>(host.Audit().Append(e));
+        }
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "project-summary")
+    {
+        bool save = false;
+        std::filesystem::path root = std::filesystem::current_path();
+        for (int i = 2; i < argc; ++i)
+        {
+            if (std::string(argv[i]) == "--save")
+                save = true;
+            else
+                root = argv[i];
+        }
+        std::vector<std::string> paths;
+        const char* exts[] = {".hpp", ".h", ".cpp", ".cc", ".c", ".md", ".py", ".rs", ".go", ".ts", ".js"};
+        std::error_code ec;
+        if (std::filesystem::is_directory(root, ec))
+        {
+            for (auto it = std::filesystem::recursive_directory_iterator(
+                     root,
+                     std::filesystem::directory_options::skip_permission_denied,
+                     ec);
+                 it != std::filesystem::recursive_directory_iterator();
+                 it.increment(ec))
+            {
+                if (ec)
+                {
+                    ec.clear();
+                    continue;
+                }
+                if (!it->is_regular_file())
+                    continue;
+                const auto pth = it->path();
+                const auto name = pth.filename().string();
+                if (name == "CMakeLists.txt" || name.ends_with(".cmake"))
+                {
+                    paths.push_back(pth.string());
+                }
+                else
+                {
+                    const auto ext = pth.extension().string();
+                    for (const char* e : exts)
+                    {
+                        if (ext == e)
+                        {
+                            paths.push_back(pth.string());
+                            break;
+                        }
+                    }
+                }
+                if (paths.size() >= 40)
+                    break;
+            }
+        }
+        std::ostringstream user;
+        user << "Summarize this project structure and main responsibilities.\n";
+        user << "Root: " << root.string() << "\nFiles included: " << paths.size() << "\n";
+        constexpr std::size_t kMaxTotal = 48 * 1024;
+        std::size_t total = 0;
+        for (const auto& path : paths)
+        {
+            if (total >= kMaxTotal)
+                break;
+            std::ifstream in(path);
+            if (!in)
+                continue;
+            std::string body;
+            char buf[4096];
+            while (in && body.size() < 4096)
+            {
+                in.read(buf, sizeof(buf));
+                body.append(buf, static_cast<std::size_t>(in.gcount()));
+            }
+            user << "\n----- " << path << " -----\n" << body;
+            total += body.size();
+        }
+        sovereign::model_router::ChatRequest req;
+        req.model = host.DefaultModel();
+        req.messages.push_back(sovereign::model_router::ChatMessage{
+            "system",
+            "You are Sovereign project analyst. Produce a concise architecture summary. "
+            "No system changes.",
+            {},
+            {}});
+        req.messages.push_back(
+            sovereign::model_router::ChatMessage{"user", user.str(), {}, {}});
+        auto r = host.Models().Chat(req);
+        if (!r.Ok() || !r.value.ok)
+        {
+            std::cerr << "project-summary failed (is Ollama up? model="
+                      << host.DefaultModel() << ")\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << r.value.content << '\n';
+        if (save)
+        {
+            sovereign::memory::MemoryRecord rec;
+            rec.tags = {"project-summary"};
+            rec.body = r.value.content;
+            auto app = host.Memory().Append(rec);
+            if (app.Ok())
+                std::cout << "saved_record_id=" << ToHex(app.value.bytes) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "review-diff" && argc >= 3)
+    {
+        bool save = false;
+        std::string path;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (std::string(argv[i]) == "--save")
+                save = true;
+            else
+                path = argv[i];
+        }
+        if (path.empty())
+        {
+            std::cerr << "review-diff requires a file\n";
+            host.Close();
+            return 2;
+        }
+        std::ifstream in(path);
+        if (!in)
+        {
+            std::cerr << "cannot read diff file\n";
+            host.Close();
+            return 1;
+        }
+        std::string body;
+        char buf[4096];
+        while (in && body.size() < 64 * 1024)
+        {
+            in.read(buf, sizeof(buf));
+            body.append(buf, static_cast<std::size_t>(in.gcount()));
+        }
+        sovereign::model_router::ChatRequest req;
+        req.model = host.DefaultModel();
+        req.messages.push_back(sovereign::model_router::ChatMessage{
+            "system",
+            "You are a careful code reviewer. Identify bugs, risks, and missing tests. "
+            "Be concise. No system changes.",
+            {},
+            {}});
+        req.messages.push_back(sovereign::model_router::ChatMessage{
+            "user",
+            std::string("Review this unified diff:\n") + body,
+            {},
+            {}});
+        auto r = host.Models().Chat(req);
+        if (!r.Ok() || !r.value.ok)
+        {
+            std::cerr << "review-diff failed (Ollama up? model="
+                      << host.DefaultModel() << ")\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << r.value.content << '\n';
+        if (save)
+        {
+            sovereign::memory::MemoryRecord rec;
+            rec.tags = {"review-diff"};
+            rec.body = r.value.content;
+            auto app = host.Memory().Append(rec);
+            if (app.Ok())
+                std::cout << "saved_record_id=" << ToHex(app.value.bytes) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "brief")
+    {
+        auto b = host.Briefing().Build();
+        std::cout << b.rendered_text;
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "goal-add" && argc >= 4)
+    {
+        sovereign::goals::Goal g;
+        g.priority = std::atoi(argv[2]);
+        std::string title;
+        for (int i = 3; i < argc; ++i)
+        {
+            if (i > 3)
+                title.push_back(' ');
+            title += argv[i];
+        }
+        g.title = title;
+        std::array<std::uint8_t, 16> session_bytes{};
+        if (LoadSession(cfg.data_root, session_bytes))
+        {
+            sovereign::identity::SessionId sid{};
+            sid.bytes = session_bytes;
+            auto session = host.Identity().ValidateSession(sid);
+            if (session.Ok())
+                g.owner = session.value.principal_id;
+        }
+        auto r = host.Goals().Create(g);
+        if (!r.Ok())
+        {
+            std::cerr << "goal-add failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "goal_id=";
+        // print hex
+        static constexpr char k[] = "0123456789abcdef";
+        for (auto b : r.value.bytes)
+        {
+            std::cout << k[(b >> 4) & 0xF] << k[b & 0xF];
+        }
+        std::cout << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "goal-list")
+    {
+        auto r = host.Goals().ListAll();
+        if (!r.Ok())
+        {
+            host.Close();
+            return 1;
+        }
+        for (const auto& g : r.value)
+        {
+            static constexpr char k[] = "0123456789abcdef";
+            for (auto b : g.id.bytes)
+                std::cout << k[(b >> 4) & 0xF] << k[b & 0xF];
+            std::cout << ' ' << g.priority << ' '
+                      << static_cast<int>(g.status) << ' ' << g.title << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "goal-complete" && argc >= 3)
+    {
+        sovereign::goals::GoalId id{};
+        if (!FromHex(argv[2], id.bytes))
+        {
+            std::cerr << "bad goal id\n";
+            host.Close();
+            return 1;
+        }
+        auto r = host.Goals().SetStatus(id, sovereign::goals::GoalStatus::Completed);
+        if (!r.Ok())
+        {
+            std::cerr << "goal-complete failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "completed\n";
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "memory-search" && argc >= 3)
+    {
+        std::string q;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2)
+                q.push_back(' ');
+            q += argv[i];
+        }
+        auto r = host.Memory().Search(q);
+        if (!r.Ok())
+        {
+            std::cerr << "memory-search failed\n";
+            host.Close();
+            return 1;
+        }
+        for (const auto& rec : r.value)
+            std::cout << rec.body << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "workspace-init-domains")
+    {
+        const char* domains[][2] = {
+            {"development", "development"},
+            {"knowledge", "knowledge"},
+            {"business", "business"},
+            {"finance", "finance"},
+            {"health", "health"},
+            {"infrastructure", "infrastructure"},
+            {"life", "life"},
+        };
+        for (auto& d : domains)
+        {
+            auto r = host.Workspace().Create(d[0], d[1]);
+            if (r.Ok())
+                std::cout << "created " << d[0] << '\n';
+            else
+                std::cout << "skip " << d[0] << " (exists or error)\n";
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "agent-add-brief")
+    {
+        sovereign::agent::ScheduledJob j;
+        j.kind = sovereign::agent::JobKind::BriefSnapshot;
+        j.name = "daily-brief";
+        j.interval_seconds = argc >= 3 ? std::stoull(argv[2]) : 86400ULL;
+        j.enabled = true;
+        auto r = host.Agent().Add(j);
+        if (!r.Ok())
+        {
+            std::cerr << "agent-add-brief failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "job_added interval=" << j.interval_seconds << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "agent-list")
+    {
+        auto r = host.Agent().List();
+        if (!r.Ok())
+        {
+            host.Close();
+            return 1;
+        }
+        for (const auto& j : r.value)
+        {
+            std::cout << j.name << " kind=" << static_cast<int>(j.kind)
+                      << " interval=" << j.interval_seconds
+                      << " last=" << j.last_run_unix
+                      << " enabled=" << (j.enabled ? 1 : 0) << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "agent-tick")
+    {
+        using namespace std::chrono;
+        const auto now = static_cast<std::uint64_t>(
+            duration_cast<seconds>(system_clock::now().time_since_epoch())
+                .count());
+        auto due = host.Agent().Due(now);
+        if (!due.Ok())
+        {
+            host.Close();
+            return 1;
+        }
+        int ran = 0;
+        for (const auto& j : due.value)
+        {
+            if (j.kind == sovereign::agent::JobKind::BriefSnapshot ||
+                j.kind == sovereign::agent::JobKind::MemoryDigest)
+            {
+                auto brief = host.Briefing().Build();
+                sovereign::memory::MemoryRecord rec;
+                rec.tags = {"agent", "brief", j.name};
+                rec.body = brief.rendered_text;
+                auto app = host.Memory().Append(rec);
+                if (app.Ok())
+                {
+                    std::cout << "ran " << j.name << " saved_memory\n";
+                    ++ran;
+                }
+            }
+            sovereign::agent::JobId id = j.id;
+            static_cast<void>(host.Agent().MarkRun(id, now));
+        }
+        std::cout << "agent-tick jobs_run=" << ran << '\n';
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "semantic-add" && argc >= 3)
+    {
+        std::string text;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2)
+                text.push_back(' ');
+            text += argv[i];
+        }
+        auto r = host.Semantic().Upsert(text, {"cli"});
+        if (!r.Ok())
+        {
+            std::cerr << "semantic-add failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "semantic_ok\n"; // model recorded in store
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "semantic-query" && argc >= 3)
+    {
+        std::string q;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2)
+                q.push_back(' ');
+            q += argv[i];
+        }
+        auto r = host.Semantic().Query(q, 5);
+        if (!r.Ok())
+        {
+            std::cerr << "semantic-query failed\n";
+            host.Close();
+            return 1;
+        }
+        for (const auto& s : r.value)
+            std::cout << s.score << ' ' << s.record.text << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "domain-show")
+    {
+        if (argc >= 3)
+        {
+            auto* prof = sovereign::domain::FindProfile(argv[2]);
+            if (!prof)
+            {
+                std::cerr << "unknown domain\n";
+                host.Close();
+                return 1;
+            }
+            std::cout << "name=" << prof->name << '\n';
+            std::cout << "prompt=" << prof->system_prompt << '\n';
+            std::cout << "tools=";
+            for (std::size_t i = 0; i < prof->allowed_tools.size(); ++i)
+            {
+                if (i)
+                    std::cout << ',';
+                std::cout << prof->allowed_tools[i];
+            }
+            std::cout << '\n';
+        }
+        else
+        {
+            for (const auto& prof : sovereign::domain::BuiltinProfiles())
+                std::cout << prof.name << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "domain-chat" && argc >= 4)
+    {
+        auto* profile = sovereign::domain::FindProfile(argv[2]);
+        if (!profile)
+        {
+            std::cerr << "unknown domain\n";
+            host.Close();
+            return 1;
+        }
+        std::string prompt;
+        for (int i = 3; i < argc; ++i)
+        {
+            if (i > 3)
+                prompt.push_back(' ');
+            prompt += argv[i];
+        }
+        std::string context;
+        auto sem = host.Semantic().Query(prompt, 3);
+        if (sem.Ok())
+        {
+            for (const auto& s : sem.value)
+            {
+                if (s.score > 0.05f)
+                    context += s.record.text + "\n";
+            }
+        }
+        sovereign::model_router::ChatRequest req;
+        req.model = host.DefaultModel();
+        req.messages.push_back(sovereign::model_router::ChatMessage{
+            "system", profile->system_prompt, {}, {}});
+        if (!context.empty())
+            req.messages.push_back(sovereign::model_router::ChatMessage{
+                "system", std::string("Relevant memory:\n") + context, {}, {}});
+        req.messages.push_back(
+            sovereign::model_router::ChatMessage{"user", prompt, {}, {}});
+        for (const auto& tool : profile->allowed_tools)
+        {
+            sovereign::model_router::ToolDefinition td;
+            td.name = tool;
+            td.description = "Domain-allowed tool: " + tool;
+            td.parameters_json = "{\"type\":\"object\",\"properties\":{}}";
+            req.tools.push_back(td);
+        }
+        auto r = host.Models().Chat(req);
+        if (!r.Ok() || !r.value.ok)
+        {
+            std::cerr << "domain-chat failed (Ollama up?)\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << r.value.content << '\n';
+        sovereign::domain::DomainToolRunner runner(
+            host.Memory(), host.Semantic());
+        for (const auto& tc : r.value.tool_calls)
+        {
+            sovereign::domain::ToolCallRequest req;
+            req.name = tc.name;
+            req.arguments_json = tc.arguments_json;
+            auto tr = runner.Run(*profile, req);
+            if (!tr.allowed)
+                std::cout << "tool_blocked name=" << tc.name << '\n';
+            else
+                std::cout << "tool_result name=" << tc.name
+                          << " ok=" << (tr.ok ? 1 : 0)
+                          << " detail=" << tr.detail << '\n';
+        }
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "peer-export" && argc >= 3)
+    {
+        sovereign::PrincipalId actor{};
+        actor.bytes[0] = 1;
+        auto r = host.Peer().ExportTo(argv[2], actor);
+        if (!r.Ok())
+        {
+            std::cerr << "peer-export failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "bundle=" << r.value.path << '\n';
+        std::cout << "goals=" << r.value.goals << " memory=" << r.value.memory
+                  << " audit=" << r.value.audit << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "peer-import" && argc >= 3)
+    {
+        sovereign::PrincipalId actor{};
+        actor.bytes[0] = 1;
+        auto r = host.Peer().ImportFrom(argv[2], actor);
+        if (!r.Ok())
+        {
+            std::cerr << "peer-import failed\n";
+            host.Close();
+            return 1;
+        }
+        std::cout << "imported goals=" << r.value.goals
+                  << " memory=" << r.value.memory
+                  << " semantic=" << r.value.semantic << '\n';
+        host.Close();
+        return 0;
+    }
+
+
+    if (cmd == "inspect")
+    {
+        const std::string section = argc >= 3 ? argv[2] : "all";
+        sovereign::diagnostics::TransparencyService tr(host);
+        auto report = tr.BuildSection(section);
+        std::cout << report.text;
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "ask" && argc >= 3)
+    {
+        std::string q;
+        for (int i = 2; i < argc; ++i)
+        {
+            if (i > 2)
+                q.push_back(' ');
+            q += argv[i];
+        }
+        // Map natural questions to transparency sections
+        std::string section = "all";
+        auto has = [&](const char* s) {
+            return q.find(s) != std::string::npos;
+        };
+        if (has("identity") || has("authority") || has("who"))
+            section = "identity";
+        else if (has("memory") || has("provenance") || has("remember"))
+            section = "memory";
+        else if (has("model") || has("provider") || has("routing") || has("ollama"))
+            section = "model";
+        else if (has("policy"))
+            section = "policy";
+        else if (has("plan") || has("pending") || has("goal"))
+            section = "plans";
+        else if (has("approv") || has("denial") || has("denied"))
+            section = "approvals";
+        else if (has("execut") || has("command"))
+            section = "executions";
+        else if (has("state") || has("workspace"))
+            section = "state";
+        else if (has("timing") || has("resource") || has("uptime"))
+            section = "timing";
+        else if (has("error") || has("recovery"))
+            section = "errors";
+        else if (has("audit") || has("evidence"))
+            section = "audit";
+        else if (has("health") || has("subsystem"))
+            section = "health";
+        else if (has("coverage") || has("spec") || has("complete"))
+            section = "coverage";
+        sovereign::diagnostics::TransparencyService tr(host);
+        std::cout << "question=" << q << "\nsection=" << section << "\n";
+        std::cout << tr.BuildSection(section).text;
+        host.Close();
+        return 0;
+    }
+
+    PrintUsage();
+    host.Close();
+    return 2;
+}
