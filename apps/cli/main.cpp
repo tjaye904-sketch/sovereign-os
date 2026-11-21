@@ -1,3 +1,4 @@
+#include "capability_registry.hpp"
 #include "memory_facets.hpp"
 #include "secret_manager.hpp"
 // Sovereign local CLI — in-process SovereignHost surface (not a network gateway).
@@ -130,7 +131,12 @@ void PrintUsage()
 
         << "  sovereign-cli chat-tools <prompt...>\n"
         << "  sovereign-cli execute <action> <decision-hex>\n"
-        << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
+        << "        << "  sovereign-cli capability-seed\n"
+        << "  sovereign-cli capability-list\n"
+        << "  sovereign-cli capability-enable <id>\n"
+        << "  sovereign-cli capability-disable <id>\n"
+        << "  sovereign-cli capability-check <id>\n"
+Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
 std::string ToHex(const std::array<std::uint8_t, 16>& b)
@@ -498,7 +504,61 @@ int main(int argc, char** argv)
             }
             return host.Workspace().FindByName(key);
         };
-        if (cmd == "workspace-status")
+        
+    if (cmd == "capability-seed" || cmd == "capability-list" || cmd == "capability-enable"
+        || cmd == "capability-disable" || cmd == "capability-check")
+    {
+        sovereign::capability::CapabilityRegistry caps;
+        if (caps.Open(host.DataRoot()) != sovereign::capability::CapabilityError::Ok)
+        {
+            std::cerr << "capability open failed\n";
+            return 1;
+        }
+        if (cmd == "capability-seed")
+        {
+            auto r = caps.SeedDefaults();
+            if (!r.Ok()) { std::cerr << "seed failed\n"; return 1; }
+            std::cout << "seeded_added=" << r.value << "\n";
+            return 0;
+        }
+        if (cmd == "capability-list")
+        {
+            auto r = caps.List();
+            if (!r.Ok()) { std::cerr << "list failed\n"; return 1; }
+            if (r.value.empty())
+            {
+                auto s = caps.SeedDefaults();
+                (void)s;
+                r = caps.List();
+            }
+            for (const auto& c : r.value)
+            {
+                std::cout << "id=" << c.id
+                          << " enabled=" << (c.enabled ? 1 : 0)
+                          << " source=" << c.source
+                          << " desc=" << c.description << "\n";
+            }
+            return 0;
+        }
+        if (argc < 3) {
+            std::cerr << "usage: " << cmd << " <id>\n";
+            return 2;
+        }
+        std::string id = argv[2];
+        if (cmd == "capability-enable" || cmd == "capability-disable")
+        {
+            auto r = caps.SetEnabled(id, cmd == "capability-enable");
+            if (!r.Ok()) { std::cerr << "set failed\n"; return 1; }
+            std::cout << "id=" << id << " enabled=" << (cmd == "capability-enable" ? 1 : 0) << "\n";
+            return 0;
+        }
+        auto r = caps.IsEnabled(id);
+        if (!r.Ok()) { std::cerr << "check failed\n"; return 1; }
+        std::cout << "id=" << id << " enabled=" << (r.value ? 1 : 0) << "\n";
+        return 0;
+    }
+
+    if (cmd == "workspace-status")
         {
             if (argc >= 3)
             {

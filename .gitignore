@@ -45,3 +45,7 @@ nano.*.save
 project_tree.txt
 sovereign-vm.qcow2
 nixos.qcow2
+.obsidian/
+.xgrok/
+*.AppImage
+tatus - should be clean
