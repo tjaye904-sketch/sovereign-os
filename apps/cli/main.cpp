@@ -3086,7 +3086,100 @@ int main(int argc, char** argv)
         auto* profile = sovereign::domain::FindProfile(argv[2]);
         if (!profile)
         {
-            std::cerr << "unknown domain\n";
+            // SOVEREIGN_L2_DISPATCH_BEGIN
+
+    if (cmd == "capability-seed" || cmd == "capability-list" || cmd == "capability-enable"
+        || cmd == "capability-disable" || cmd == "capability-check")
+    {
+        sovereign::capability::CapabilityRegistry caps;
+        if (caps.Open(host.DataRoot()) != sovereign::capability::CapabilityError::Ok)
+        { std::cerr << "capability open failed\n"; return 1; }
+        if (cmd == "capability-seed") {
+            auto r = caps.SeedDefaults();
+            if (!r.Ok()) { std::cerr << "seed failed\n"; return 1; }
+            std::cout << "seeded_added=" << r.value << "\n"; return 0;
+        }
+        if (cmd == "capability-list") {
+            auto r = caps.List();
+            if (!r.Ok()) { std::cerr << "list failed\n"; return 1; }
+            if (r.value.empty()) { (void)caps.SeedDefaults(); r = caps.List(); }
+            for (const auto& c : r.value)
+                std::cout << "id=" << c.id << " enabled=" << (c.enabled?1:0)
+                          << " source=" << c.source << " desc=" << c.description << "\n";
+            return 0;
+        }
+        if (argc < 3) { std::cerr << "usage: " << cmd << " <id>\n"; return 2; }
+        std::string id = argv[2];
+        if (cmd == "capability-enable" || cmd == "capability-disable") {
+            auto r = caps.SetEnabled(id, cmd == "capability-enable");
+            if (!r.Ok()) { std::cerr << "set failed\n"; return 1; }
+            std::cout << "id=" << id << " enabled=" << (cmd=="capability-enable"?1:0) << "\n"; return 0;
+        }
+        auto r = caps.IsEnabled(id);
+        if (!r.Ok()) { std::cerr << "check failed\n"; return 1; }
+        std::cout << "id=" << id << " enabled=" << (r.value?1:0) << "\n"; return 0;
+    }
+    if (cmd.rfind("node-", 0) == 0)
+    {
+        sovereign::node::NodeRegistry nodes;
+        if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
+        { std::cerr << "node open failed\n"; return 1; }
+        if (cmd == "node-register-local") {
+            if (argc < 3) { std::cerr << "usage: node-register-local <name>\n"; return 2; }
+            auto r = nodes.RegisterLocal(argv[2]);
+            if (!r.Ok()) { std::cerr << "register failed\n"; return 1; }
+            std::cout << "node_id=" << sovereign::node::NodeRegistry::IdHex(r.value) << "\n"; return 0;
+        }
+        if (cmd == "node-register-peer") {
+            if (argc < 4) { std::cerr << "usage: node-register-peer <name> <endpoint>\n"; return 2; }
+            auto r = nodes.RegisterPeer(argv[2], argv[3]);
+            if (!r.Ok()) { std::cerr << "register failed\n"; return 1; }
+            std::cout << "node_id=" << sovereign::node::NodeRegistry::IdHex(r.value) << "\n"; return 0;
+        }
+        if (cmd == "node-list") {
+            auto r = nodes.List();
+            if (!r.Ok()) { std::cerr << "list failed\n"; return 1; }
+            for (const auto& n : r.value)
+                std::cout << "name=" << n.name << " kind=" << sovereign::node::KindName(n.kind)
+                          << " health=" << sovereign::node::HealthName(n.health)
+                          << " ws=" << n.workspace_name << " caps=" << n.capabilities.size() << "\n";
+            return 0;
+        }
+        if (cmd == "node-heartbeat") {
+            if (argc < 3) { std::cerr << "usage: node-heartbeat <name>\n"; return 2; }
+            auto f = nodes.FindByName(argv[2]);
+            if (!f.Ok()) { std::cerr << "not found\n"; return 1; }
+            if (!nodes.Heartbeat(f.value.id).Ok()) { std::cerr << "heartbeat failed\n"; return 1; }
+            std::cout << "name=" << argv[2] << " health=healthy\n"; return 0;
+        }
+        if (cmd == "node-bind") {
+            if (argc < 4) { std::cerr << "usage: node-bind <name> <workspace>\n"; return 2; }
+            auto f = nodes.FindByName(argv[2]);
+            if (!f.Ok()) { std::cerr << "not found\n"; return 1; }
+            if (!nodes.BindWorkspace(f.value.id, argv[3]).Ok()) { std::cerr << "bind failed\n"; return 1; }
+            std::cout << "name=" << argv[2] << " workspace=" << argv[3] << "\n"; return 0;
+        }
+        if (cmd == "node-caps") {
+            if (argc < 4) { std::cerr << "usage: node-caps <name> <cap,cap,...>\n"; return 2; }
+            auto f = nodes.FindByName(argv[2]);
+            if (!f.Ok()) { std::cerr << "not found\n"; return 1; }
+            std::vector<std::string> caps; std::string s=argv[3], cur;
+            for (char c: s) { if (c==',') { if(!cur.empty()) caps.push_back(cur); cur.clear(); } else cur.push_back(c); }
+            if (!cur.empty()) caps.push_back(cur);
+            if (!nodes.SetCapabilities(f.value.id, caps).Ok()) { std::cerr << "caps failed\n"; return 1; }
+            std::cout << "name=" << argv[2] << " caps=" << caps.size() << "\n"; return 0;
+        }
+        if (cmd == "node-events") {
+            auto r = nodes.RecentEvents(30);
+            if (!r.Ok()) { std::cerr << "events failed\n"; return 1; }
+            for (const auto& e : r.value) std::cout << e << "\n";
+            return 0;
+        }
+        std::cerr << "unknown node command\n"; return 2;
+    }
+
+    // SOVEREIGN_L2_DISPATCH_END
+std::cerr << "unknown domain\n";
             host.Close();
             return 1;
         }
