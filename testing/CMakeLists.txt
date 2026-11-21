@@ -94,3 +94,5 @@ sovereign_add_smoke(memory_facets_smoke_test memory sovereign_memory)
 sovereign_add_smoke(workspace_controller_smoke_test workspace sovereign_workspace)
 
 sovereign_add_smoke(capability_registry_smoke_test capability sovereign_capability)
+
+sovereign_add_smoke(node_registry_smoke_test node sovereign_node)
