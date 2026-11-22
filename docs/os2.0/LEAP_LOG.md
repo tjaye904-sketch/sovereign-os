@@ -25,3 +25,15 @@
 
 ## NEXT
 - L2.1 Node registry (or product hardening as prioritized)
+
+## Branch policy
+- One leap per branch `leap/L{N}-…`
+- Merge to main only at 100% CTest
+
+## Completed
+- L1 capability registry
+- L2 node federation
+- L3 CapabilityGate + gate-check (e87a8f7)
+
+## In progress
+- L4 capability bridge (Python CU/sys)
