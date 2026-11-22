@@ -146,6 +146,10 @@ Result<std::size_t> CapabilityRegistry::SeedDefaults()
         {"sync.peer", "Peer bundle export/import"},
         {"voice.speak", "TTS output"},
         {"voice.listen", "STT input"},
+          {"host.execute", "Governed execute"},
+          {"host.purpose", "Purpose automation"},
+          {"host.voice", "Voice"},
+
     };
     std::size_t added = 0;
     for (const auto& s : seeds)
@@ -178,9 +182,6 @@ Result<std::size_t> CapabilityRegistry::SeedDefaults()
     r.value = added;
     return r;
 
-        {"host.execute", "Governed execute"},
-        {"host.purpose", "Purpose automation"},
-        {"host.voice", "Voice"},
 }
 
 Result<void> CapabilityRegistry::Register(const Capability& cap)
