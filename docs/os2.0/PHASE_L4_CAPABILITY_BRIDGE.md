@@ -16,3 +16,11 @@ Host automation services must respect the same capability registry as the CLI.
 
 ## Branch
 `leap/L4-capability-bridge`
+
+## L4b verified (host)
+
+- Package tree: `~/.local/share/sovereign-computer-use/src-tree/src/sovereign_computer_use/`
+- Gate injected at start of `dispatch()` (before `evaluate`)
+- Start with: `PYTHONPATH=.../src-tree/src` and `SOVEREIGN_CLI` + `SOVEREIGN_DATA_ROOT` set
+- Deny when `capability-disable host.computer_use`:
+  `capability_denied` / `"denied": true` (no Playwright)

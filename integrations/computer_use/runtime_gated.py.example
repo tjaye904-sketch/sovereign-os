@@ -1,0 +1,113 @@
+from __future__ import annotations
+import os
+from pathlib import Path
+from typing import Any
+from . import audit, browser, desktop, desktop
+from .policy import Risk, evaluate
+
+def data_root() -> Path:
+    return Path(os.environ.get("SOVEREIGN_DATA_ROOT", str(Path.home() / ".local/share/sovereign")))
+
+def profile_dir() -> Path:
+    return data_root() / "computer_use" / "chrome_profile"
+
+def artifacts_dir() -> Path:
+    p = data_root() / "computer_use" / "artifacts"
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+def auto_approve_max() -> Risk:
+    v = os.environ.get("SOVEREIGN_CU_AUTO_APPROVE_MAX", "low").lower()
+    try:
+        return Risk(v)
+    except ValueError:
+        return Risk.LOW
+
+def dispatch(action: str, args: dict[str, Any] | None = None, *, approved: bool = False) -> dict[str, Any]:
+    # L4 capability gate (fail closed) — before risk policy
+    if action not in ("ping", "list_tools"):
+        try:
+            from .capability_client import require_for_cu_action
+            _gate = require_for_cu_action(action)
+            if not _gate.get("ok", False):
+                return _gate
+        except Exception as _ex:
+            return {"ok": False, "error": f"capability_gate_error: {_ex}", "denied": True}
+
+    args = dict(args or {})
+    allowed, reason, risk = evaluate(action, args, auto_approve_max=auto_approve_max(), approved=approved)
+    if not allowed:
+        result = {"ok": False, "error": reason, "denied": True}
+        audit.log_event(data_root(), action=action, args=args, result=result, risk=risk.value, allowed=False, reason=reason)
+        result["risk"] = risk.value
+        result["policy_reason"] = reason
+        return result
+    try:
+        result = _run(action, args)
+    except Exception as e:
+        result = {"ok": False, "error": str(e)}
+    audit.log_event(data_root(), action=action, args=args, result=result, risk=risk.value, allowed=True, reason=reason)
+    result["risk"] = risk.value
+    result["policy_reason"] = reason
+    return result
+
+def _run(action: str, args: dict[str, Any]) -> dict[str, Any]:
+    # L4 capability gate (fail closed) — before risk policy
+    if action not in ("ping", "list_tools"):
+        try:
+            from .capability_client import require_for_cu_action
+            _gate = require_for_cu_action(action)
+            if not _gate.get("ok", False):
+                return _gate
+        except Exception as _ex:
+            return {"ok": False, "error": f"capability_gate_error: {_ex}", "denied": True}
+
+    if action == "ping":
+        return {"ok": True, "pong": True, "version": "0.1.1"}
+    if action == "list_tools":
+        from .policy import ACTION_RISK
+        return {"ok": True, "tools": [{"name": k, "risk": v.value} for k, v in ACTION_RISK.items()]}
+    if action == "purpose_list":
+        from .purpose_runtime import handle_purpose_list
+        return handle_purpose_list(args)
+    if action == "purpose_run":
+        from .purpose_runtime import handle_purpose_run
+        return handle_purpose_run(args, lambda a, ar, approved=False: dispatch(a, ar, approved=approved))
+    if action == "desktop_focus":
+        from .purpose_runtime import handle_desktop_focus
+        return handle_desktop_focus(args)
+    if action == "app_open":
+        return desktop.app_open(str(args.get("target", "")))
+    if action == "browser_close":
+        return browser.close_browser()
+    if action == "browser_open":
+        return browser.open_url(str(args.get("url", "")), profile_dir())
+    if action == "browser_snapshot":
+        return browser.snapshot(profile_dir(), int(args.get("max_chars", 4000)))
+    if action == "browser_screenshot":
+        name = str(args.get("name", "shot.png"))
+        return browser.screenshot(profile_dir(), artifacts_dir() / name)
+    if action == "browser_click":
+        return browser.click(profile_dir(), str(args.get("selector", "")))
+    if action == "browser_type":
+        return browser.type_text(profile_dir(), str(args.get("selector", "")), str(args.get("text", "")), bool(args.get("clear", True)))
+    if action == "browser_press":
+        return browser.press(profile_dir(), str(args.get("key", "Enter")))
+    if action == "propose_trade":
+        return {"ok": True, "proposed": True, "symbol": args.get("symbol"), "side": args.get("side"), "size": args.get("size"), "note": "paper plan"}
+    if action == "execute_trade_ui":
+        return {"ok": False, "error": "execute_trade_ui scaffold: configure selectors and paper=true first."}
+    
+    if action in ("desktop_list_windows", "list_windows"):
+        return desktop.list_windows()
+    if action in ("desktop_focus", "focus_window"):
+        return desktop.focus_window(
+            str(args.get("title") or args.get("title_substr") or ""),
+            str(args.get("id") or args.get("window_id") or ""),
+        )
+    if action in ("desktop_screenshot", "screenshot_desktop"):
+        name = str(args.get("name") or "desktop.png")
+        path = artifacts_dir() / name
+        return desktop.desktop_screenshot(path)
+
+    return {"ok": False, "error": f"unknown action: {action}"}
