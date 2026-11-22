@@ -177,6 +177,10 @@ Result<std::size_t> CapabilityRegistry::SeedDefaults()
     }
     r.value = added;
     return r;
+
+        {"host.execute", "Governed execute"},
+        {"host.purpose", "Purpose automation"},
+        {"host.voice", "Voice"},
 }
 
 Result<void> CapabilityRegistry::Register(const Capability& cap)

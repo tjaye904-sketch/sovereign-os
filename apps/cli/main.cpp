@@ -1,3 +1,4 @@
+#include "capability_gate.hpp"
 #include "node_registry.hpp"
 #include "capability_registry.hpp"
 #include "memory_facets.hpp"
@@ -42,6 +43,28 @@ namespace {
 // Returns optional exit code if handled; -1 if not this family of commands.
 int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int argc, char** argv, const std::string& cmd)
 {
+
+    if (cmd == "capability-gate-check") {
+        if (argc < 3) { std::cerr << "usage: capability-gate-check <action-or-id>\n"; return 2; }
+        sovereign::capability::CapabilityRegistry caps;
+        if (caps.Open(host.DataRoot()) != sovereign::capability::CapabilityError::Ok) {
+            std::cerr << "capability open failed\n"; return 1;
+        }
+        (void)caps.SeedDefaults();
+        sovereign::capability::CapabilityGate gate(caps);
+        std::string key = argv[2];
+        auto d = (key.find('.') != std::string::npos && key.rfind("host.", 0) == 0)
+            ? gate.Require(key)
+            : gate.RequireForAction(key);
+        // also allow raw id without host. prefix
+        if (!d.allowed && key.find('.') != std::string::npos)
+            d = gate.Require(key);
+        std::cout << "capability_id=" << d.capability_id
+                  << " allowed=" << (d.allowed ? 1 : 0)
+                  << " reason=" << d.reason << "\n";
+        return d.allowed ? 0 : 3;
+    }
+
     if (cmd == "capability-seed" || cmd == "capability-list" || cmd == "capability-enable"
         || cmd == "capability-disable" || cmd == "capability-check")
     {
@@ -245,6 +268,7 @@ void PrintUsage()
         << "  sovereign-cli node-bind <name> <workspace>\n"
         << "  sovereign-cli node-caps <name> <cap,cap,...>\n"
         << "  sovereign-cli node-events\n"
+                << "  sovereign-cli capability-gate-check <action-or-id>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -481,6 +505,21 @@ int main(int argc, char** argv)
 
     if (cmd == "purpose-run" && argc >= 3)
     {
+        {
+            sovereign::capability::CapabilityRegistry _caps;
+            if (_caps.Open(host.DataRoot()) == sovereign::capability::CapabilityError::Ok) {
+                (void)_caps.SeedDefaults();
+                sovereign::capability::CapabilityGate _gate(_caps);
+                auto _d = _gate.RequireForAction("purpose-run");
+                if (!_d.allowed) {
+                    std::cerr << "capability_denied id=" << _d.capability_id
+                              << " reason=" << _d.reason << "\n";
+                    host.Close();
+                    return 3;
+                }
+            }
+        }
+
         std::string target;
         std::string summary;
         if (argc >= 4)
@@ -2658,6 +2697,21 @@ int main(int argc, char** argv)
 
     if (cmd == "execute" && argc >= 4)
     {
+        {
+            sovereign::capability::CapabilityRegistry _caps;
+            if (_caps.Open(host.DataRoot()) == sovereign::capability::CapabilityError::Ok) {
+                (void)_caps.SeedDefaults();
+                sovereign::capability::CapabilityGate _gate(_caps);
+                auto _d = _gate.RequireForAction("execute");
+                if (!_d.allowed) {
+                    std::cerr << "capability_denied id=" << _d.capability_id
+                              << " reason=" << _d.reason << "\n";
+                    host.Close();
+                    return 3;
+                }
+            }
+        }
+
         std::array<std::uint8_t, 16> decision{};
         if (!FromHex(argv[3], decision))
         {
