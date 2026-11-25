@@ -33,6 +33,7 @@ bool SovereignHost::Open()
         return false;
     }
 
+    if (nodes_.Open(config_.data_root) != node::NodeError::Ok) return false;
     if (capabilities_.Open(config_.data_root) != capability::CapabilityError::Ok)
     {
         return false;
@@ -123,6 +124,7 @@ void SovereignHost::Close() noexcept
     {
         return;
     }
+    nodes_.Close();
     capabilities_.Close();
     sync_.Close();
     audit_.Close();

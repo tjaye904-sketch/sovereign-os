@@ -99,7 +99,7 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
         std::cout << "id=" << id << " enabled=" << (r.value ? 1 : 0) << "\n";
         return 0;
     }
-    if (cmd.rfind("node-", 0) != 0) return -1;
+    if (cmd.rfind("node-", 0) != 0 || cmd == "node-execute") return -1;
     sovereign::node::NodeRegistry nodes;
     if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
     { std::cerr << "node open failed\n"; return 1; }
@@ -273,6 +273,7 @@ void PrintUsage()
                 << "  sovereign-cli desktop-status [--json]\n"
                 << "  sovereign-cli session-ensure [--json]\n"
                 << "  sovereign-cli plan-route [--json] <workspace> <action>\n"
+                << "  sovereign-cli node-execute [--json] <workspace> <action> [payload...]\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3505,6 +3506,52 @@ int main(int argc, char** argv)
         }
         host.Close();
         return dec.allowed ? 0 : 1;
+    }
+
+    if (cmd == "node-execute" && argc >= 4)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 5) { as_json = true; ++idx; }
+        const std::string ws = argv[idx];
+        const std::string act = argv[idx + 1];
+        std::string payload;
+        for (int i = idx + 2; i < argc; ++i) { if (!payload.empty()) payload.push_back(' '); payload += argv[i]; }
+        const auto gate_dec = host.Gate().RequireForAction(act);
+        sovereign::node::NodeExecutionReport rep;
+        rep.workspace = ws;
+        rep.action = act;
+        rep.capability_id = gate_dec.capability_id;
+        if (!gate_dec.allowed)
+        {
+            rep.reason = gate_dec.reason.empty() ? "capability_denied" : gate_dec.reason;
+        }
+        else
+        {
+            const auto res = host.Nodes().ExecuteOnBoundNode(ws, act, gate_dec.capability_id, payload);
+            if (res.Ok()) rep = res.value;
+        }
+        sovereign::audit::AuditEntry ae;
+        ae.category = "federation";
+        ae.action = rep.executed ? "node.execute.allowed" : "node.execute.denied";
+        ae.subject = rep.node_id_hex.empty() ? ws : rep.node_id_hex;
+        ae.detail = "ws=" + ws + " action=" + act + " reason=" + rep.reason;
+        (void)host.Audit().Append(ae);
+        if (as_json)
+        {
+            std::cout << "{\"executed\":" << (rep.executed ? "true" : "false")
+                      << ",\"workspace\":\"" << rep.workspace << "\",\"action\":\"" << rep.action
+                      << "\",\"node_id\":\"" << rep.node_id_hex << "\",\"node\":\"" << rep.node_name
+                      << "\",\"reason\":\"" << rep.reason << "\",\"audit_logged\":true}\n";
+        }
+        else
+        {
+            std::cout << "executed=" << (rep.executed ? "1" : "0") << " workspace=" << rep.workspace
+                      << " action=" << rep.action << " node_id=" << rep.node_id_hex
+                      << " node=" << rep.node_name << " reason=" << rep.reason << " audit_logged=1\n";
+        }
+        host.Close();
+        return rep.executed ? 0 : 1;
     }
 
     PrintUsage();

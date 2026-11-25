@@ -98,6 +98,10 @@ if(TARGET sovereign-cli)
         NAME cli_plan_route
         COMMAND sh -c "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-plan-route $<TARGET_FILE:sovereign-cli> plan-route --json unbound-ws browser_open || true")
     set_tests_properties(cli_plan_route PROPERTIES PASS_REGULAR_EXPRESSION "no_node_bound_to_workspace")
+    add_test(
+        NAME cli_node_execute
+        COMMAND sh -c "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-node-exec $<TARGET_FILE:sovereign-cli> node-execute --json unbound-ws browser_open || true")
+    set_tests_properties(cli_node_execute PROPERTIES PASS_REGULAR_EXPRESSION "no_node_bound_to_workspace")
 endif()
 
 if(TARGET sovereign-daemon)

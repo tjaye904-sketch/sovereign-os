@@ -14,7 +14,8 @@
 - L8 governed purpose runner (`937dfc1`)
 - L9 desktop operator visibility (`ba94a88d`, `ca5109f`)
 - L10 session ensure ready (`428939e`, `d6c9343e`)
-- L11 federation plan routing (`leap/L11-federation-plan-routing`) — `NodeRegistry::RouteWorkspaceAction`, `sovereign-cli plan-route [--json]`, and Mission Control `/api/federation`
+- L11 federation plan routing (`0409941`)
+- L12 federation node execute (`leap/L12-federation-node-execute`) — `NodeRegistry::ExecuteOnBoundNode`, `SovereignHost::Nodes()`, `sovereign-cli node-execute [--json]` with `AuditLog` node-id recording
 
 ## In progress / Starting point
-- **OS 2.0 Leaps L1–L11 complete on `main` (50/50 CTest)**
+- **OS 2.0 Leaps L1–L12 complete on `main` (51/51 CTest)**
