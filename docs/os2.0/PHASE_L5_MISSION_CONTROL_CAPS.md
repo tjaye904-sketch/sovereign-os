@@ -21,3 +21,8 @@ Hub UI lists capability ids with enable/disable toggles; status reflects registr
 
 ## Branch
 `leap/L5-mission-control-caps`
+
+## Verified (host)
+
+- Caps panel: http://127.0.0.1:8769/ui (8768 reserved for sovereign-hub-chat)
+- API list/toggle → capability-gate-check allow/deny for host.computer_use
