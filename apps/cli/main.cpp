@@ -3978,7 +3978,7 @@ int main(int argc, char** argv)
 
     if (cmd == "os2-lab-status")
     {
-        const bool as_json = (argc >= 3 && std::string(argv) == "--json");
+        const bool as_json = (argc >= 3 && std::string(argv[2]) == "--json");
         const bool has_nix = std::filesystem::exists("/nix/var/nix/profiles/default/bin/nix") || std::filesystem::exists("/run/current-system/sw/bin/nix");
         const bool has_qemu = std::filesystem::exists("/usr/bin/qemu-system-x86_64");
         const bool has_xorriso = std::filesystem::exists("/usr/bin/xorriso");
