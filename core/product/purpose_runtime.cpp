@@ -513,6 +513,16 @@ void PurposeRuntime::LogAction(
     entry.detail = detail;
     entry.timestamp = stamp.str();
     action_log_.push_back(entry);
+
+    if (audit_ != nullptr)
+    {
+        sovereign::audit::AuditEntry ae;
+        ae.category = "governance";
+        ae.action = "purpose." + action + "." + status;
+        ae.subject = purpose_id;
+        ae.detail = target.empty() ? detail : (target + ": " + detail);
+        (void)audit_->Append(ae);
+    }
 }
 
 std::vector<PurposeActionLog> PurposeRuntime::ActionLog() const
@@ -555,6 +565,36 @@ PurposeExecutionResult PurposeRuntime::Run(
             result.allowed = false;
             result.executed = false;
             result.reason = host_gate.reason.empty() ? "capability denied: host.purpose" : host_gate.reason;
+            LogAction(pack.id, "purpose_run", target, result.reason, "blocked");
+            return result;
+        }
+    }
+
+    if ((pack.risk == PurposeRisk::High || pack.risk == PurposeRisk::Critical) && governance_ != nullptr)
+    {
+        const std::string gov_action = "purpose.run." + pack.id;
+        const std::string gov_summary = summary.empty()
+            ? ("Execute high-risk purpose pack " + pack.id)
+            : summary;
+        const auto req = governance_->RequestDecision(
+            sovereign::PrincipalId{},
+            gov_action,
+            gov_summary,
+            target);
+        if (!req.Ok())
+        {
+            result.allowed = false;
+            result.executed = false;
+            result.reason = "governance_request_failed";
+            LogAction(pack.id, "purpose_run", target, result.reason, "blocked");
+            return result;
+        }
+        const auto dec = governance_->Get(req.value);
+        if (!dec.Ok() || dec.value.status != sovereign::governance::DecisionStatus::Approved)
+        {
+            result.allowed = false;
+            result.executed = false;
+            result.reason = "governance_approval_required";
             LogAction(pack.id, "purpose_run", target, result.reason, "blocked");
             return result;
         }

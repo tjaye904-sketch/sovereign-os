@@ -1,6 +1,8 @@
 #pragma once
 
+#include "../audit/audit_log.hpp"
 #include "../capability/capability_gate.hpp"
+#include "../governance/governance_service.hpp"
 
 #include <filesystem>
 #include <optional>
@@ -78,6 +80,10 @@ public:
 
     void SetCapabilityGate(sovereign::capability::CapabilityGate* gate) noexcept { gate_ = gate; }
     sovereign::capability::CapabilityGate* Gate() const noexcept { return gate_; }
+    void SetGovernanceService(sovereign::governance::GovernanceService* gov) noexcept { governance_ = gov; }
+    sovereign::governance::GovernanceService* Governance() const noexcept { return governance_; }
+    void SetAuditLog(sovereign::audit::AuditLog* audit) noexcept { audit_ = audit; }
+    sovereign::audit::AuditLog* Audit() const noexcept { return audit_; }
 
     void LoadFromDirectory(const std::filesystem::path& directory);
     void LoadFromFile(const std::filesystem::path& path);
@@ -124,6 +130,8 @@ private:
 
     std::vector<PurposePack> packs_;
     sovereign::capability::CapabilityGate* gate_{nullptr};
+    sovereign::governance::GovernanceService* governance_{nullptr};
+    sovereign::audit::AuditLog* audit_{nullptr};
     mutable std::string active_purpose_id_;
     mutable std::vector<PurposeActionLog> action_log_;
 };

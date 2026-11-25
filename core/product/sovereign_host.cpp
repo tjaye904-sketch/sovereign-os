@@ -33,6 +33,16 @@ bool SovereignHost::Open()
         return false;
     }
 
+    if (capabilities_.Open(config_.data_root) != capability::CapabilityError::Ok)
+    {
+        return false;
+    }
+    (void)capabilities_.SeedDefaults();
+    capability_gate_ = std::make_unique<capability::CapabilityGate>(capabilities_);
+
+    purpose_.SetCapabilityGate(capability_gate_.get());
+    purpose_.SetGovernanceService(&governance_);
+    purpose_.SetAuditLog(&audit_);
     purpose_.LoadFromDirectory(config_.data_root / "purposes");
     purpose_.LoadFromDirectory(std::filesystem::current_path() / "purposes");
 
@@ -113,6 +123,7 @@ void SovereignHost::Close() noexcept
     {
         return;
     }
+    capabilities_.Close();
     sync_.Close();
     audit_.Close();
     goals_.Close();
