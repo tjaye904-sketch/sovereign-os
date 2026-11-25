@@ -3077,9 +3077,18 @@ int main(int argc, char** argv)
             {"knowledge", "knowledge"},
             {"business", "business"},
             {"finance", "finance"},
+            {"life_management", "life_management"},
             {"health", "health"},
+            {"research", "research"},
+            {"security", "security"},
             {"infrastructure", "infrastructure"},
-            {"life", "life"},
+            {"automation", "automation"},
+            {"robotics", "robotics"},
+            {"communications", "communications"},
+            {"creative", "creative"},
+            {"intelligence", "intelligence"},
+            {"governance", "governance"},
+            {"federation", "federation"},
         };
         for (auto& d : domains)
         {
