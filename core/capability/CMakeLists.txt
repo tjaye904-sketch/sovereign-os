@@ -1,4 +1,5 @@
-add_library(sovereign_capability STATIC capability_registry.cpp capability_gate.cpp)
+add_library(sovereign_capability STATIC capability_registry.cpp
+  node_capability_binding.cpp capability_gate.cpp)
 target_include_directories(sovereign_capability PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_features(sovereign_capability PUBLIC cxx_std_23)
 target_compile_options(sovereign_capability PRIVATE -Wall -Wextra -Wpedantic)
