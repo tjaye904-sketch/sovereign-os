@@ -116,6 +116,12 @@ if(TARGET sovereign-cli)
         NAME nixos_lab_gates_smoke
         COMMAND bash ${CMAKE_SOURCE_DIR}/scripts/verify-nixos-lab-gates.sh)
     set_tests_properties(nixos_lab_gates_smoke PROPERTIES PASS_REGULAR_EXPRESSION "NIXOS_LAB_GATES_OK")
+    add_test(
+        NAME cli_fleet_replace_drill
+        COMMAND ${CMAKE_COMMAND} -E env
+            "SOVEREIGN_CLI=$<TARGET_FILE:sovereign-cli>"
+            bash ${CMAKE_SOURCE_DIR}/scripts/sovereign-fleet-drill.sh)
+    set_tests_properties(cli_fleet_replace_drill PROPERTIES PASS_REGULAR_EXPRESSION "FLEET_DRILL_OK")
 endif()
 
 if(TARGET sovereign-daemon)

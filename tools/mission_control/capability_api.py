@@ -162,3 +162,9 @@ def decide_governance(decision_hex: str, approve: bool, reason: str = "mission-c
     cmd = "approve" if approve else "reject"
     code, out = _run([cmd, decision_hex, reason or "mission-control"])
     return {"ok": code == 0, "decision_id": decision_hex, "status": "approved" if approve else "rejected", "detail": out}
+
+
+def fleet_status() -> dict[str, Any]:
+    code, out = _run(["fleet-status", "--json"])
+    import json as _j
+    return {"ok": code == 0, **(_j.loads(out.splitlines()[-1]) if code == 0 and out else {"raw": out})}

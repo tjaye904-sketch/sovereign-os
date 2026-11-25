@@ -99,7 +99,7 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
         std::cout << "id=" << id << " enabled=" << (r.value ? 1 : 0) << "\n";
         return 0;
     }
-    if (cmd.rfind("node-", 0) != 0 || cmd == "node-execute") return -1;
+    if (cmd.rfind("node-", 0) != 0 || cmd == "node-execute" || cmd == "node-replace") return -1;
     sovereign::node::NodeRegistry nodes;
     if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
     { std::cerr << "node open failed\n"; return 1; }
@@ -277,6 +277,8 @@ void PrintUsage()
                 << "  sovereign-cli core-backup [--json] <snapshot-dir>\n"
                 << "  sovereign-cli core-restore [--json] <snapshot-dir>\n"
                 << "  sovereign-cli profile-check [--json]\n"
+                << "  sovereign-cli fleet-status [--json]\n"
+                << "  sovereign-cli node-replace [--json] <workspace> <new-node-name> [endpoint]\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3636,6 +3638,47 @@ int main(int argc, char** argv)
         }
         host.Close();
         return 0;
+    }
+
+    if (cmd == "fleet-status")
+    {
+        const bool as_json = (argc >= 3 && std::string(argv[2]) == "--json");
+        const auto fs = host.Nodes().GetFleetSummary();
+        if (as_json)
+        {
+            std::cout << "{\"total_nodes\":" << fs.total_nodes << ",\"healthy_nodes\":" << fs.healthy_nodes
+                      << ",\"bound_workspaces\":" << fs.bound_workspaces << ",\"target_capacity\":" << fs.target_capacity << "}\n";
+        }
+        else
+        {
+            std::cout << "total_nodes=" << fs.total_nodes << " healthy_nodes=" << fs.healthy_nodes
+                      << " bound_workspaces=" << fs.bound_workspaces << " target_capacity=" << fs.target_capacity << "\n";
+        }
+        host.Close();
+        return 0;
+    }
+    if (cmd == "node-replace" && argc >= 4)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 5) { as_json = true; ++idx; }
+        const std::string ws = argv[idx];
+        const std::string new_name = argv[idx + 1];
+        const std::string ep = (argc > idx + 2) ? argv[idx + 2] : "";
+        const auto r = host.Nodes().ReplaceWorkspaceNode(ws, new_name, ep);
+        const std::string hex = r.Ok() ? sovereign::node::NodeRegistry::IdHex(r.value) : "";
+        sovereign::audit::AuditEntry ae;
+        ae.category = "federation";
+        ae.action = "node.replace";
+        ae.subject = hex.empty() ? ws : hex;
+        ae.detail = "ws=" + ws + " new_node=" + new_name + " ok=" + std::string(r.Ok() ? "1" : "0");
+        (void)host.Audit().Append(ae);
+        if (as_json)
+            std::cout << "{\"ok\":" << (r.Ok() ? "true" : "false") << ",\"workspace\":\"" << ws << "\",\"node\":\"" << new_name << "\",\"node_id\":\"" << hex << "\"}\n";
+        else
+            std::cout << "ok=" << (r.Ok() ? "1" : "0") << " workspace=" << ws << " node=" << new_name << " node_id=" << hex << "\n";
+        host.Close();
+        return r.Ok() ? 0 : 1;
     }
 
     PrintUsage();
