@@ -12,7 +12,8 @@
 - L6 node <-> capability binding (`7da20bb`)
 - L7 federation peer auth (`1a58ad2`)
 - L8 governed purpose runner (`937dfc1`)
-- L9 desktop operator visibility (`ba94a88d`) — `DesktopOperatorStatus` telemetry, `ApiGatewayService::GetDesktopStatus()`, `sovereign-cli desktop-status [--json]`, and Mission Control `/api/desktop-status`
+- L9 desktop operator visibility (`ba94a88d`, `ca5109fd`)
+- L10 session ensure ready (`leap/L10-session-ensure-ready`) — 5-service session readiness topology (`daemon`, `computer_use`, `sys`, `hub`, `caps`), `sovereign-cli session-ensure [--json]`, `scripts/sovereign-session-ensure.sh`, and Mission Control `ensure_ready()`
 
 ## In progress / Starting point
-- **OS 2.0 Capability, Federation, Governance & Operator Visibility Leaps (L1–L9) complete on `main` (48/48 CTest)**
+- **OS 2.0 Leaps L1–L10 complete on `main` (49/49 CTest)**
