@@ -434,6 +434,31 @@ int main(int argc, char** argv)
     }
 
     sovereign::product::SovereignHost host(cfg);
+    if (argc >= 3 && std::string(argv[1]) == "core-restore")
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 4) { as_json = true; ++idx; }
+        const std::filesystem::path snap_dir = argv[idx];
+        const auto rep = sovereign::archive::ArchiveService::RestoreCoreSnapshot(snap_dir, cfg.data_root);
+        if (rep.ok && host.Open())
+        {
+            sovereign::audit::AuditEntry ae;
+            ae.category = "ha";
+            ae.action = "core-restore";
+            ae.subject = snap_dir.string();
+            ae.detail = "ok=1 checksum=" + rep.checksum_hex;
+            (void)host.Audit().Append(ae);
+            host.Close();
+        }
+        if (as_json)
+            std::cout << "{\"ok\":" << (rep.ok ? "true" : "false") << ",\"op\":\"core-restore\",\"files\":" << rep.file_count
+                      << ",\"bytes\":" << rep.total_bytes << ",\"checksum\":\"" << rep.checksum_hex << "\",\"detail\":\"" << rep.detail << "\"}\n";
+        else
+            std::cout << "ok=" << (rep.ok ? "1" : "0") << " op=core-restore files=" << rep.file_count << " checksum=" << rep.checksum_hex << "\n";
+        return rep.ok ? 0 : 1;
+    }
+
     if (!host.Open())
     {
         std::cerr << "failed to open host at " << cfg.data_root << '\n';
