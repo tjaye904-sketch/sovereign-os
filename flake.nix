@@ -90,6 +90,7 @@
         modules = [
           "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
           ./nix/modules/sovereign-iso.nix
+          ./nix/modules/sovereign-voice.nix
           { nixpkgs.overlays = [ sovOverlay ]; }
         ];
       };

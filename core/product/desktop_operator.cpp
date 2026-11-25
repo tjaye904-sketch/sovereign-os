@@ -584,8 +584,12 @@ VoiceRouteReceipt DesktopOperatorGateway::RouteVoice(
     {
         const char* home = std::getenv("HOME");
         const char* env_m = std::getenv("SOVEREIGN_PIPER_MODEL");
-        const std::string piper_bin = home ? (std::string(home) + "/.local/bin/piper") : "";
-        const std::string model_path = env_m ? std::string(env_m) : (home ? (std::string(home) + "/.local/share/piper/en_US-lessac-medium.onnx") : "");
+        std::string piper_bin = home ? (std::string(home) + "/.local/bin/piper") : "";
+        if (piper_bin.empty() || !std::filesystem::exists(piper_bin))
+            if (std::filesystem::exists("/run/current-system/sw/bin/piper")) piper_bin = "/run/current-system/sw/bin/piper";
+        std::string model_path = env_m ? std::string(env_m) : (home ? (std::string(home) + "/.local/share/piper/en_US-lessac-medium.onnx") : "");
+        if (model_path.empty() || !std::filesystem::exists(model_path))
+            if (std::filesystem::exists("/etc/sovereign/voices/en_US-lessac-medium.onnx")) model_path = "/etc/sovereign/voices/en_US-lessac-medium.onnx";
         if (!piper_bin.empty() && std::filesystem::exists(piper_bin) && !model_path.empty() && std::filesystem::exists(model_path))
         {
             std::string clean;
