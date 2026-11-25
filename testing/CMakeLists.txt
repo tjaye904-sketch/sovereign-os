@@ -150,6 +150,10 @@ if(TARGET sovereign-cli)
         NAME cli_doctor_hardening_smoke
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l23.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> doctor --json --fix")
     set_tests_properties(cli_doctor_hardening_smoke PROPERTIES PASS_REGULAR_EXPRESSION "\"all_ok\":true")
+    add_test(
+        NAME nixos_iso_vm_boot_gate
+        COMMAND bash ${CMAKE_SOURCE_DIR}/scripts/verify-nixos-iso-vm-boot.sh)
+    set_tests_properties(nixos_iso_vm_boot_gate PROPERTIES PASS_REGULAR_EXPRESSION "NIXOS_ISO_VM_BOOT_GATE_OK")
 endif()
 
 if(TARGET sovereign-daemon)

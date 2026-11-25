@@ -35,7 +35,7 @@
 | 10 | Desktop operator MVP | done |
 | 11 | Voice on same router | done |
 | 12 | Hardening & daily UX | done |
-| 13 | OS 2.0 optional (ISO/VM) | ready_for_os2_lab |
+| 13 | OS 2.0 optional (ISO/VM) | done |
 
 Update **Status** only when closing a WP: `not_started` → `in_progress` → `done`.
 

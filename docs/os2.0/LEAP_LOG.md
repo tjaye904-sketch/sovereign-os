@@ -56,3 +56,4 @@
 - L21 desktop operator a11y / window drive MVP (DesktopOperatorGateway::DriveWindow + CLI desktop-drive + /api/desktop-drive)
 - L22 voice router integration on unified CapabilityGate + Policy router (DesktopOperatorGateway::RouteVoice + CLI voice-route + /api/voice)
 - L23 hardening & daily UX doctor + unified Mission Control dashboard (TransparencyService::RunDoctor + CLI doctor --fix + /api/doctor + WP-00..WP-12 done)
+- L24 OS 2.0 NixOS ISO/VM lab build & boot verification (verify-nixos-iso-vm-boot.sh + CLI os2-lab-status + /api/os2-lab + WP-13 done)
