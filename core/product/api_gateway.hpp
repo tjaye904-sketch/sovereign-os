@@ -1,5 +1,6 @@
 #pragma once
 
+#include "desktop_operator.hpp"
 #include "governance_types.hpp"
 #include "principal_id.hpp"
 
@@ -34,6 +35,8 @@ public:
         const PrincipalId& actor,
         const std::string& decision_hex,
         const std::string& reason);
+
+    [[nodiscard]] DesktopOperatorStatus GetDesktopStatus(std::size_t audit_limit = 10) const;
 
 private:
     static std::string ToHex(const std::array<std::uint8_t, 16>& bytes);

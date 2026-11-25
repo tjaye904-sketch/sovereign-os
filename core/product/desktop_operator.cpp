@@ -406,4 +406,74 @@ bool DesktopOperatorGateway::ExecuteApprovedAction(
     return ok;
 }
 
+DesktopOperatorStatus DesktopOperatorGateway::Status(std::size_t audit_limit) const
+{
+    DesktopOperatorStatus out;
+    out.has_display = HasHeadedDesktop();
+    if (IsHeadlessExecutionMode() || !out.has_display)
+    {
+        out.mode = "headless";
+    }
+    else
+    {
+        out.mode = "headed";
+    }
+
+    if (host_ == nullptr)
+    {
+        return out;
+    }
+
+    const auto cu = host_->Capabilities().IsEnabled("host.computer_use");
+    out.computer_use_enabled = cu.Ok() && cu.value;
+    out.active_purpose_id = host_->Purpose().CurrentPurposeId();
+
+    const auto pending = host_->Governance().ListPending();
+    if (pending.Ok())
+    {
+        out.pending_decisions = pending.value.size();
+    }
+
+    std::error_code ec;
+    const auto evidence_dir = host_->DataRoot() / "desktop";
+    if (std::filesystem::exists(evidence_dir, ec) && std::filesystem::is_directory(evidence_dir, ec))
+    {
+        for (const auto& entry : std::filesystem::directory_iterator(evidence_dir, ec))
+        {
+            if (entry.is_regular_file(ec))
+            {
+                ++out.evidence_files;
+            }
+        }
+    }
+
+    const auto desktop_audits = host_->Audit().ListByCategory("desktop", audit_limit);
+    if (desktop_audits.Ok())
+    {
+        for (const auto& item : desktop_audits.value)
+        {
+            out.recent_audit_events.push_back(
+                "desktop:" + item.action + " subject=" + item.subject + " detail=" + item.detail);
+        }
+    }
+
+    const auto gov_audits = host_->Audit().ListByCategory("governance", audit_limit);
+    if (gov_audits.Ok())
+    {
+        for (const auto& item : gov_audits.value)
+        {
+            if (out.recent_audit_events.size() >= audit_limit)
+            {
+                break;
+            }
+            if (item.action.rfind("purpose.", 0) == 0)
+            {
+                out.recent_audit_events.push_back(
+                    "governance:" + item.action + " subject=" + item.subject + " detail=" + item.detail);
+            }
+        }
+    }
+
+    return out;
+}
 } // namespace sovereign::product
