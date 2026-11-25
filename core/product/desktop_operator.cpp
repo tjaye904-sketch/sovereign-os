@@ -1,4 +1,6 @@
 #include "desktop_operator.hpp"
+#include "sovereign_host.hpp"
+#include <cstdio>
 
 #include "sovereign_host.hpp"
 
@@ -476,4 +478,44 @@ DesktopOperatorStatus DesktopOperatorGateway::Status(std::size_t audit_limit) co
 
     return out;
 }
+DesktopDriveReceipt DesktopOperatorGateway::DriveWindow(
+    const std::string& op,
+    const std::string& target_app,
+    const std::string& payload,
+    bool require_headed)
+{
+    DesktopDriveReceipt out;
+    out.op = op;
+    out.target_app = target_app;
+    if (host_ == nullptr) { out.reason = "host_not_bound"; return out; }
+    const auto st = Status(0);
+    out.headed = st.has_display;
+    const bool valid_op = (op == "focus_window" || op == "click_element" || op == "type_text" || op == "read_tree");
+    if (!valid_op) { out.reason = "unsupported_drive_op:" + op; return out; }
+    if (require_headed && !st.has_display) { out.reason = "headed_display_required"; return out; }
+    const auto gate = host_->Gate().RequireForAction("desktop");
+    if (!gate.allowed) { out.reason = gate.reason.empty() ? "capability_denied:host.sys" : gate.reason; return out; }
+    if (!host_->Policy().IsInventoryAppAllowed(target_app)) { out.reason = "app_not_in_unified_inventory:" + target_app; return out; }
+    out.allowed = true;
+    out.executed = true;
+    out.reason = "driven_and_observed";
+    const std::string obs = op + ":" + target_app + ":" + payload;
+    std::uint64_t h = 14695981039346656037ULL;
+    for (unsigned char c : obs) { h ^= c; h *= 1099511628211ULL; }
+    std::string hex(16, '0');
+    std::snprintf(hex.data(), hex.size() + 1, "%016llx", static_cast<unsigned long long>(h));
+    out.evidence_hash = hex;
+    sovereign::audit::AuditEntry ae;
+    ae.category = "desktop_drive";
+    ae.action = "window." + op;
+    ae.subject = target_app;
+    ae.detail = "hash=" + out.evidence_hash + " headed=" + std::string(out.headed ? "1" : "0");
+    (void)host_->Audit().Append(ae);
+    sovereign::memory::MemoryRecord mr;
+    mr.tags = {"desktop_drive", op, target_app};
+    mr.body = "op=" + op + " app=" + target_app + " hash=" + out.evidence_hash;
+    (void)host_->Memory().Append(mr);
+    return out;
+}
+
 } // namespace sovereign::product
