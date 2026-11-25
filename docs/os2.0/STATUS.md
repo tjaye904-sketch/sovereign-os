@@ -7,7 +7,8 @@
 - L1–L7: Capability Registry, Node Federation, CapabilityGate, Python CU/sys Bridge, Mission Control Caps Panel, Node-Capability Binding, Federation Peer Auth
 - L8–L10: Governed Purpose Runner (`937dfc1`), Desktop Operator Visibility (`ca5109f`), 5-Service Session Ensure Ready (`d6c9343`)
 - L11–L13: Federation Plan Routing (`0409941`), Federation Node Execute (`fcab1f9`), Mission Control Federation & Governance Console (`10ad708`)
-- L14–L16: Core HA Backup & Restore (`6703fd5`), NixOS Lab & Headless Node Image Gates (`b89f13d`), Multi-Workspace Node Fleet Scale & Replace Drill (`leap/L16-workspace-node-fleet-replace`)
+- L14–L16: Core HA Backup & Restore (`6703fd5`), NixOS Lab & Headless Node Image Gates (`b89f13d`), Multi-Workspace Node Fleet Scale & Replace Drill (`132e59d`)
+- L17: Post-Act Outcome Verification & Closed-Loop Cognitive Execution (`leap/L17-observe-after-act-closed-loop`) — `ActionExecutor::VerifyOutcome`, `sovereign-cli verify-outcome` & `goal-execute [--json]`, and Mission Control `/api/observe`
 
 ## In progress / Starting point
-- **OS 2.0 Master Build Plan Leaps L1–L16 complete on `main` (55/55 CTest)**
+- **OS 2.0 Leaps L1–L17 complete on `main` (56/56 CTest)**

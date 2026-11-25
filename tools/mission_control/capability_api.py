@@ -168,3 +168,10 @@ def fleet_status() -> dict[str, Any]:
     code, out = _run(["fleet-status", "--json"])
     import json as _j
     return {"ok": code == 0, **(_j.loads(out.splitlines()[-1]) if code == 0 and out else {"raw": out})}
+
+
+def observe_status() -> dict[str, Any]:
+    c1, o1 = _run(["audit-list", "closed_loop"])
+    c2, o2 = _run(["audit-list", "verification"])
+    events = [l for l in (o1 + "\n" + o2).splitlines() if l.strip()]
+    return {"ok": c1 == 0 and c2 == 0, "count": len(events), "events": events[-20:]}

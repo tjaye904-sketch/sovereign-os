@@ -279,6 +279,8 @@ void PrintUsage()
                 << "  sovereign-cli profile-check [--json]\n"
                 << "  sovereign-cli fleet-status [--json]\n"
                 << "  sovereign-cli node-replace [--json] <workspace> <new-node-name> [endpoint]\n"
+                << "  sovereign-cli verify-outcome [--json] <action> <expected> <observed...>\n"
+                << "  sovereign-cli goal-execute [--json] <workspace> <goal...>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3679,6 +3681,70 @@ int main(int argc, char** argv)
             std::cout << "ok=" << (r.Ok() ? "1" : "0") << " workspace=" << ws << " node=" << new_name << " node_id=" << hex << "\n";
         host.Close();
         return r.Ok() ? 0 : 1;
+    }
+
+    if (cmd == "verify-outcome" && argc >= 5)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 6) { as_json = true; ++idx; }
+        const std::string act = argv[idx];
+        const std::string exp = argv[idx + 1];
+        std::string obs;
+        for (int i = idx + 2; i < argc; ++i) { if (!obs.empty()) obs.push_back(' '); obs += argv[i]; }
+        const auto rec = sovereign::executor::ActionExecutor::VerifyOutcome(act, "token_match", exp, obs);
+        sovereign::audit::AuditEntry ae;
+        ae.category = "verification";
+        ae.action = rec.verified ? "outcome.verified" : "outcome.failed";
+        ae.subject = act;
+        ae.detail = "hash=" + rec.evidence_hash + " detail=" + rec.observed_detail;
+        (void)host.Audit().Append(ae);
+        if (as_json)
+            std::cout << "{\"verified\":" << (rec.verified ? "true" : "false") << ",\"action\":\"" << rec.action
+                      << "\",\"evidence_hash\":\"" << rec.evidence_hash << "\",\"detail\":\"" << rec.observed_detail << "\"}\n";
+        else
+            std::cout << "verified=" << (rec.verified ? "1" : "0") << " action=" << rec.action
+                      << " evidence_hash=" << rec.evidence_hash << " detail=" << rec.observed_detail << "\n";
+        host.Close();
+        return rec.verified ? 0 : 1;
+    }
+    if (cmd == "goal-execute" && argc >= 4)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 5) { as_json = true; ++idx; }
+        const std::string ws = argv[idx];
+        std::string goal;
+        for (int i = idx + 1; i < argc; ++i) { if (!goal.empty()) goal.push_back(' '); goal += argv[i]; }
+        const std::string act = "browser_open";
+        const auto gate = host.Gate().RequireForAction(act);
+        sovereign::node::NodeExecutionReport ex;
+        if (gate.allowed)
+        {
+            const auto r = host.Nodes().ExecuteOnBoundNode(ws, act, gate.capability_id, goal);
+            if (r.Ok()) ex = r.value;
+        }
+        const auto ver = sovereign::executor::ActionExecutor::VerifyOutcome(
+            act, "non_empty_output", ex.executed ? "executed_on_bound_node" : "unroutable", ex.executed ? ex.reason : "");
+        sovereign::audit::AuditEntry ae;
+        ae.category = "closed_loop";
+        ae.action = ver.verified ? "goal.verified" : "goal.unverified";
+        ae.subject = ws;
+        ae.detail = "goal=" + goal + " node=" + ex.node_name + " hash=" + ver.evidence_hash;
+        (void)host.Audit().Append(ae);
+        sovereign::memory::MemoryRecord mr;
+        mr.tags = {"closed_loop", ver.verified ? "verified" : "failed", ws};
+        mr.body = "goal=" + goal + " node=" + ex.node_name + " verified=" + std::string(ver.verified ? "1" : "0") + " hash=" + ver.evidence_hash;
+        (void)host.Memory().Append(mr);
+        if (as_json)
+            std::cout << "{\"verified\":" << (ver.verified ? "true" : "false") << ",\"workspace\":\"" << ws
+                      << "\",\"node\":\"" << ex.node_name << "\",\"evidence_hash\":\"" << ver.evidence_hash
+                      << "\",\"memory_recorded\":true}\n";
+        else
+            std::cout << "verified=" << (ver.verified ? "1" : "0") << " workspace=" << ws
+                      << " node=" << ex.node_name << " evidence_hash=" << ver.evidence_hash << " memory_recorded=1\n";
+        host.Close();
+        return ver.verified ? 0 : 1;
     }
 
     PrintUsage();
