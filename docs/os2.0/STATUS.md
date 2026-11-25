@@ -16,7 +16,8 @@
 - L10 session ensure ready (`428939e`, `d6c9343e`)
 - L11 federation plan routing (`0409941`)
 - L12 federation node execute (`fcab1f9`)
-- L13 Mission Control federation & governance console (`leap/L13-mc-federation-governance-console`) — `/api/federation`, `/api/governance/pending`, `POST /api/governance/{id}`, and `/ui` governance console
+- L13 Mission Control federation & governance console (`10ad708`)
+- L14 Core HA backup, verify & cold-failover restore (`leap/L14-core-ha-backup-restore`) — `ArchiveService` Core snapshot/checksum/restore, `sovereign-cli core-backup` & `core-restore [--json]`, and `scripts/sovereign-ha-drill.sh`
 
 ## In progress / Starting point
-- **OS 2.0 Leaps L1–L13 complete on `main` (52/52 CTest)**
+- **OS 2.0 Leaps L1–L14 complete on `main` (53/53 CTest)**

@@ -106,6 +106,12 @@ if(TARGET sovereign-cli)
         NAME mc_federation_governance_smoke
         COMMAND python3 -c "import sys; sys.path.insert(0, '${CMAKE_SOURCE_DIR}/tools/mission_control'); import capability_api as c; f=c.federation_status(); g=c.list_pending_decisions(); assert f.get('ok') and g.get('ok'); print('mc_fed_gov_ok')")
     set_tests_properties(mc_federation_governance_smoke PROPERTIES PASS_REGULAR_EXPRESSION "mc_fed_gov_ok")
+    add_test(
+        NAME cli_core_ha_drill
+        COMMAND ${CMAKE_COMMAND} -E env
+            "SOVEREIGN_CLI=$<TARGET_FILE:sovereign-cli>"
+            bash ${CMAKE_SOURCE_DIR}/scripts/sovereign-ha-drill.sh)
+    set_tests_properties(cli_core_ha_drill PROPERTIES PASS_REGULAR_EXPRESSION "HA_DRILL_OK")
 endif()
 
 if(TARGET sovereign-daemon)

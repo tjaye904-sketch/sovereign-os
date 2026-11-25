@@ -46,3 +46,4 @@
 - L11 federation plan routing (NodeRegistry::RouteWorkspaceAction + CLI plan-route + Mission Control /api/federation)
 - L12 federation node execute (NodeRegistry::ExecuteOnBoundNode + SovereignHost::Nodes + CLI node-execute + AuditLog)
 - L13 Mission Control federation & governance console (/api/federation + /api/governance/pending + /ui approve/reject)
+- L14 Core HA backup, verify & cold-failover restore (ArchiveService Core snapshot + CLI core-backup/core-restore + sovereign-ha-drill.sh)
