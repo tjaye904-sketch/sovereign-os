@@ -34,6 +34,13 @@ int main()
     // L2.5
     REQUIRE(reg.AppendEvent("test", "ok").Ok());
     REQUIRE(reg.RecentEvents(5).value.size() >= 1);
+    // L11: workspace plan routing
+    auto r_ok = reg.RouteWorkspaceAction("development", "cli", "host.cli");
+    REQUIRE(r_ok.Ok() && r_ok.value.allowed && r_ok.value.node_name == "laptop");
+    auto r_nocap = reg.RouteWorkspaceAction("development", "speak", "voice.speak");
+    REQUIRE(r_nocap.Ok() && !r_nocap.value.allowed && r_nocap.value.reason == "node_missing_capability:voice.speak");
+    auto r_unb = reg.RouteWorkspaceAction("research", "cli", "host.cli");
+    REQUIRE(r_unb.Ok() && !r_unb.value.allowed && r_unb.value.reason == "no_node_bound_to_workspace");
 
     reg.Close();
     sovereign::node::NodeRegistry reg2;

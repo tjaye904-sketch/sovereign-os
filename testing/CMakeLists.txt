@@ -94,6 +94,10 @@ if(TARGET sovereign-cli)
             "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-session-ensure"
             $<TARGET_FILE:sovereign-cli> session-ensure --json)
     set_tests_properties(cli_session_ensure PROPERTIES PASS_REGULAR_EXPRESSION "\"total\":5")
+    add_test(
+        NAME cli_plan_route
+        COMMAND sh -c "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-plan-route $<TARGET_FILE:sovereign-cli> plan-route --json unbound-ws browser_open || true")
+    set_tests_properties(cli_plan_route PROPERTIES PASS_REGULAR_EXPRESSION "no_node_bound_to_workspace")
 endif()
 
 if(TARGET sovereign-daemon)

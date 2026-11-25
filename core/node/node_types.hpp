@@ -52,6 +52,19 @@ struct Result<void>
     static Result Err(NodeError e) { return Result{e}; }
 };
 
+struct PlanRouteDecision
+{
+    bool allowed{false};
+    std::string workspace;
+    std::string action;
+    std::string capability_id;
+    std::string node_id_hex;
+    std::string node_name;
+    std::string endpoint;
+    NodeHealth health{NodeHealth::Unknown};
+    std::string reason;
+};
+
 struct NodeRecord
 {
     NodeId id{};

@@ -272,6 +272,7 @@ void PrintUsage()
                 << "  sovereign-cli capability-gate-check <action-or-id>\n"
                 << "  sovereign-cli desktop-status [--json]\n"
                 << "  sovereign-cli session-ensure [--json]\n"
+                << "  sovereign-cli plan-route [--json] <workspace> <action>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3470,6 +3471,40 @@ int main(int argc, char** argv)
         }
         host.Close();
         return 0;
+    }
+
+    if (cmd == "plan-route" && argc >= 4)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 5) { as_json = true; ++idx; }
+        const std::string ws = argv[idx];
+        const std::string act = argv[idx + 1];
+        const std::string cap = sovereign::capability::CapabilityGate::CapabilityForAction(act);
+        sovereign::node::NodeRegistry reg;
+        sovereign::node::PlanRouteDecision dec;
+        if (reg.Open(host.DataRoot()) == sovereign::node::NodeError::Ok)
+        {
+            const auto r = reg.RouteWorkspaceAction(ws, act, cap);
+            if (r.Ok()) dec = r.value;
+            reg.Close();
+        }
+        if (as_json)
+        {
+            std::cout << "{\"allowed\":" << (dec.allowed ? "true" : "false")
+                      << ",\"workspace\":\"" << dec.workspace << "\",\"action\":\"" << dec.action
+                      << "\",\"capability_id\":\"" << dec.capability_id << "\",\"node\":\"" << dec.node_name
+                      << "\",\"endpoint\":\"" << dec.endpoint << "\",\"reason\":\"" << dec.reason << "\"}\n";
+        }
+        else
+        {
+            std::cout << "allowed=" << (dec.allowed ? "1" : "0") << " workspace=" << dec.workspace
+                      << " action=" << dec.action << " capability_id=" << dec.capability_id
+                      << " node=" << dec.node_name << " endpoint=" << dec.endpoint
+                      << " reason=" << dec.reason << "\n";
+        }
+        host.Close();
+        return dec.allowed ? 0 : 1;
     }
 
     PrintUsage();

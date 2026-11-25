@@ -12,8 +12,9 @@
 - L6 node <-> capability binding (`7da20bb`)
 - L7 federation peer auth (`1a58ad2`)
 - L8 governed purpose runner (`937dfc1`)
-- L9 desktop operator visibility (`ba94a88d`, `ca5109fd`)
-- L10 session ensure ready (`leap/L10-session-ensure-ready`) — 5-service session readiness topology (`daemon`, `computer_use`, `sys`, `hub`, `caps`), `sovereign-cli session-ensure [--json]`, `scripts/sovereign-session-ensure.sh`, and Mission Control `ensure_ready()`
+- L9 desktop operator visibility (`ba94a88d`, `ca5109f`)
+- L10 session ensure ready (`428939e`, `d6c9343e`)
+- L11 federation plan routing (`leap/L11-federation-plan-routing`) — `NodeRegistry::RouteWorkspaceAction`, `sovereign-cli plan-route [--json]`, and Mission Control `/api/federation`
 
 ## In progress / Starting point
-- **OS 2.0 Leaps L1–L10 complete on `main` (49/49 CTest)**
+- **OS 2.0 Leaps L1–L11 complete on `main` (50/50 CTest)**

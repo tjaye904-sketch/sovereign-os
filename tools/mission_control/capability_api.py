@@ -132,3 +132,9 @@ def desktop_status() -> dict[str, Any]:
         return data
     except Exception as exc:
         return {"ok": False, "error": f"invalid json: {exc}", "raw": out}
+
+
+def federation_status() -> dict[str, Any]:
+    code, out = _run(["node-list"])
+    nodes = [line for line in out.splitlines() if line.strip()]
+    return {"ok": code == 0, "nodes": nodes, "count": len(nodes)}
