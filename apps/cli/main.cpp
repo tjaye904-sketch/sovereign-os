@@ -288,6 +288,7 @@ void PrintUsage()
                 << "  sovereign-cli purpose-inspect [--json] <purpose-id>\n"
                 << "  sovereign-cli desktop-drive [--json] [--allow-headless] <op> <app> [payload...]\n"
                 << "  sovereign-cli voice-route [--json] <speak|listen|intent> <utterance...>\n"
+                << "  sovereign-cli doctor [--json] [--fix]\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3932,6 +3933,46 @@ int main(int argc, char** argv)
                       << " evidence_hash=" << rec.evidence_hash << " reason=" << rec.reason << "\n";
         host.Close();
         return rec.routed ? 0 : 1;
+    }
+
+    if (cmd == "doctor")
+    {
+        bool as_json = false;
+        bool auto_fix = false;
+        for (int i = 2; i < argc; ++i)
+        {
+            const std::string f = argv[i];
+            if (f == "--json") as_json = true;
+            else if (f == "--fix") auto_fix = true;
+        }
+        sovereign::diagnostics::TransparencyService diag(host);
+        const auto rep = diag.RunDoctor(auto_fix);
+        sovereign::audit::AuditEntry ae;
+        ae.category = "hardening";
+        ae.action = auto_fix ? "doctor.fix" : "doctor.check";
+        ae.subject = "host";
+        ae.detail = "passed=" + std::to_string(rep.passed) + "/" + std::to_string(rep.total);
+        (void)host.Audit().Append(ae);
+        if (as_json)
+        {
+            std::cout << "{\"all_ok\":" << (rep.all_ok ? "true" : "false")
+                      << ",\"passed\":" << rep.passed << ",\"total\":" << rep.total << ",\"checks\":[";
+            for (std::size_t i = 0; i < rep.checks.size(); ++i)
+            {
+                if (i) std::cout << ",";
+                std::cout << "{\"name\":\"" << rep.checks[i].name << "\",\"ok\":" << (rep.checks[i].ok ? "true" : "false")
+                          << ",\"detail\":\"" << rep.checks[i].detail << "\"}";
+            }
+            std::cout << "]}\n";
+        }
+        else
+        {
+            std::cout << "doctor all_ok=" << (rep.all_ok ? "1" : "0") << " passed=" << rep.passed << "/" << rep.total << "\n";
+            for (const auto& c : rep.checks)
+                std::cout << "  [" << (c.ok ? "PASS" : "WARN") << "] " << c.name << " (" << c.detail << ")\n";
+        }
+        host.Close();
+        return rep.all_ok ? 0 : 1;
     }
 
     PrintUsage();
