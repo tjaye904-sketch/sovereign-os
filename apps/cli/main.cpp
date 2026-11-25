@@ -282,6 +282,8 @@ void PrintUsage()
                 << "  sovereign-cli verify-outcome [--json] <action> <expected> <observed...>\n"
                 << "  sovereign-cli goal-execute [--json] <workspace> <goal...>\n"
                 << "  sovereign-cli curiosity-probe [--json] <probe-action> <topic...>\n"
+                << "  sovereign-cli inventory-sync [--apps a,b,c]\n"
+                << "  sovereign-cli app-check [--json] <app-id>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3785,6 +3787,59 @@ int main(int argc, char** argv)
         }
         host.Close();
         return rep.allowed ? 0 : 1;
+    }
+
+    if (cmd == "inventory-sync")
+    {
+        std::vector<std::string> apps;
+        if (argc >= 4 && std::string(argv[2]) == "--apps")
+        {
+            std::string s = argv[3], cur;
+            for (char c : s) { if (c == ',') { if (!cur.empty()) apps.push_back(cur); cur.clear(); } else cur.push_back(c); }
+            if (!cur.empty()) apps.push_back(cur);
+        }
+        else
+        {
+            for (const auto& dir : {std::filesystem::path("/usr/share/applications"), std::filesystem::path(std::getenv("HOME") ? std::getenv("HOME") : "") / ".local/share/applications"})
+            {
+                std::error_code ec;
+                if (!std::filesystem::exists(dir, ec)) continue;
+                for (const auto& e : std::filesystem::directory_iterator(dir, ec))
+                    if (e.path().extension() == ".desktop") apps.push_back(e.path().stem().string());
+            }
+        }
+        const auto r = host.Policy().SyncInventoryAllowlist(apps);
+        sovereign::audit::AuditEntry ae;
+        ae.category = "inventory";
+        ae.action = "inventory.sync";
+        ae.subject = "allowlist";
+        ae.detail = "count=" + std::to_string(r.value);
+        (void)host.Audit().Append(ae);
+        std::cout << "synced_apps=" << r.value << "\n";
+        host.Close();
+        return r.Ok() ? 0 : 1;
+    }
+    if (cmd == "app-check" && argc >= 3)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 4) { as_json = true; ++idx; }
+        const std::string app_id = argv[idx];
+        const bool ok = host.Policy().IsInventoryAppAllowed(app_id);
+        sovereign::audit::AuditEntry ae;
+        ae.category = "inventory";
+        ae.action = ok ? "app_open.allowed" : "app_open.denied";
+        ae.subject = app_id;
+        ae.detail = ok ? "in_unified_inventory" : "not_in_unified_inventory";
+        (void)host.Audit().Append(ae);
+        if (as_json)
+            std::cout << "{\"allowed\":" << (ok ? "true" : "false") << ",\"app_id\":\"" << app_id
+                      << "\",\"reason\":\"" << (ok ? "in_unified_inventory" : "not_in_unified_inventory") << "\"}\n";
+        else
+            std::cout << "allowed=" << (ok ? "1" : "0") << " app_id=" << app_id
+                      << " reason=" << (ok ? "in_unified_inventory" : "not_in_unified_inventory") << "\n";
+        host.Close();
+        return ok ? 0 : 1;
     }
 
     PrintUsage();

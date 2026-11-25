@@ -51,3 +51,4 @@
 - L16 multi-workspace node fleet scaling & atomic replace drill (GetFleetSummary + ReplaceWorkspaceNode + sovereign-fleet-drill.sh + /api/fleet)
 - L17 post-act outcome verification & closed-loop goal execution (ActionExecutor::VerifyOutcome + CLI verify-outcome/goal-execute + /api/observe)
 - L18 policy-bounded curiosity probe (CuriosityEngine::RunBoundedProbe + CLI curiosity-probe + Mission Control /api/curiosity)
+- L19 unified inventory & policy allowlist enforcement (PolicyEngine::SyncInventoryAllowlist + CLI inventory-sync/app-check + /api/inventory)

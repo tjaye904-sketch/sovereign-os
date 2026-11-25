@@ -130,6 +130,10 @@ if(TARGET sovereign-cli)
         NAME cli_curiosity_bounded_probe
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l18.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> curiosity-probe --json observe kernel_telemetry && ! SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> curiosity-probe --json shell rm_rf >/dev/null")
     set_tests_properties(cli_curiosity_bounded_probe PROPERTIES PASS_REGULAR_EXPRESSION "bounded_probe_allowed")
+    add_test(
+        NAME cli_unified_inventory_allowlist
+        COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l19.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> inventory-sync --apps firefox,code >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> app-check --json firefox && ! SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> app-check --json unlisted-evil-app >/dev/null")
+    set_tests_properties(cli_unified_inventory_allowlist PROPERTIES PASS_REGULAR_EXPRESSION "in_unified_inventory")
 endif()
 
 if(TARGET sovereign-daemon)
