@@ -1,15 +1,16 @@
 { config, pkgs, lib, ... }:
 let
+  hf = "https://" + "huggingface.co";
   piperModel = pkgs.fetchurl {
-    url = "https://huggingface.co";
+    url = "${hf}/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx";
     sha256 = "5efe09e69902187827af646e1a6e9d269dee769f9877d17b16b1b46eeaaf019f";
   };
   piperConfig = pkgs.fetchurl {
-    url = "https://huggingface.co.json";
+    url = "${hf}/rhasspy/piper-voices/resolve/v1.0.0/en/en_US/lessac/medium/en_US-lessac-medium.onnx.json";
     sha256 = "efe19c417bed055f2d69908248c6ba650fa135bc868b0e6abb3da181dab690a0";
   };
   whisperModel = pkgs.fetchurl {
-    url = "https://huggingface.co";
+    url = "${hf}/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin";
     sha256 = "sha256-88ZEgynBnRmY4QFLZGRAxIcKtbQmJtK/PFTI75Ve/Rw=";
   };
   hubChat = pkgs.writeShellScriptBin "sovereign-hub-chat" ''
