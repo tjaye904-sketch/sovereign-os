@@ -170,6 +170,10 @@ if(TARGET sovereign-cli)
         NAME workspace_sixteen_domains_smoke
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l34.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-init-domains | wc -l | grep -q '^16$' && SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-list | grep -q 'robotics' && SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-list | grep -q 'federation'")
     set_tests_properties(workspace_sixteen_domains_smoke PROPERTIES PASS_REGULAR_EXPRESSION "^$")
+    add_test(
+        NAME model_router_task_assignment_smoke
+        COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l35.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> model-bind development qwen2.5-coder:7b >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> model-bind communications granite4.1:3b >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> model-route --json development && SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> model-route --json communications")
+    set_tests_properties(model_router_task_assignment_smoke PROPERTIES PASS_REGULAR_EXPRESSION "granite4.1:3b")
 endif()
 
 if(TARGET sovereign-daemon)

@@ -2527,6 +2527,49 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    if (cmd == "model-bind" && argc >= 4)
+    {
+        const std::string scope = argv[2];
+        const std::string model = argv[3];
+        host.Models().BindRoute(scope, model);
+        sovereign::memory::MemoryRecord rec;
+        rec.tags = {"model-route", scope};
+        rec.body = "scope=" + scope + " model=" + model;
+        (void)host.Memory().Append(rec);
+        sovereign::audit::AuditEntry ae;
+        ae.category = "model_router";
+        ae.action = "model.bind";
+        ae.subject = scope;
+        ae.detail = "model=" + model;
+        (void)host.Audit().Append(ae);
+        std::cout << "bound scope=" << scope << " model=" << model << '\n';
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "model-route" && argc >= 3)
+    {
+        const bool json = (std::string(argv[2]) == "--json");
+        const std::string scope = json ? (argc >= 4 ? argv[3] : "") : argv[2];
+        const auto recs = host.Memory().Search("scope=" + scope + " model=");
+        if (recs.Ok())
+        {
+            for (const auto& r : recs.value)
+            {
+                const auto pos = r.body.find(" model=");
+                if (r.body.rfind("scope=" + scope + " ", 0) == 0 && pos != std::string::npos)
+                    host.Models().BindRoute(scope, r.body.substr(pos + 7));
+            }
+        }
+        const std::string resolved = host.Models().ResolveModel(scope, host.DefaultModel());
+        if (json)
+            std::cout << "{\"scope\":\"" << scope << "\",\"model\":\"" << resolved << "\",\"authority\":\"sovereign_policy_plane\"}\n";
+        else
+            std::cout << "scope=" << scope << " model=" << resolved << " authority=sovereign_policy_plane\n";
+        host.Close();
+        return 0;
+    }
+
     if (cmd == "models")
     {
         auto r = host.Models().ListModels();
