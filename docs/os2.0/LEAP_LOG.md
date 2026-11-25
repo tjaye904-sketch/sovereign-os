@@ -66,3 +66,4 @@
 - L34 16 canonical workspace domains, L35 task-oriented multi-model routing, L36 canonical architectural README.md & 5-tier Maturity Matrix
 - L37 push-to-talk hands-free voice chat bridge (sovereign-voice-talk.sh: Dell mic -> Whisper STT -> sovereign-hub-chat -> Piper TTS, CTest #69)
 - L40 NixOS ISO audio & two-way voice stack (PipeWire, Intel SOF firmware, piper-tts en_US-lessac-medium, whisper-cpp ggml-base.en, ollama, sovereign-voice-talk)
+- L45 KDE Plasma 6 graphical desktop + SDDM Wayland autologin + NetworkManager Wi-Fi + Firefox & Mission Control launchers in NixOS ISO
