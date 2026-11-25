@@ -79,6 +79,12 @@
         ];
       };
 
+      checks.${system} = {
+        iso-eval = self.packages.${system}.iso;
+        vm-eval = self.packages.${system}.sovereign-vm;
+        node-vm-eval = self.packages.${system}.sovereign-node-vm;
+      };
+
       nixosConfigurations.sovereign-iso = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [

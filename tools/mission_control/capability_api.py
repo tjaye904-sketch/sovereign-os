@@ -214,3 +214,12 @@ def doctor_status() -> dict[str, Any]:
         return {"ok": c == 0, **_j.loads(out.splitlines()[-1])}
     except Exception:
         return {"ok": False, "raw": out}
+
+
+def os2_lab_status() -> dict[str, Any]:
+    c, out = _run(["os2-lab-status", "--json"])
+    import json as _j
+    try:
+        return {"ok": c == 0, **_j.loads(out.splitlines()[-1])}
+    except Exception:
+        return {"ok": False, "raw": out}

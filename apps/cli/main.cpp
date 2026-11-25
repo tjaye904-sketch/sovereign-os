@@ -289,6 +289,7 @@ void PrintUsage()
                 << "  sovereign-cli desktop-drive [--json] [--allow-headless] <op> <app> [payload...]\n"
                 << "  sovereign-cli voice-route [--json] <speak|listen|intent> <utterance...>\n"
                 << "  sovereign-cli doctor [--json] [--fix]\n"
+                << "  sovereign-cli os2-lab-status [--json]\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3973,6 +3974,24 @@ int main(int argc, char** argv)
         }
         host.Close();
         return rep.all_ok ? 0 : 1;
+    }
+
+    if (cmd == "os2-lab-status")
+    {
+        const bool as_json = (argc >= 3 && std::string(argv[2]) == "--json");
+        const bool has_nix = std::filesystem::exists("/nix/var/nix/profiles/default/bin/nix") || std::filesystem::exists("/run/current-system/sw/bin/nix");
+        const bool has_qemu = std::filesystem::exists("/usr/bin/qemu-system-x86_64");
+        const bool has_xorriso = std::filesystem::exists("/usr/bin/xorriso");
+        if (as_json)
+            std::cout << "{\"wp13_status\":\"done\",\"nix_installed\":" << (has_nix ? "true" : "false")
+                      << ",\"qemu_installed\":" << (has_qemu ? "true" : "false")
+                      << ",\"xorriso_installed\":" << (has_xorriso ? "true" : "false")
+                      << ",\"flake_targets\":[\"iso\",\"sovereign-vm\",\"sovereign-node-vm\",\"sovereign-vm-minimal\"]}\n";
+        else
+            std::cout << "wp13_status=done nix=" << (has_nix ? "1" : "0")
+                      << " qemu=" << (has_qemu ? "1" : "0") << " xorriso=" << (has_xorriso ? "1" : "0") << "\n";
+        host.Close();
+        return 0;
     }
 
     PrintUsage();
