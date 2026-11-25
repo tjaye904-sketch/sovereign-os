@@ -236,10 +236,10 @@ std::vector<SessionServiceEndpoint> ServiceOrchestrator::DefaultSessionTopology(
 {
     return {
         SessionServiceEndpoint{.name = "daemon", .unit_or_bin = "sovereign-daemon", .health_url = "", .port = 0, .ready = false},
-        SessionServiceEndpoint{.name = "computer_use", .unit_or_bin = "sovereign-cu-server", .health_url = "http://localhost", .port = 8765, .ready = false},
-        SessionServiceEndpoint{.name = "sys", .unit_or_bin = "sovereign-sys-server", .health_url = "http://localhost", .port = 8767, .ready = false},
-        SessionServiceEndpoint{.name = "hub", .unit_or_bin = "sovereign-hub-server", .health_url = "http://localhost", .port = 8766, .ready = false},
-        SessionServiceEndpoint{.name = "caps", .unit_or_bin = "caps_sidecar.py", .health_url = "http://localhost", .port = 8769, .ready = false},
+        SessionServiceEndpoint{.name = "computer_use", .unit_or_bin = "sovereign-cu-server", .health_url = "http://localhost:8765/health", .port = 8765, .ready = false},
+        SessionServiceEndpoint{.name = "sys", .unit_or_bin = "sovereign-sys-server", .health_url = "http://localhost:8767/health", .port = 8767, .ready = false},
+        SessionServiceEndpoint{.name = "hub", .unit_or_bin = "sovereign-hub-server", .health_url = "http://localhost:8766/api/status", .port = 8766, .ready = false},
+        SessionServiceEndpoint{.name = "caps", .unit_or_bin = "caps_sidecar.py", .health_url = "http://localhost:8769/health", .port = 8769, .ready = false},
     };
 }
 
