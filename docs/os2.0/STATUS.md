@@ -17,7 +17,8 @@
 - L11 federation plan routing (`0409941`)
 - L12 federation node execute (`fcab1f9`)
 - L13 Mission Control federation & governance console (`10ad708`)
-- L14 Core HA backup, verify & cold-failover restore (`leap/L14-core-ha-backup-restore`) — `ArchiveService` Core snapshot/checksum/restore, `sovereign-cli core-backup` & `core-restore [--json]`, and `scripts/sovereign-ha-drill.sh`
+- L14 Core HA backup, verify & cold-failover restore (`6703fd5`)
+- L15 NixOS lab & headless workspace node image gates (`leap/L15-nixos-lab-node-image-gates`) — `nix/modules/sovereign-node.nix`, `flake.nix` `sovereign-node`, `scripts/verify-nixos-lab-gates.sh`, and `sovereign-cli profile-check [--json]`
 
 ## In progress / Starting point
-- **OS 2.0 Leaps L1–L14 complete on `main` (53/53 CTest)**
+- **OS 2.0 Leaps L1–L15 complete on `main` (54/54 CTest)**
