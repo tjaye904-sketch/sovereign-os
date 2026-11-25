@@ -476,5 +476,4 @@ DesktopOperatorStatus DesktopOperatorGateway::Status(std::size_t audit_limit) co
 
     return out;
 }
-
 } // namespace sovereign::product

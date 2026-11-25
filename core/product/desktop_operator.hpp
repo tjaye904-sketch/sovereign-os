@@ -4,6 +4,7 @@
 #include "principal_id.hpp"
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -15,7 +16,7 @@ class SovereignHost;
 
 struct DesktopOperatorStatus
 {
-    std::string mode; // headed | headless
+    std::string mode;
     bool has_display{false};
     bool computer_use_enabled{false};
     std::string active_purpose_id;
