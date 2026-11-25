@@ -232,4 +232,40 @@ Result<PolicyDecision> PolicyEngine::DryRun(
     return EvaluateImpl(roles, action, true);
 }
 
+Result<std::size_t> PolicyEngine::SyncInventoryAllowlist(const std::vector<std::string>& app_ids)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!open_ || directory_.empty()) return Result<std::size_t>{PolicyError::StorageFailure, 0};
+    std::vector<std::string> clean;
+    for (const auto& raw : app_ids)
+    {
+        if (!raw.empty() && std::find(clean.begin(), clean.end(), raw) == clean.end())
+            clean.push_back(raw);
+    }
+    std::sort(clean.begin(), clean.end());
+    std::ofstream out(directory_ / "inventory_allowlist.dat", std::ios::trunc);
+    if (!out.is_open()) return Result<std::size_t>{PolicyError::StorageFailure, 0};
+    for (const auto& id : clean) out << id << "\n";
+    return Result<std::size_t>{PolicyError::Ok, clean.size()};
+}
+
+std::vector<std::string> PolicyEngine::ListInventoryAllowlist() const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    std::vector<std::string> items;
+    if (directory_.empty()) return items;
+    std::ifstream in(directory_ / "inventory_allowlist.dat");
+    std::string line;
+    while (std::getline(in, line))
+        if (!line.empty()) items.push_back(line);
+    return items;
+}
+
+bool PolicyEngine::IsInventoryAppAllowed(const std::string& app_id) const
+{
+    if (app_id.empty()) return false;
+    const auto items = ListInventoryAllowlist();
+    return std::find(items.begin(), items.end(), app_id) != items.end();
+}
+
 } // namespace sovereign::policy

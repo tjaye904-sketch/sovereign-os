@@ -31,6 +31,9 @@ public:
     std::uint64_t Version() const;
     Result<void> SetRule(const PolicyRule& rule); // bumps version
     Result<std::vector<PolicyRule>> ListRules() const;
+    Result<std::size_t> SyncInventoryAllowlist(const std::vector<std::string>& app_ids);
+    std::vector<std::string> ListInventoryAllowlist() const;
+    bool IsInventoryAppAllowed(const std::string& app_id) const;
 
 private:
     Result<PolicyDecision> EvaluateImpl(
