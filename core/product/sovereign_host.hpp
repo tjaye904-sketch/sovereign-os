@@ -9,6 +9,8 @@
 #include "archive_service.hpp"
 #include "audit_log.hpp"
 #include "briefing_service.hpp"
+#include "../capability/capability_gate.hpp"
+#include "../capability/capability_registry.hpp"
 #include "cognitive_service.hpp"
 #include "desktop_operator.hpp"
 #include "evolution_engine.hpp"
@@ -69,6 +71,8 @@ public:
     DesktopOperatorGateway& Desktop() noexcept { return *desktop_; }
     ExternalInterfaceGateway& External() noexcept { return *external_; }
     ApiGatewayService& ApiGateway() noexcept { return *api_gateway_; }
+    capability::CapabilityRegistry& Capabilities() noexcept { return capabilities_; }
+    capability::CapabilityGate& Gate() noexcept { return *capability_gate_; }
     PurposeRuntime& Purpose() noexcept { return purpose_; }
     cognitive::CognitiveService& Cognitive() noexcept { return *cognitive_; }
     executor::ActionExecutor& Executor() noexcept { return *executor_; }
@@ -100,6 +104,8 @@ private:
     std::unique_ptr<DesktopOperatorGateway> desktop_;
     std::unique_ptr<ExternalInterfaceGateway> external_;
     std::unique_ptr<ApiGatewayService> api_gateway_;
+    capability::CapabilityRegistry capabilities_{};
+    std::unique_ptr<capability::CapabilityGate> capability_gate_;
     PurposeRuntime purpose_{};
     std::unique_ptr<cognitive::CognitiveService> cognitive_;
     std::unique_ptr<executor::ActionExecutor> executor_;

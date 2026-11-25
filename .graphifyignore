@@ -1,0 +1,6 @@
+build/
+dist/
+.git/
+__pycache__/
+*.qcow2
+*.iso

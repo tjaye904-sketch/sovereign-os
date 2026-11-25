@@ -37,3 +37,7 @@
 
 ## In progress
 - L4 capability bridge (Python CU/sys)
+
+- L6 node <-> capability binding (7da20bb)
+- L7 federation peer auth (1a58ad2)
+- L8 governed purpose runner (CapabilityGate + GovernanceService + AuditLog)

@@ -49,3 +49,4 @@ nixos.qcow2
 .xgrok/
 *.AppImage
 tatus - should be clean
+graphify-out/

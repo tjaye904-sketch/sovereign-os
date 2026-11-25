@@ -506,17 +506,13 @@ int main(int argc, char** argv)
     if (cmd == "purpose-run" && argc >= 3)
     {
         {
-            sovereign::capability::CapabilityRegistry _caps;
-            if (_caps.Open(host.DataRoot()) == sovereign::capability::CapabilityError::Ok) {
-                (void)_caps.SeedDefaults();
-                sovereign::capability::CapabilityGate _gate(_caps);
-                auto _d = _gate.RequireForAction("purpose-run");
-                if (!_d.allowed) {
-                    std::cerr << "capability_denied id=" << _d.capability_id
-                              << " reason=" << _d.reason << "\n";
-                    host.Close();
-                    return 3;
-                }
+            auto _d = host.Gate().RequireForAction("purpose-run");
+            if (!_d.allowed) {
+                host.Purpose().LogAction(argv[2], "purpose_run", "", _d.reason, "blocked");
+                std::cerr << "capability_denied id=" << _d.capability_id
+                          << " reason=" << _d.reason << "\n";
+                host.Close();
+                return 3;
             }
         }
 
