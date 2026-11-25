@@ -11,4 +11,5 @@
 ## In progress / Starting point
 - L29: Autonomous multi-turn tool dispatch & synthesis loop in `sovereign-cli chat-tools` (6 tools, max 4 turns, CTest #64)
 - L30: Live Linux `wmctrl` window dispatch & Piper TTS (`en_US-lessac-medium.onnx` + `pw-play`/`aplay`) audio bindings (CTest #65)
-- **Next packet (Final Step):** `leap/L31-multi-node-enrollment-and-usb-release` (Two-node peer enrollment drill & physical USB flash / bare-metal secondary-machine boot)
+- L31: Two-node peer enrollment drill (`sovereign-multinode-drill.sh`) & safe physical USB flash / bare-metal boot helper (`sovereign-flash-usb.sh`, CTest #66)
+- **Status:** All OS 2.0 Master Build Plan (`P0`–`P7`), JARVIS Completion Pathway (`WP-00`–`WP-13`), and Next-Horizon (`L28`–`L31`) milestones complete on `main` (`66/66` CTest passing)
