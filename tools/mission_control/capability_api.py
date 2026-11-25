@@ -175,3 +175,9 @@ def observe_status() -> dict[str, Any]:
     c2, o2 = _run(["audit-list", "verification"])
     events = [l for l in (o1 + "\n" + o2).splitlines() if l.strip()]
     return {"ok": c1 == 0 and c2 == 0, "count": len(events), "events": events[-20:]}
+
+
+def curiosity_status() -> dict[str, Any]:
+    c, out = _run(["audit-list", "curiosity"])
+    probes = [l for l in out.splitlines() if l.strip()]
+    return {"ok": c == 0, "count": len(probes), "probes": probes[-20:]}
