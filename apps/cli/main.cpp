@@ -6,6 +6,7 @@
 // Sovereign local CLI — in-process SovereignHost surface (not a network gateway).
 
 #include "sovereign_host.hpp"
+#include "service_orchestrator.hpp"
 #include "transparency_report.hpp"
 #include "domain_tool_runner.hpp"
 #include "identity_verifier.hpp"
@@ -270,6 +271,7 @@ void PrintUsage()
         << "  sovereign-cli node-events\n"
                 << "  sovereign-cli capability-gate-check <action-or-id>\n"
                 << "  sovereign-cli desktop-status [--json]\n"
+                << "  sovereign-cli session-ensure [--json]\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3430,6 +3432,41 @@ int main(int argc, char** argv)
             {
                 std::cout << "audit=" << ev << "\n";
             }
+        }
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "session-ensure")
+    {
+        const bool as_json = (argc >= 3 && std::string(argv[2]) == "--json");
+        auto probe = [](const sovereign::os_runtime::SessionServiceEndpoint& ep) -> bool {
+            if (ep.port == 0)
+                return std::system("pgrep -f sovereign-daemon >/dev/null 2>&1") == 0;
+            const std::string cmd_str = "curl -fsS --max-time 1 " + ep.health_url + " >/dev/null 2>&1";
+            return std::system(cmd_str.c_str()) == 0;
+        };
+        const auto rep = sovereign::os_runtime::ServiceOrchestrator::EvaluateSessionReadiness(probe);
+        if (as_json)
+        {
+            std::cout << "{\"all_ready\":" << (rep.all_ready ? "true" : "false")
+                      << ",\"ready_count\":" << rep.ready_count
+                      << ",\"total\":" << rep.services.size() << ",\"services\":[";
+            for (std::size_t i = 0; i < rep.services.size(); ++i)
+            {
+                const auto& s = rep.services[i];
+                if (i > 0) std::cout << ",";
+                std::cout << "{\"name\":\"" << s.name << "\",\"port\":" << s.port
+                          << ",\"ready\":" << (s.ready ? "true" : "false") << "}";
+            }
+            std::cout << "]}\n";
+        }
+        else
+        {
+            std::cout << "all_ready=" << (rep.all_ready ? "1" : "0")
+                      << " ready_count=" << rep.ready_count << "/" << rep.services.size() << "\n";
+            for (const auto& s : rep.services)
+                std::cout << "service=" << s.name << " port=" << s.port << " ready=" << (s.ready ? "1" : "0") << "\n";
         }
         host.Close();
         return 0;
