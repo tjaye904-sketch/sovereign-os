@@ -48,6 +48,9 @@
 
         sovereign-vm =
           self.nixosConfigurations.sovereign-system.config.system.build.vm;
+
+        sovereign-node-vm =
+          self.nixosConfigurations.sovereign-node.config.system.build.vm;
       };
 
       nixosConfigurations.sovereign-vm-minimal = nixpkgs.lib.nixosSystem {
@@ -58,6 +61,14 @@
       nixosConfigurations.sovereign-system-bare = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [ ./nix/modules/sovereign-system.nix ];
+      };
+
+      nixosConfigurations.sovereign-node = nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [
+          ./nix/modules/sovereign-node.nix
+          { nixpkgs.overlays = [ sovOverlay ]; }
+        ];
       };
 
       nixosConfigurations.sovereign-system = nixpkgs.lib.nixosSystem {

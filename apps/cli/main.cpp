@@ -276,6 +276,7 @@ void PrintUsage()
                 << "  sovereign-cli node-execute [--json] <workspace> <action> [payload...]\n"
                 << "  sovereign-cli core-backup [--json] <snapshot-dir>\n"
                 << "  sovereign-cli core-restore [--json] <snapshot-dir>\n"
+                << "  sovereign-cli profile-check [--json]\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3611,6 +3612,30 @@ int main(int argc, char** argv)
         }
         host.Close();
         return rep.ok ? 0 : 1;
+    }
+
+    if (cmd == "profile-check")
+    {
+        const bool as_json = (argc >= 3 && std::string(argv[2]) == "--json");
+        const char* env_prof = std::getenv("SOVEREIGN_PROFILE");
+        const bool is_nixos = std::filesystem::exists("/etc/NIXOS") || (env_prof != nullptr && std::string(env_prof) == "nixos-sovereign");
+        const std::string profile = is_nixos ? "nixos-sovereign" : "host-pop";
+        const bool has_flake = std::filesystem::exists("flake.nix") || std::filesystem::exists("../flake.nix");
+        const bool has_node_mod = std::filesystem::exists("nix/modules/sovereign-node.nix") || std::filesystem::exists("../nix/modules/sovereign-node.nix");
+        if (as_json)
+        {
+            std::cout << "{\"profile\":\"" << profile << "\",\"is_nixos\":" << (is_nixos ? "true" : "false")
+                      << ",\"flake_present\":" << (has_flake ? "true" : "false")
+                      << ",\"node_module_present\":" << (has_node_mod ? "true" : "false") << "}\n";
+        }
+        else
+        {
+            std::cout << "profile=" << profile << " is_nixos=" << (is_nixos ? "1" : "0")
+                      << " flake_present=" << (has_flake ? "1" : "0")
+                      << " node_module_present=" << (has_node_mod ? "1" : "0") << "\n";
+        }
+        host.Close();
+        return 0;
     }
 
     PrintUsage();

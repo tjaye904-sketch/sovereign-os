@@ -112,6 +112,10 @@ if(TARGET sovereign-cli)
             "SOVEREIGN_CLI=$<TARGET_FILE:sovereign-cli>"
             bash ${CMAKE_SOURCE_DIR}/scripts/sovereign-ha-drill.sh)
     set_tests_properties(cli_core_ha_drill PROPERTIES PASS_REGULAR_EXPRESSION "HA_DRILL_OK")
+    add_test(
+        NAME nixos_lab_gates_smoke
+        COMMAND bash ${CMAKE_SOURCE_DIR}/scripts/verify-nixos-lab-gates.sh)
+    set_tests_properties(nixos_lab_gates_smoke PROPERTIES PASS_REGULAR_EXPRESSION "NIXOS_LAB_GATES_OK")
 endif()
 
 if(TARGET sovereign-daemon)

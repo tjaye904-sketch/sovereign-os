@@ -47,3 +47,4 @@
 - L12 federation node execute (NodeRegistry::ExecuteOnBoundNode + SovereignHost::Nodes + CLI node-execute + AuditLog)
 - L13 Mission Control federation & governance console (/api/federation + /api/governance/pending + /ui approve/reject)
 - L14 Core HA backup, verify & cold-failover restore (ArchiveService Core snapshot + CLI core-backup/core-restore + sovereign-ha-drill.sh)
+- L15 NixOS lab & headless workspace node image gates (sovereign-node.nix + flake.nix + verify-nixos-lab-gates.sh + CLI profile-check)
