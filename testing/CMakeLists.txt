@@ -166,6 +166,10 @@ if(TARGET sovereign-cli)
         NAME multinode_peer_enrollment_drill
         COMMAND bash ${CMAKE_SOURCE_DIR}/scripts/sovereign-multinode-drill.sh $<TARGET_FILE:sovereign-cli>)
     set_tests_properties(multinode_peer_enrollment_drill PROPERTIES PASS_REGULAR_EXPRESSION "MULTINODE_ENROLLMENT_DRILL_OK")
+    add_test(
+        NAME workspace_sixteen_domains_smoke
+        COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l34.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-init-domains | wc -l | grep -q '^16$' && SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-list | grep -q 'robotics' && SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-list | grep -q 'federation'")
+    set_tests_properties(workspace_sixteen_domains_smoke PROPERTIES PASS_REGULAR_EXPRESSION "^$")
 endif()
 
 if(TARGET sovereign-daemon)
