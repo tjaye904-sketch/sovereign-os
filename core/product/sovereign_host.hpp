@@ -11,6 +11,7 @@
 #include "briefing_service.hpp"
 #include "../capability/capability_gate.hpp"
 #include "../capability/capability_registry.hpp"
+#include "../node/node_registry.hpp"
 #include "cognitive_service.hpp"
 #include "desktop_operator.hpp"
 #include "evolution_engine.hpp"
@@ -73,6 +74,7 @@ public:
     ApiGatewayService& ApiGateway() noexcept { return *api_gateway_; }
     capability::CapabilityRegistry& Capabilities() noexcept { return capabilities_; }
     capability::CapabilityGate& Gate() noexcept { return *capability_gate_; }
+    node::NodeRegistry& Nodes() noexcept { return nodes_; }
     PurposeRuntime& Purpose() noexcept { return purpose_; }
     cognitive::CognitiveService& Cognitive() noexcept { return *cognitive_; }
     executor::ActionExecutor& Executor() noexcept { return *executor_; }
@@ -106,6 +108,7 @@ private:
     std::unique_ptr<ApiGatewayService> api_gateway_;
     capability::CapabilityRegistry capabilities_{};
     std::unique_ptr<capability::CapabilityGate> capability_gate_;
+    node::NodeRegistry nodes_{};
     PurposeRuntime purpose_{};
     std::unique_ptr<cognitive::CognitiveService> cognitive_;
     std::unique_ptr<executor::ActionExecutor> executor_;
