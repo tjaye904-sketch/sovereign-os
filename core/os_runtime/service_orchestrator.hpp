@@ -49,6 +49,22 @@ struct ServiceStatus
     std::string last_error;
 };
 
+struct SessionServiceEndpoint
+{
+    std::string name;
+    std::string unit_or_bin;
+    std::string health_url;
+    std::uint16_t port{0};
+    bool ready{false};
+};
+
+struct SessionReadinessReport
+{
+    bool all_ready{false};
+    std::size_t ready_count{0};
+    std::vector<SessionServiceEndpoint> services;
+};
+
 class ServiceOrchestrator
 {
 public:
@@ -61,6 +77,9 @@ public:
     void WatchdogTick();
     std::vector<ServiceStatus> List() const;
     ServiceStatus Get(const std::string& name) const;
+    static std::vector<SessionServiceEndpoint> DefaultSessionTopology();
+    static SessionReadinessReport EvaluateSessionReadiness(
+        const std::function<bool(const SessionServiceEndpoint&)>& probe);
 
 private:
     std::vector<std::string> TopoOrder() const;

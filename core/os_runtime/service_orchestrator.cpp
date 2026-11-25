@@ -232,4 +232,32 @@ ServiceStatus ServiceOrchestrator::Get(const std::string& name) const
     return it->second;
 }
 
+std::vector<SessionServiceEndpoint> ServiceOrchestrator::DefaultSessionTopology()
+{
+    return {
+        SessionServiceEndpoint{.name = "daemon", .unit_or_bin = "sovereign-daemon", .health_url = "", .port = 0, .ready = false},
+        SessionServiceEndpoint{.name = "computer_use", .unit_or_bin = "sovereign-cu-server", .health_url = "http://127.0.0", .port = 8765, .ready = false},
+        SessionServiceEndpoint{.name = "sys", .unit_or_bin = "sovereign-sys-server", .health_url = "http://127.0.0", .port = 8767, .ready = false},
+        SessionServiceEndpoint{.name = "hub", .unit_or_bin = "sovereign-hub-server", .health_url = "http://127.0.0", .port = 8766, .ready = false},
+        SessionServiceEndpoint{.name = "caps", .unit_or_bin = "caps_sidecar.py", .health_url = "http://127.0.0", .port = 8769, .ready = false},
+    };
+}
+
+SessionReadinessReport ServiceOrchestrator::EvaluateSessionReadiness(
+    const std::function<bool(const SessionServiceEndpoint&)>& probe)
+{
+    SessionReadinessReport report;
+    report.services = DefaultSessionTopology();
+    for (auto& svc : report.services)
+    {
+        svc.ready = probe ? probe(svc) : false;
+        if (svc.ready)
+        {
+            ++report.ready_count;
+        }
+    }
+    report.all_ready = !report.services.empty() && report.ready_count == report.services.size();
+    return report;
+}
+
 } // namespace sovereign::os_runtime
