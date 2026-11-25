@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../capability/capability_gate.hpp"
+
 #include <filesystem>
 #include <optional>
 #include <string>
@@ -74,6 +76,9 @@ class PurposeRuntime
 public:
     PurposeRuntime();
 
+    void SetCapabilityGate(sovereign::capability::CapabilityGate* gate) noexcept { gate_ = gate; }
+    sovereign::capability::CapabilityGate* Gate() const noexcept { return gate_; }
+
     void LoadFromDirectory(const std::filesystem::path& directory);
     void LoadFromFile(const std::filesystem::path& path);
     bool RegisterPack(PurposePack pack);
@@ -118,6 +123,7 @@ private:
     static PurposeRisk ParseRisk(const std::string& value);
 
     std::vector<PurposePack> packs_;
+    sovereign::capability::CapabilityGate* gate_{nullptr};
     mutable std::string active_purpose_id_;
     mutable std::vector<PurposeActionLog> action_log_;
 };

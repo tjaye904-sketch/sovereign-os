@@ -15,6 +15,7 @@ target_link_libraries(
         sovereign_domain
         sovereign_identity
         sovereign_governance
+    sovereign_capability
         sovereign_policy
         sovereign_memory
         sovereign_workspace

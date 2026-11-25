@@ -546,6 +546,20 @@ PurposeExecutionResult PurposeRuntime::Run(
 {
     PurposeExecutionResult result;
     result.purpose_id = pack.id;
+
+    if (gate_ != nullptr)
+    {
+        const auto host_gate = gate_->Require("host.purpose");
+        if (!host_gate.allowed)
+        {
+            result.allowed = false;
+            result.executed = false;
+            result.reason = host_gate.reason.empty() ? "capability denied: host.purpose" : host_gate.reason;
+            LogAction(pack.id, "purpose_run", target, result.reason, "blocked");
+            return result;
+        }
+    }
+
     result.allowed = true;
     result.executed = true;
 
@@ -599,6 +613,24 @@ PurposeEvaluation PurposeRuntime::CanRun(
     {
         eval.reason = "empty action";
         return eval;
+    }
+
+    if (gate_ != nullptr)
+    {
+        const auto host_gate = gate_->Require("host.purpose");
+        if (!host_gate.allowed)
+        {
+            eval.reason = host_gate.reason.empty() ? "capability denied: host.purpose" : host_gate.reason;
+            return eval;
+        }
+        const auto action_gate = gate_->RequireForAction(action_name);
+        if (!action_gate.allowed)
+        {
+            eval.reason = action_gate.reason.empty()
+                ? ("capability denied for action: " + action_name)
+                : action_gate.reason;
+            return eval;
+        }
     }
 
     if (!ListContains(pack.allowed_tools, action_name))
