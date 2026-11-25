@@ -99,3 +99,5 @@ sovereign_add_smoke(capability_gate_smoke_test capability sovereign_capability)
 sovereign_add_smoke(node_registry_smoke_test node sovereign_node)
 
 sovereign_add_smoke(node_capability_binding_smoke_test capability sovereign_capability)
+
+sovereign_add_smoke(peer_auth_smoke_test federation sovereign_federation)
