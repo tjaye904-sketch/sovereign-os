@@ -63,3 +63,4 @@
 - L29 autonomous 4-turn tool dispatch & synthesis loop in sovereign-cli chat-tools (CTest #64 cli_chat_tools_loop_smoke)
 - L30 live Linux wmctrl window dispatch & Piper TTS audio playback bindings (CTest #65 cli_live_window_voice_bridge)
 - L31 two-node peer enrollment drill (sovereign-multinode-drill.sh) & physical USB flash helper (sovereign-flash-usb.sh, CTest #66)
+- L34 16 canonical workspace domains, L35 task-oriented multi-model routing, L36 canonical architectural README.md & 5-tier Maturity Matrix
