@@ -52,3 +52,4 @@
 - L17 post-act outcome verification & closed-loop goal execution (ActionExecutor::VerifyOutcome + CLI verify-outcome/goal-execute + /api/observe)
 - L18 policy-bounded curiosity probe (CuriosityEngine::RunBoundedProbe + CLI curiosity-probe + Mission Control /api/curiosity)
 - L19 unified inventory & policy allowlist enforcement (PolicyEngine::SyncInventoryAllowlist + CLI inventory-sync/app-check + /api/inventory)
+- L20 canonical purpose library & inventory validation (PurposeRuntime::SeedDefaultLibrary + ValidateAgainstInventory + CLI purpose-seed/purpose-inspect + /api/purposes)

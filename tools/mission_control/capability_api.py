@@ -187,3 +187,9 @@ def inventory_status() -> dict[str, Any]:
     c, out = _run(["audit-list", "inventory"])
     events = [l for l in out.splitlines() if l.strip()]
     return {"ok": c == 0, "count": len(events), "events": events[-20:]}
+
+
+def purposes_status() -> dict[str, Any]:
+    c, out = _run(["purpose-list"])
+    packs = [l for l in out.splitlines() if l.strip()]
+    return {"ok": c == 0, "count": len(packs), "purposes": packs}

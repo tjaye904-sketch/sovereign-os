@@ -834,4 +834,42 @@ PurposeRisk PurposeRuntime::ParseRisk(const std::string& value)
     return PurposeRisk::Low;
 }
 
+std::size_t PurposeRuntime::SeedDefaultLibrary(const std::filesystem::path& directory)
+{
+    std::error_code ec;
+    if (!directory.empty()) std::filesystem::create_directories(directory, ec);
+    const std::vector<PurposePack> lib = {
+        {"research.web_collect", "research.web_collect", "Collect and summarize web documentation", PurposeRisk::Low, true, {"docs.python.org", "github.com"}, {"firefox"}, {"browser_open", "snapshot"}, {{"browser_open", "https://python.org", "open docs"}}},
+        {"dev.review_repo", "dev.review_repo", "Inspect repository status and test suite", PurposeRisk::Low, false, {}, {"code"}, {"cli", "snapshot"}, {{"cli", "status", "check repo status"}}},
+        {"ops.check_services", "ops.check_services", "Verify Sovereign session services health", PurposeRisk::Low, false, {"localhost"}, {}, {"cli"}, {{"cli", "session-ensure", "verify services"}}},
+        {"life.inbox_triage", "life.inbox_triage", "Triage operator inbox and pending decisions", PurposeRisk::Medium, true, {}, {"thunderbird"}, {"desktop", "snapshot"}, {{"desktop", "inbox", "triage inbox"}}},
+        {"finance.market_observe", "finance.market_observe", "Read-only market chart observation (approval-gated)", PurposeRisk::High, true, {"tradingview.com"}, {"firefox"}, {"browser_open", "snapshot"}, {{"browser_open", "https://tradingview.com", "observe market"}}}
+    };
+    std::size_t added = 0;
+    for (const auto& p : lib)
+    {
+        if (RegisterPack(p)) ++added;
+        if (!directory.empty())
+        {
+            std::ofstream out(directory / (p.purpose_id + ".purpose"), std::ios::trunc);
+            out << "purpose_id: " << p.purpose_id << "\ndescription: " << p.description << "\nrequire_headed: " << (p.require_headed ? "true" : "false") << "\n";
+        }
+    }
+    return added;
+}
+
+PurposeEvaluation PurposeRuntime::ValidateAgainstInventory(
+    const std::string& purpose_id,
+    const std::vector<std::string>& allowed_inventory_apps) const
+{
+    const auto found = Find(purpose_id);
+    if (!found.has_value()) return {false, "unknown_purpose:" + purpose_id};
+    for (const auto& app : found->allowed_apps)
+    {
+        if (!app.empty() && !ListContains(allowed_inventory_apps, app))
+            return {false, "app_not_in_unified_inventory:" + app};
+    }
+    return {true, "inventory_compliant"};
+}
+
 } // namespace sovereign::product
