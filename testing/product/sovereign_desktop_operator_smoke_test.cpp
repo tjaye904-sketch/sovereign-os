@@ -73,6 +73,18 @@ int main()
     REQUIRE(desktop_audit.Ok());
     REQUIRE(!desktop_audit.value.empty());
 
+    // --- L9: DesktopOperatorStatus & ApiGatewayService::GetDesktopStatus() ---
+    const auto status_headless = host.ApiGateway().GetDesktopStatus(10);
+    REQUIRE(status_headless.mode == "headless");
+    REQUIRE(status_headless.computer_use_enabled);
+    REQUIRE(status_headless.evidence_files > 0);
+    REQUIRE(!status_headless.recent_audit_events.empty());
+
+    REQUIRE(host.Capabilities().SetEnabled("host.computer_use", false).Ok());
+    const auto status_disabled = host.Desktop().Status(10);
+    REQUIRE(!status_disabled.computer_use_enabled);
+    REQUIRE(host.Capabilities().SetEnabled("host.computer_use", true).Ok());
+
     unsetenv("SOVEREIGN_SYS_HEADLESS");
     host.Close();
     std::filesystem::remove_all(root, ec);
