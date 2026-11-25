@@ -65,6 +65,19 @@ struct PlanRouteDecision
     std::string reason;
 };
 
+struct NodeExecutionReport
+{
+    bool executed{false};
+    std::string workspace;
+    std::string action;
+    std::string capability_id;
+    std::string node_id_hex;
+    std::string node_name;
+    std::string endpoint;
+    std::string output;
+    std::string reason;
+};
+
 struct NodeRecord
 {
     NodeId id{};

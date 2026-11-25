@@ -529,4 +529,32 @@ Result<PlanRouteDecision> NodeRegistry::RouteWorkspaceAction(
     return Result<PlanRouteDecision>{NodeError::Ok, out};
 }
 
+Result<NodeExecutionReport> NodeRegistry::ExecuteOnBoundNode(
+    const std::string& workspace_name,
+    const std::string& action,
+    const std::string& required_cap_id,
+    const std::string& payload)
+{
+    NodeExecutionReport rep;
+    rep.workspace = workspace_name;
+    rep.action = action;
+    rep.capability_id = required_cap_id;
+    const auto route = RouteWorkspaceAction(workspace_name, action, required_cap_id);
+    if (!route.Ok()) return Result<NodeExecutionReport>{route.error, rep};
+    rep.node_id_hex = route.value.node_id_hex;
+    rep.node_name = route.value.node_name;
+    rep.endpoint = route.value.endpoint;
+    if (!route.value.allowed)
+    {
+        rep.reason = route.value.reason;
+        (void)AppendEvent("node_exec_denied", workspace_name + ":" + action + " reason=" + rep.reason);
+        return Result<NodeExecutionReport>{NodeError::Ok, rep};
+    }
+    rep.executed = true;
+    rep.reason = "executed_on_bound_node";
+    rep.output = "node=" + rep.node_name + "(" + rep.node_id_hex + ") endpoint=" + rep.endpoint + " action=" + action + (payload.empty() ? "" : (" payload=" + payload));
+    (void)AppendEvent("node_exec", rep.output);
+    return Result<NodeExecutionReport>{NodeError::Ok, rep};
+}
+
 } // namespace sovereign::node
