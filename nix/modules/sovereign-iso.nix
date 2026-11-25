@@ -60,6 +60,8 @@ in
   ];
 
   environment.variables.SOVEREIGN_DATA_ROOT = "/var/lib/sovereign";
+  environment.variables.SOVEREIGN_PROFILE = "nixos-sovereign";
+  environment.etc."sovereign-release".text = "SOVEREIGN_OS=2.0\nSUBSTRATE=nixos\nMILESTONE=WP-13\n";
   environment.variables.OLLAMA_HOST = "http://127.0.0.1:11434";
   environment.variables.SOVEREIGN_OLLAMA_MODEL = "openclaw";
   environment.variables.SOVEREIGN_EMBED_MODEL = "nomic-embed-text";
