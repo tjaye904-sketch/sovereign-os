@@ -78,6 +78,14 @@ struct NodeExecutionReport
     std::string reason;
 };
 
+struct FleetSummary
+{
+    std::size_t total_nodes{0};
+    std::size_t healthy_nodes{0};
+    std::size_t bound_workspaces{0};
+    std::size_t target_capacity{16};
+};
+
 struct NodeRecord
 {
     NodeId id{};

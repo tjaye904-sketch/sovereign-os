@@ -37,6 +37,8 @@ public:
     Result<bool> NodeHasCapability(const NodeId& id, const std::string& cap_id) const;
     Result<PlanRouteDecision> RouteWorkspaceAction(const std::string& workspace_name, const std::string& action, const std::string& required_cap_id) const;
     Result<NodeExecutionReport> ExecuteOnBoundNode(const std::string& workspace_name, const std::string& action, const std::string& required_cap_id, const std::string& payload);
+    FleetSummary GetFleetSummary() const;
+    Result<NodeId> ReplaceWorkspaceNode(const std::string& workspace_name, const std::string& new_node_name, const std::string& endpoint = "");
 
     // L2.5 — append-only lifecycle events under data_root/node/events.dat
     Result<void> AppendEvent(const std::string& kind, const std::string& detail);

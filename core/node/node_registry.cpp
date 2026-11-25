@@ -557,4 +557,46 @@ Result<NodeExecutionReport> NodeRegistry::ExecuteOnBoundNode(
     return Result<NodeExecutionReport>{NodeError::Ok, rep};
 }
 
+FleetSummary NodeRegistry::GetFleetSummary() const
+{
+    FleetSummary fs;
+    const auto all = List();
+    if (!all.Ok()) return fs;
+    fs.total_nodes = all.value.size();
+    for (const auto& n : all.value)
+    {
+        if (n.health == NodeHealth::Healthy) ++fs.healthy_nodes;
+        if (!n.workspace_name.empty()) ++fs.bound_workspaces;
+    }
+    return fs;
+}
+
+Result<NodeId> NodeRegistry::ReplaceWorkspaceNode(
+    const std::string& workspace_name,
+    const std::string& new_node_name,
+    const std::string& endpoint)
+{
+    if (workspace_name.empty() || new_node_name.empty())
+        return Result<NodeId>{NodeError::InvalidArgument, {}};
+    std::vector<std::string> inherited_caps;
+    const auto existing = ListByWorkspace(workspace_name);
+    if (existing.Ok())
+    {
+        for (const auto& old : existing.value)
+        {
+            if (inherited_caps.empty()) inherited_caps = old.capabilities;
+            (void)UnbindWorkspace(old.id);
+            (void)AppendEvent("node_retired", old.name + " ws=" + workspace_name);
+        }
+    }
+    auto reg = endpoint.empty() ? RegisterLocal(new_node_name) : RegisterPeer(new_node_name, endpoint);
+    if (!reg.Ok()) return reg;
+    (void)Heartbeat(reg.value, NodeHealth::Healthy);
+    auto b = BindWorkspace(reg.value, workspace_name);
+    if (!b.Ok()) return Result<NodeId>{b.error, {}};
+    if (!inherited_caps.empty()) (void)SetCapabilities(reg.value, inherited_caps);
+    (void)AppendEvent("node_replaced", workspace_name + "->" + new_node_name);
+    return reg;
+}
+
 } // namespace sovereign::node
