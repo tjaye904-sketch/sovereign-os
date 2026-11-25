@@ -154,6 +154,10 @@ if(TARGET sovereign-cli)
         NAME nixos_iso_vm_boot_gate
         COMMAND bash ${CMAKE_SOURCE_DIR}/scripts/verify-nixos-iso-vm-boot.sh)
     set_tests_properties(nixos_iso_vm_boot_gate PROPERTIES PASS_REGULAR_EXPRESSION "NIXOS_ISO_VM_BOOT_GATE_OK")
+    add_test(
+        NAME cli_chat_tools_loop_smoke
+        COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/test-chat-tools-loop.py $<TARGET_FILE:sovereign-cli>)
+    set_tests_properties(cli_chat_tools_loop_smoke PROPERTIES PASS_REGULAR_EXPRESSION "tool_calls_executed=1")
 endif()
 
 if(TARGET sovereign-daemon)
