@@ -269,6 +269,7 @@ void PrintUsage()
         << "  sovereign-cli node-caps <name> <cap,cap,...>\n"
         << "  sovereign-cli node-events\n"
                 << "  sovereign-cli capability-gate-check <action-or-id>\n"
+                << "  sovereign-cli desktop-status [--json]\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3398,6 +3399,38 @@ int main(int argc, char** argv)
         sovereign::diagnostics::TransparencyService tr(host);
         std::cout << "question=" << q << "\nsection=" << section << "\n";
         std::cout << tr.BuildSection(section).text;
+        host.Close();
+        return 0;
+    }
+
+    if (cmd == "desktop-status")
+    {
+        const bool as_json = (argc >= 3 && std::string(argv[2]) == "--json");
+        const auto st = host.ApiGateway().GetDesktopStatus(10);
+        if (as_json)
+        {
+            std::cout << "{\"mode\":\"" << st.mode << "\","
+                      << "\"has_display\":" << (st.has_display ? "true" : "false") << ","
+                      << "\"computer_use_enabled\":" << (st.computer_use_enabled ? "true" : "false") << ","
+                      << "\"active_purpose_id\":\"" << st.active_purpose_id << "\","
+                      << "\"pending_decisions\":" << st.pending_decisions << ","
+                      << "\"evidence_files\":" << st.evidence_files << ","
+                      << "\"recent_audit_count\":" << st.recent_audit_events.size() << "}\n";
+        }
+        else
+        {
+            std::cout << "mode=" << st.mode << "\n"
+                      << "has_display=" << (st.has_display ? "1" : "0") << "\n"
+                      << "computer_use_enabled=" << (st.computer_use_enabled ? "1" : "0") << "\n"
+                      << "active_purpose_id=" << st.active_purpose_id << "\n"
+                      << "pending_decisions=" << st.pending_decisions << "\n"
+                      << "evidence_files=" << st.evidence_files << "\n"
+                      << "recent_audit_count=" << st.recent_audit_events.size() << "\n";
+            for (const auto& ev : st.recent_audit_events)
+            {
+                std::cout << "audit=" << ev << "\n";
+            }
+        }
         host.Close();
         return 0;
     }
