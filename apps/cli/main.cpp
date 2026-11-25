@@ -3538,7 +3538,7 @@ int main(int argc, char** argv)
         return dec.allowed ? 0 : 1;
     }
 
-    if (cmd == "node-execute" || cmd == "node-replace" && argc >= 4)
+    if (cmd == "node-execute" && argc >= 4)
     {
         bool as_json = false;
         int idx = 2;
