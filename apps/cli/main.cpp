@@ -2663,73 +2663,35 @@ int main(int argc, char** argv)
         req.model = host.DefaultModel();
         req.messages.push_back(
             sovereign::model_router::ChatMessage{"user", prompt, {}, {}});
-        if (cmd == "chat-tools")
-        {
-            sovereign::model_router::ToolDefinition tool;
-            tool.name = "record_memory";
-            tool.description = "Store a short note in Sovereign memory";
-            tool.parameters_json =
-                "{\"type\":\"object\",\"properties\":{"
-                "\"tag\":{\"type\":\"string\"},"
-                "\"body\":{\"type\":\"string\"}},"
-                "\"required\":[\"tag\",\"body\"]}";
-            req.tools.push_back(tool);
+        if (cmd == "chat-tools") {
+            req.messages.insert(req.messages.begin(), {"system", "Use Sovereign tools before answering.", {}, {}});
+            for (auto [n, d] : std::vector<std::pair<std::string,std::string>>{{"list_tools","List tools"},{"system_status","Host status"},{"doctor_check","Doctor check"},{"inventory_check","Inventory count"},{"purpose_list","Purpose packs"},{"record_memory","Store note"}})
+                req.tools.push_back({n, d, "{\"type\":\"object\",\"properties\":{}}"});
         }
-        auto r = host.Models().Chat(req);
-        if (!r.Ok() || !r.value.ok)
-        {
-            std::cerr << "chat failed error=" << static_cast<int>(r.error)
-                      << " detail=" << r.value.error << '\n';
-            host.Close();
-            return 1;
-        }
-        std::cout << "model=" << r.value.model << '\n';
-        std::cout << "content=" << r.value.content << '\n';
-        std::vector<sovereign::model_router::ChatMessage> follow =
-            req.messages;
-        follow.push_back(sovereign::model_router::ChatMessage{
-            "assistant", r.value.content, {}, {}});
-        bool any_tool = false;
-        for (const auto& tc : r.value.tool_calls)
-        {
-            std::cout << "tool_call name=" << tc.name
-                      << " args=" << tc.arguments_json << '\n';
-            std::string tool_result = "ok";
-            if (tc.name == "record_memory")
-            {
-                sovereign::memory::MemoryRecord rec;
-                rec.tags = {"ollama-tool"};
-                rec.body = tc.arguments_json.empty() ? prompt : tc.arguments_json;
-                auto app = host.Memory().Append(rec);
-                if (app.Ok())
-                {
-                    tool_result = std::string("stored:") + ToHex(app.value.bytes);
-                    std::cout << "tool_result record_id="
-                              << ToHex(app.value.bytes) << '\n';
-                }
-                else
-                {
-                    tool_result = "storage_failed";
-                }
+        auto run_t = [&](const std::string& n, const std::string& ag) -> std::string {
+            sovereign::audit::AuditEntry ae; ae.category="chat_tool"; ae.action="tool."+n; ae.subject="chat-tools"; ae.detail=ag; (void)host.Audit().Append(ae);
+            if (n=="list_tools") return "tools=list_tools,system_status,doctor_check,inventory_check,purpose_list,record_memory";
+            if (n=="system_status") return "sovereign_os=2.0 caps="+std::to_string(host.Capabilities().List().value.size())+" nodes="+std::to_string(host.Nodes().List().value.size());
+            if (n=="doctor_check") { auto r=sovereign::diagnostics::TransparencyService(host).RunDoctor(false); return "doctor_all_ok="+std::string(r.all_ok?"true":"false"); }
+            if (n=="inventory_check") return "inventory="+std::to_string(host.Policy().ListInventoryAllowlist().size());
+            if (n=="purpose_list") { (void)host.Purpose().SeedDefaultLibrary({}); return "purposes="+std::to_string(host.Purpose().BuiltinPacks().size()); }
+            if (n=="record_memory") { sovereign::memory::MemoryRecord mr; mr.tags={"ollama-tool"}; mr.body=ag.empty()?prompt:ag; auto ok=host.Memory().Append(mr); return ok.Ok()?"stored":"err"; }
+            return "unknown:"+n;
+        };
+        std::size_t turns = 0;
+        for (int t = 0; t < 4; ++t) {
+            auto r = host.Models().Chat(req);
+            if (!r.Ok() || !r.value.ok) { std::cerr << "chat failed error=" << static_cast<int>(r.error) << " detail=" << r.value.error << '\n'; host.Close(); return 1; }
+            auto calls = r.value.tool_calls;
+            if (calls.empty() && cmd == "chat-tools") {
+                auto pos = r.value.content.find("\"name\"");
+                auto q1 = (pos!=std::string::npos) ? r.value.content.find('"', pos+6) : std::string::npos;
+                auto q2 = (q1!=std::string::npos) ? r.value.content.find('"', q1+1) : std::string::npos;
+                if (q1!=std::string::npos && q2!=std::string::npos && q2>q1+1) calls.push_back({"in_"+std::to_string(t), r.value.content.substr(q1+1, q2-q1-1), "{}"});
             }
-            sovereign::model_router::ChatMessage tr;
-            tr.role = "tool";
-            tr.content = tool_result;
-            tr.tool_name = tc.name;
-            tr.tool_call_id = tc.id;
-            follow.push_back(tr);
-            any_tool = true;
-        }
-        if (any_tool)
-        {
-            sovereign::model_router::ChatRequest req2;
-            req2.model = host.DefaultModel();
-            req2.messages = follow;
-            auto r2 = host.Models().Chat(req2);
-            if (r2.Ok() && r2.value.ok)
-            {
-                std::cout << "followup_content=" << r2.value.content << '\n';
-            }
+            if (calls.empty() || cmd != "chat-tools") { std::cout << "model=" << r.value.model << "\ntool_calls_executed=" << turns << "\ncontent=" << r.value.content << '\n'; break; }
+            req.messages.push_back({"assistant", r.value.content, {}, {}});
+            for (const auto& tc : calls) { ++turns; auto res = run_t(tc.name, tc.arguments_json); std::cout << "tool_call name=" << tc.name << " result=" << res << '\n'; req.messages.push_back({"tool", res, tc.name, tc.id}); }
         }
         host.Close();
         return 0;

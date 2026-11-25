@@ -9,4 +9,5 @@
 - L28: Zero-warning C++23 build (`apps/cli/main.cpp`), persistent `systemd --user` `sovereign-caps-ui.service`, and updated `HANDOFF.md` + OS 2.0 roadmap docs (`L28`–`L31`)
 
 ## In progress / Starting point
-- **Next packet:** `leap/L29-autonomous-multi-turn-tool-loop` (Autonomous multi-turn tool dispatch & synthesis loop in `sovereign-cli chat-tools`), followed by `L30` (live window/A11y & Piper TTS audio) and `L31` (multi-node peer enrollment & physical USB flash / bare-metal boot)
+- L29: Autonomous multi-turn tool dispatch & synthesis loop in `sovereign-cli chat-tools` (6 tools, max 4 turns, CTest #64)
+- **Next packet:** `leap/L30-live-a11y-window-and-piper-audio` (Live Linux window/A11y dispatch & Piper TTS audio playback bindings), followed by `L31` (multi-node peer enrollment & physical USB flash / bare-metal boot)
