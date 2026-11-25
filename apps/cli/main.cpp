@@ -286,6 +286,7 @@ void PrintUsage()
                 << "  sovereign-cli app-check [--json] <app-id>\n"
                 << "  sovereign-cli purpose-seed\n"
                 << "  sovereign-cli purpose-inspect [--json] <purpose-id>\n"
+                << "  sovereign-cli desktop-drive [--json] [--allow-headless] <op> <app> [payload...]\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3880,6 +3881,36 @@ int main(int argc, char** argv)
                       << " inventory_compliant=" << (inv.allowed ? "1" : "0") << " reason=" << inv.reason << "\n";
         host.Close();
         return 0;
+    }
+
+    if (cmd == "desktop-drive" && argc >= 4)
+    {
+        bool as_json = false;
+        bool req_headed = true;
+        int idx = 2;
+        while (idx < argc && std::string(argv[idx]).rfind("--", 0) == 0)
+        {
+            const std::string fl = argv[idx++];
+            if (fl == "--json") as_json = true;
+            else if (fl == "--allow-headless") req_headed = false;
+        }
+        if (argc < idx + 2) { PrintUsage(); host.Close(); return 2; }
+        const std::string op = argv[idx];
+        const std::string app = argv[idx + 1];
+        std::string payload;
+        for (int i = idx + 2; i < argc; ++i) { if (!payload.empty()) payload.push_back(' '); payload += argv[i]; }
+        sovereign::product::DesktopOperatorGateway gw(host);
+        const auto rec = gw.DriveWindow(op, app, payload, req_headed);
+        if (as_json)
+            std::cout << "{\"executed\":" << (rec.executed ? "true" : "false") << ",\"op\":\"" << rec.op
+                      << "\",\"app\":\"" << rec.target_app << "\",\"headed\":" << (rec.headed ? "true" : "false")
+                      << ",\"evidence_hash\":\"" << rec.evidence_hash << "\",\"reason\":\"" << rec.reason << "\"}\n";
+        else
+            std::cout << "executed=" << (rec.executed ? "1" : "0") << " op=" << rec.op
+                      << " app=" << rec.target_app << " headed=" << (rec.headed ? "1" : "0")
+                      << " evidence_hash=" << rec.evidence_hash << " reason=" << rec.reason << "\n";
+        host.Close();
+        return rec.executed ? 0 : 1;
     }
 
     PrintUsage();

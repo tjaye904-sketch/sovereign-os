@@ -138,6 +138,10 @@ if(TARGET sovereign-cli)
         NAME cli_purpose_library_seed
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l20.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> inventory-sync --apps firefox,code >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> purpose-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> purpose-inspect --json research.web_collect")
     set_tests_properties(cli_purpose_library_seed PROPERTIES PASS_REGULAR_EXPRESSION "\"inventory_compliant\":true")
+    add_test(
+        NAME cli_desktop_drive_mvp
+        COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l21.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> inventory-sync --apps firefox >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> desktop-drive --json --allow-headless focus_window firefox && ! SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> desktop-drive --json --allow-headless focus_window unlisted-app >/dev/null")
+    set_tests_properties(cli_desktop_drive_mvp PROPERTIES PASS_REGULAR_EXPRESSION "driven_and_observed")
 endif()
 
 if(TARGET sovereign-daemon)

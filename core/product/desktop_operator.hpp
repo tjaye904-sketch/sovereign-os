@@ -25,6 +25,17 @@ struct DesktopOperatorStatus
     std::vector<std::string> recent_audit_events;
 };
 
+struct DesktopDriveReceipt
+{
+    bool allowed{false};
+    bool executed{false};
+    std::string op;
+    std::string target_app;
+    bool headed{false};
+    std::string evidence_hash;
+    std::string reason;
+};
+
 class DesktopOperatorGateway
 {
 public:
@@ -52,6 +63,11 @@ public:
         std::string& report);
 
     [[nodiscard]] DesktopOperatorStatus Status(std::size_t audit_limit = 10) const;
+    DesktopDriveReceipt DriveWindow(
+        const std::string& op,
+        const std::string& target_app,
+        const std::string& payload,
+        bool require_headed = true);
 
 private:
     static std::string ToHex(const std::array<std::uint8_t, 16>& bytes);
