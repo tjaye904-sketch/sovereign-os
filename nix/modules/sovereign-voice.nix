@@ -10,7 +10,7 @@ let
   };
   whisperModel = pkgs.fetchurl {
     url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin";
-    sha256 = "sha256-88ZEgynBnRmY4QFLZGRAxIcKtbQmJtK/PFTI75Ve/Rw=";
+    sha256 = "sha256-oDd5yG3zMjB19eeWyyzlAp8A7Ihp7uP9+4l6/jbG0AI=";
   };
   hubChat = pkgs.writeShellScriptBin "sovereign-hub-chat" ''
     set -euo pipefail
