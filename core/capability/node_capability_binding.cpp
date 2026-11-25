@@ -1,5 +1,6 @@
 #include "node_capability_binding.hpp"
 
+#include <cctype>
 #include <fstream>
 #include <set>
 
@@ -13,7 +14,6 @@ NodeCapabilityBinding::NodeCapabilityBinding(fs::path data_root)
 }
 
 fs::path NodeCapabilityBinding::path_for(const std::string& node_id) const {
-  // sanitize simple path segment
   std::string safe;
   for (char c : node_id) {
     if (std::isalnum(static_cast<unsigned char>(c)) || c == '.' || c == '_' || c == '-')
@@ -34,21 +34,12 @@ BindingResult NodeCapabilityBinding::Bind(const std::string& node_id,
     r.error = "empty node or capability id";
     return r;
   }
-  auto caps = registry.List();
-  bool found = false;
-  bool enabled = false;
-  for (const auto& c : caps) {
-    if (c.id == capability_id) {
-      found = true;
-      enabled = c.enabled;
-      break;
-    }
-  }
-  if (!found) {
+  auto got = registry.Get(capability_id);
+  if (!got.Ok()) {
     r.error = "unknown capability: " + capability_id;
     return r;
   }
-  if (require_enabled && !enabled) {
+  if (require_enabled && !got.value.enabled) {
     r.error = "capability disabled: " + capability_id;
     return r;
   }

@@ -1,7 +1,6 @@
 #include "capability_gate.hpp"
 #include "node_registry.hpp"
 #include "capability_registry.hpp"
-#include "node_capability_binding.hpp"
 #include "memory_facets.hpp"
 #include "secret_manager.hpp"
 // Sovereign local CLI — in-process SovereignHost surface (not a network gateway).
@@ -66,10 +65,7 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
         return d.allowed ? 0 : 3;
     }
 
-    if (cmd == "capability-seed" || cmd == "capability-list
-  sovereign-cli node-caps-bind <node> <capability-id>
-  sovereign-cli node-caps-list <node>
-  sovereign-cli node-caps-unbind <node> <capability-id>" || cmd == "capability-enable"
+    if (cmd == "capability-seed" || cmd == "capability-list" || cmd == "capability-enable"
         || cmd == "capability-disable" || cmd == "capability-check")
     {
         sovereign::capability::CapabilityRegistry caps;
@@ -3343,32 +3339,7 @@ int main(int argc, char** argv)
         {
             std::cerr << "peer-import failed\n";
             host.Close();
-            
-  if (cmd == "node-caps-bind") {
-    if (argc < 4) { std::cerr << "usage: node-caps-bind <node> <capability-id>\n"; return 2; }
-    sovereign::capability::CapabilityRegistry reg(data_root);
-    sovereign::capability::NodeCapabilityBinding bind(data_root);
-    auto r = bind.Bind(argv[2], argv[3], reg, true);
-    if (!r.ok) { std::cout << "error=" << r.error << "\n"; return 1; }
-    std::cout << "bound node=" << argv[2] << " capability=" << argv[3] << "\n";
-    return 0;
-  }
-  if (cmd == "node-caps-list") {
-    if (argc < 3) { std::cerr << "usage: node-caps-list <node>\n"; return 2; }
-    sovereign::capability::NodeCapabilityBinding bind(data_root);
-    for (const auto& id : bind.List(argv[2])) std::cout << "capability=" << id << "\n";
-    return 0;
-  }
-  if (cmd == "node-caps-unbind") {
-    if (argc < 4) { std::cerr << "usage: node-caps-unbind <node> <capability-id>\n"; return 2; }
-    sovereign::capability::NodeCapabilityBinding bind(data_root);
-    auto r = bind.Unbind(argv[2], argv[3]);
-    if (!r.ok) { std::cout << "error=" << r.error << "\n"; return 1; }
-    std::cout << "unbound node=" << argv[2] << " capability=" << argv[3] << "\n";
-    return 0;
-  }
-
-  return 1;
+            return 1;
         }
         std::cout << "imported goals=" << r.value.goals
                   << " memory=" << r.value.memory
