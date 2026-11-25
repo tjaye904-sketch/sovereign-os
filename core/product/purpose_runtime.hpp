@@ -5,6 +5,7 @@
 #include "../governance/governance_service.hpp"
 
 #include <filesystem>
+#include <fstream>
 #include <optional>
 #include <string>
 #include <vector>
@@ -88,6 +89,8 @@ public:
     void LoadFromDirectory(const std::filesystem::path& directory);
     void LoadFromFile(const std::filesystem::path& path);
     bool RegisterPack(PurposePack pack);
+    std::size_t SeedDefaultLibrary(const std::filesystem::path& directory);
+    PurposeEvaluation ValidateAgainstInventory(const std::string& purpose_id, const std::vector<std::string>& allowed_inventory_apps) const;
 
     const std::vector<PurposePack>& BuiltinPacks() const noexcept;
     std::optional<PurposePack> Find(const std::string& purpose_id) const;
