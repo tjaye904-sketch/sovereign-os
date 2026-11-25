@@ -417,4 +417,38 @@ Result<CuriosityProposal> CuriosityEngine::Propose(
     return result;
 }
 
+BoundedProbeReport CuriosityEngine::RunBoundedProbe(
+    const PrincipalId& requester,
+    const std::string& probe_action,
+    const std::string& topic)
+{
+    BoundedProbeReport rep;
+    rep.probe_action = probe_action;
+    rep.topic = NormalizeTopic(topic);
+    if (rep.topic.empty())
+    {
+        rep.reason = "empty_topic";
+        return rep;
+    }
+    const bool safe_action = (probe_action == "observe" || probe_action == "inspect" ||
+                              probe_action == "search" || probe_action == "plan" || probe_action == "chat");
+    if (!safe_action)
+    {
+        rep.reason = "policy_denied_mutating_probe:" + probe_action;
+        return rep;
+    }
+    auto prop = Propose(requester, rep.topic, {});
+    if (!prop.Ok())
+    {
+        rep.reason = "propose_failed";
+        return rep;
+    }
+    ObserveInterest(rep.topic, 1.0);
+    QueueDiscovery(rep.topic, 0.7);
+    rep.allowed = true;
+    rep.questions = prop.value.questions;
+    rep.reason = "bounded_probe_allowed";
+    return rep;
+}
+
 } // namespace sovereign::cognitive
