@@ -162,6 +162,10 @@ if(TARGET sovereign-cli)
         NAME cli_live_window_voice_bridge
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l30.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-enable host.voice >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> inventory-sync --apps firefox >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT SOVEREIGN_DRIVE_DRY_RUN=1 $<TARGET_FILE:sovereign-cli> desktop-drive --json --allow-headless read_tree firefox && SOVEREIGN_DATA_ROOT=$ROOT SOVEREIGN_VOICE_DRY_RUN=1 $<TARGET_FILE:sovereign-cli> voice-route --json speak ready")
     set_tests_properties(cli_live_window_voice_bridge PROPERTIES PASS_REGULAR_EXPRESSION "routed_on_same_router")
+    add_test(
+        NAME multinode_peer_enrollment_drill
+        COMMAND bash ${CMAKE_SOURCE_DIR}/scripts/sovereign-multinode-drill.sh $<TARGET_FILE:sovereign-cli>)
+    set_tests_properties(multinode_peer_enrollment_drill PROPERTIES PASS_REGULAR_EXPRESSION "MULTINODE_ENROLLMENT_DRILL_OK")
 endif()
 
 if(TARGET sovereign-daemon)

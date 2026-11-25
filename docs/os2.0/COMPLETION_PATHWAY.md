@@ -67,4 +67,4 @@ See also:
 | L28 | `leap/L28-systemd-caps-service-and-clean-build` | Zero-warning build + persistent `systemd --user` `sovereign-caps-ui.service` + docs/handoff update | done |
 | L29 | `leap/L29-autonomous-multi-turn-tool-loop` | Autonomous multi-turn tool execution & synthesis loop in `sovereign-cli chat-tools` | done |
 | L30 | `leap/L30-live-a11y-window-and-piper-audio` | Live Linux window/A11y dispatch & Piper TTS audio playback bindings | done |
-| L31 | `leap/L31-multi-node-enrollment-and-usb-release` | Two-node peer enrollment drill & physical USB flash / bare-metal secondary-machine boot | ready_final_step |
+| L31 | `leap/L31-multi-node-enrollment-and-usb-release` | Two-node peer enrollment drill & physical USB flash / bare-metal secondary-machine boot | done |
