@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 sys.path.insert(0, str(Path(__file__).parent))
-from capability_api import list_capabilities, set_capability, gate_check, desktop_status, federation_status
+from capability_api import list_capabilities, set_capability, gate_check, desktop_status, federation_status, list_pending_decisions, decide_governance
 
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -33,6 +33,8 @@ class H(BaseHTTPRequestHandler):
             return self._json(200, desktop_status())
         if path == "/api/federation":
             return self._json(200, federation_status())
+        if path == "/api/governance/pending":
+            return self._json(200, list_pending_decisions())
         if path == "/api/gate-check":
             q = parse_qs(urlparse(self.path).query)
             act = (q.get("action") or ["browser_open"])[0]
@@ -62,6 +64,10 @@ load();
             body = json.loads(self.rfile.read(n).decode() or "{}")
         except Exception:
             body = {}
+        if path.startswith("/api/governance/"):
+            did = path.split("/api/governance/", 1)[1]
+            approve = str(body.get("decision", "approve")).lower() == "approve"
+            return self._json(200, decide_governance(did, approve, str(body.get("reason", "mission-control"))))
         if path.startswith("/api/capabilities/"):
             cap_id = path.split("/api/capabilities/", 1)[1]
             return self._json(200, set_capability(cap_id, bool(body.get("enabled", True))))

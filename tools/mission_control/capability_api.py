@@ -138,3 +138,27 @@ def federation_status() -> dict[str, Any]:
     code, out = _run(["node-list"])
     nodes = [line for line in out.splitlines() if line.strip()]
     return {"ok": code == 0, "nodes": nodes, "count": len(nodes)}
+
+
+def list_pending_decisions() -> dict[str, Any]:
+    code, out = _run(["pending-decisions"])
+    items = []
+    for line in out.splitlines():
+        line = line.strip()
+        if not line or line.startswith("pending="):
+            continue
+        parts = {}
+        for tok in line.split():
+            if "=" in tok:
+                k, v = tok.split("=", 1)
+                parts[k] = v
+        items.append({"raw": line, **parts})
+    return {"ok": code == 0, "pending": items, "count": len(items), "raw": out}
+
+
+def decide_governance(decision_hex: str, approve: bool, reason: str = "mission-control") -> dict[str, Any]:
+    if not re.match(r"^[0-9a-fA-F]{32}$", decision_hex):
+        return {"ok": False, "error": "invalid decision id"}
+    cmd = "approve" if approve else "reject"
+    code, out = _run([cmd, decision_hex, reason or "mission-control"])
+    return {"ok": code == 0, "decision_id": decision_hex, "status": "approved" if approve else "rejected", "detail": out}
