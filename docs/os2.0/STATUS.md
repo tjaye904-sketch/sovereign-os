@@ -10,4 +10,5 @@
 
 ## In progress / Starting point
 - L29: Autonomous multi-turn tool dispatch & synthesis loop in `sovereign-cli chat-tools` (6 tools, max 4 turns, CTest #64)
-- **Next packet:** `leap/L30-live-a11y-window-and-piper-audio` (Live Linux window/A11y dispatch & Piper TTS audio playback bindings), followed by `L31` (multi-node peer enrollment & physical USB flash / bare-metal boot)
+- L30: Live Linux `wmctrl` window dispatch & Piper TTS (`en_US-lessac-medium.onnx` + `pw-play`/`aplay`) audio bindings (CTest #65)
+- **Next packet (Final Step):** `leap/L31-multi-node-enrollment-and-usb-release` (Two-node peer enrollment drill & physical USB flash / bare-metal secondary-machine boot)
