@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 sys.path.insert(0, str(Path(__file__).parent))
-from capability_api import list_capabilities, set_capability, gate_check, desktop_status
+from capability_api import list_capabilities, set_capability, gate_check, desktop_status, federation_status
 
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -31,6 +31,8 @@ class H(BaseHTTPRequestHandler):
             return self._json(200, list_capabilities())
         if path == "/api/desktop-status":
             return self._json(200, desktop_status())
+        if path == "/api/federation":
+            return self._json(200, federation_status())
         if path == "/api/gate-check":
             q = parse_qs(urlparse(self.path).query)
             act = (q.get("action") or ["browser_open"])[0]
