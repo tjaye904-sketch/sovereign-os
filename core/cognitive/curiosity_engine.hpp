@@ -59,6 +59,15 @@ private:
     std::vector<InterestGraphEntry> entries_;
 };
 
+struct BoundedProbeReport
+{
+    bool allowed{false};
+    std::string probe_action;
+    std::string topic;
+    std::vector<std::string> questions;
+    std::string reason;
+};
+
 class CuriosityEngine
 {
 public:
@@ -77,6 +86,7 @@ public:
 
     void ObserveInterest(const std::string& topic, double weight = 1.0);
     std::vector<InterestGraphEntry> InterestGraph(std::size_t limit = 10) const;
+    BoundedProbeReport RunBoundedProbe(const PrincipalId& requester, const std::string& probe_action, const std::string& topic);
 
 private:
     static AnalysisId NewId();
