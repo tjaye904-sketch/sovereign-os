@@ -284,6 +284,8 @@ void PrintUsage()
                 << "  sovereign-cli curiosity-probe [--json] <probe-action> <topic...>\n"
                 << "  sovereign-cli inventory-sync [--apps a,b,c]\n"
                 << "  sovereign-cli app-check [--json] <app-id>\n"
+                << "  sovereign-cli purpose-seed\n"
+                << "  sovereign-cli purpose-inspect [--json] <purpose-id>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3840,6 +3842,44 @@ int main(int argc, char** argv)
                       << " reason=" << (ok ? "in_unified_inventory" : "not_in_unified_inventory") << "\n";
         host.Close();
         return ok ? 0 : 1;
+    }
+
+    if (cmd == "purpose-seed")
+    {
+        const auto added = host.Purpose().SeedDefaultLibrary(host.DataRoot() / "purposes");
+        sovereign::audit::AuditEntry ae;
+        ae.category = "purpose";
+        ae.action = "purpose.library.seed";
+        ae.subject = "library";
+        ae.detail = "added=" + std::to_string(added);
+        (void)host.Audit().Append(ae);
+        std::cout << "seeded_purposes=" << added << " total_purposes=" << host.Purpose().BuiltinPacks().size() << "\n";
+        host.Close();
+        return 0;
+    }
+    if (cmd == "purpose-inspect" && argc >= 3)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 4) { as_json = true; ++idx; }
+        const std::string pid = argv[idx];
+        (void)host.Purpose().SeedDefaultLibrary({});
+        const auto found = host.Purpose().Find(pid);
+        if (!found.has_value())
+        {
+            std::cerr << "purpose not found: " << pid << "\n";
+            host.Close();
+            return 1;
+        }
+        const auto inv = host.Purpose().ValidateAgainstInventory(pid, host.Policy().ListInventoryAllowlist());
+        if (as_json)
+            std::cout << "{\"purpose_id\":\"" << found->purpose_id << "\",\"require_headed\":" << (found->require_headed ? "true" : "false")
+                      << ",\"inventory_compliant\":" << (inv.allowed ? "true" : "false") << ",\"reason\":\"" << inv.reason << "\"}\n";
+        else
+            std::cout << "purpose_id=" << found->purpose_id << " require_headed=" << (found->require_headed ? "1" : "0")
+                      << " inventory_compliant=" << (inv.allowed ? "1" : "0") << " reason=" << inv.reason << "\n";
+        host.Close();
+        return 0;
     }
 
     PrintUsage();
