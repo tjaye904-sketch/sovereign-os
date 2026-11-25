@@ -8,7 +8,7 @@
 - L8–L10: Governed Purpose Runner (`937dfc1`), Desktop Operator Visibility (`ca5109f`), 5-Service Session Ensure Ready (`d6c9343`)
 - L11–L13: Federation Plan Routing (`0409941`), Federation Node Execute (`fcab1f9`), Mission Control Federation & Governance Console (`10ad708`)
 - L14–L16: Core HA Backup & Restore (`6703fd5`), NixOS Lab & Headless Node Image Gates (`b89f13d`), Multi-Workspace Node Fleet Scale & Replace Drill (`132e59d`)
-- L17–L19: Post-Act Outcome Verification & Closed-Loop Execution (`9ac9c8c`), Policy-Bounded Curiosity Probe (`b52dd16`), Unified Inventory & Policy Allowlist (`leap/L19-unified-inventory-policy-allowlist`) — `PolicyEngine::SyncInventoryAllowlist`, `sovereign-cli inventory-sync` & `app-check [--json]`, and Mission Control `/api/inventory`
+- L17–L20: Post-Act Outcome Verification & Closed-Loop Execution (`9ac9c8c`), Policy-Bounded Curiosity Probe (`b52dd16`), Unified Inventory & Policy Allowlist (`e85656d`), Canonical Purpose Library & Inventory Validation (`leap/L20-purpose-library`)
 
 ## In progress / Starting point
-- **OS 2.0 Leaps L1–L19 complete on `main` (58/58 CTest)**
+- **OS 2.0 Leaps L1–L20 complete on `main` (59/59 CTest)**

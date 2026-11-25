@@ -134,6 +134,10 @@ if(TARGET sovereign-cli)
         NAME cli_unified_inventory_allowlist
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l19.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> inventory-sync --apps firefox,code >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> app-check --json firefox && ! SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> app-check --json unlisted-evil-app >/dev/null")
     set_tests_properties(cli_unified_inventory_allowlist PROPERTIES PASS_REGULAR_EXPRESSION "in_unified_inventory")
+    add_test(
+        NAME cli_purpose_library_seed
+        COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l20.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> inventory-sync --apps firefox,code >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> purpose-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> purpose-inspect --json research.web_collect")
+    set_tests_properties(cli_purpose_library_seed PROPERTIES PASS_REGULAR_EXPRESSION "\"inventory_compliant\":true")
 endif()
 
 if(TARGET sovereign-daemon)
