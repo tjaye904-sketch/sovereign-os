@@ -41,3 +41,4 @@
 - L6 node <-> capability binding (7da20bb)
 - L7 federation peer auth (1a58ad2)
 - L8 governed purpose runner (CapabilityGate + GovernanceService + AuditLog)
+- L9 desktop operator visibility (DesktopOperatorStatus + ApiGateway + CLI + Mission Control)

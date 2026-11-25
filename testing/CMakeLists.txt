@@ -82,6 +82,12 @@ if(TARGET sovereign-cli)
             "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-purpose-run"
             $<TARGET_FILE:sovereign-cli> purpose-run research.web_collect https://docs.python.org/3/)
     set_tests_properties(cli_purpose_run PROPERTIES PASS_REGULAR_EXPRESSION "purpose_id=research\.web_collect|allowed=1")
+    add_test(
+        NAME cli_desktop_status
+        COMMAND ${CMAKE_COMMAND} -E env
+            "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-desktop-status"
+            $<TARGET_FILE:sovereign-cli> desktop-status --json)
+    set_tests_properties(cli_desktop_status PROPERTIES PASS_REGULAR_EXPRESSION "computer_use_enabled")
 endif()
 
 if(TARGET sovereign-daemon)

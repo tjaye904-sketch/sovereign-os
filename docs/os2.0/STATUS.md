@@ -11,7 +11,8 @@
 - L5 Mission Control capability panel
 - L6 node <-> capability binding (`7da20bb`)
 - L7 federation peer auth (`1a58ad2`)
-- L8 governed purpose runner (`leap/L8-governed-purpose-runner`) — `purpose-run` wired through `CapabilityGate` + `GovernanceService` for `High`/`Critical` risk actions + `AuditLog` recording
+- L8 governed purpose runner (`937dfc1`)
+- L9 desktop operator visibility (`ba94a88d`) — `DesktopOperatorStatus` telemetry, `ApiGatewayService::GetDesktopStatus()`, `sovereign-cli desktop-status [--json]`, and Mission Control `/api/desktop-status`
 
 ## In progress / Starting point
-- **Next Leap (`L9`):** Desktop operator visibility + Mission Control capability/governance telemetry
+- **OS 2.0 Capability, Federation, Governance & Operator Visibility Leaps (L1–L9) complete on `main` (48/48 CTest)**
