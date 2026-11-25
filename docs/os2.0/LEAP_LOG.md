@@ -43,3 +43,4 @@
 - L8 governed purpose runner (CapabilityGate + GovernanceService + AuditLog)
 - L9 desktop operator visibility (DesktopOperatorStatus + ApiGateway + CLI + Mission Control)
 - L10 session ensure ready (5-service topology + CLI + scripts/sovereign-session-ensure.sh + Mission Control)
+- L11 federation plan routing (NodeRegistry::RouteWorkspaceAction + CLI plan-route + Mission Control /api/federation)
