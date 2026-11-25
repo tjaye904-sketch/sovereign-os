@@ -205,3 +205,12 @@ def voice_status() -> dict[str, Any]:
     c, out = _run(["audit-list", "voice"])
     turns = [l for l in out.splitlines() if l.strip()]
     return {"ok": c == 0, "count": len(turns), "turns": turns[-20:]}
+
+
+def doctor_status() -> dict[str, Any]:
+    c, out = _run(["doctor", "--json"])
+    import json as _j
+    try:
+        return {"ok": c == 0, **_j.loads(out.splitlines()[-1])}
+    except Exception:
+        return {"ok": False, "raw": out}
