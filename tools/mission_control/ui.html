@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><title>Sovereign OS 2.0 — Mission Control</title>
+<style>
+body{background:#0d1117;color:#e6edf3;font-family:system-ui,sans-serif;margin:1.5rem;max-width:1100px}
+section{border:1px solid #30363d;border-radius:8px;padding:1rem;margin-bottom:1rem;background:#161b22}
+h1,h2{margin-top:0} table{width:100%;border-collapse:collapse} td,th{border-bottom:1px solid #30363d;padding:6px;text-align:left}
+button{background:#238636;color:#fff;border:none;border-radius:5px;padding:4px 10px;cursor:pointer;margin-right:4px}
+button.deny{background:#da3633} pre{background:#0d1117;padding:0.75rem;border-radius:6px;overflow:auto}
+</style>
+</head>
+<body>
+<h1>Sovereign OS 2.0 — Mission Control</h1>
+<section><h2>Governance Console (Pending Decisions)</h2><div id="gov">loading...</div></section>
+<section><h2>Federation Nodes &amp; Workspace Bindings</h2><pre id="fed">loading...</pre></section>
+<section><h2>Desktop Operator Telemetry</h2><pre id="desk">loading...</pre></section>
+<section><h2>Capabilities</h2><table><thead><tr><th>ID</th><th>Enabled</th><th>Description</th><th>Action</th></tr></thead><tbody id="caps"></tbody></table></section>
+<script>
+async function toggleCap(id, en){await fetch('/api/capabilities/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:en})});refresh();}
+async function decideGov(id, d){await fetch('/api/governance/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision:d,reason:'mission-control-ui'})});refresh();}
+async function refresh(){
+  const [c,f,d,g]=await Promise.all([fetch('/api/capabilities').then(r=>r.json()),fetch('/api/federation').then(r=>r.json()),fetch('/api/desktop-status').then(r=>r.json()),fetch('/api/governance/pending').then(r=>r.json())]);
+  document.getElementById('fed').textContent=JSON.stringify(f,null,2);
+  document.getElementById('desk').textContent=JSON.stringify(d,null,2);
+  const tb=document.getElementById('caps'); tb.innerHTML='';
+  for(const x of (c.capabilities||[])){
+    tb.innerHTML+=`<tr><td>${x.id}</td><td>${x.enabled}</td><td>${x.description||''}</td><td><button onclick="toggleCap('${x.id}',${!x.enabled})">${x.enabled?'Disable':'Enable'}</button></td></tr>`;
+  }
+  const gd=document.getElementById('gov');
+  if(!(g.pending||[]).length){gd.textContent='No pending governance decisions.';}
+  else{gd.innerHTML=g.pending.map(p=>{const id=p.id||p.decision_id||(p.raw.match(/[0-9a-f]{32}/i)||[''])[0];return `<div><code>${p.raw}</code> ${id?`<button onclick="decideGov('${id}','approve')">Approve</button><button class="deny" onclick="decideGov('${id}','reject')">Reject</button>`:''}</div>`;}).join('');}
+}
+refresh();
+</script>
+</body></html>
