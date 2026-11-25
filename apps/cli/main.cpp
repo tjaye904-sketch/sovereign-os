@@ -281,6 +281,7 @@ void PrintUsage()
                 << "  sovereign-cli node-replace [--json] <workspace> <new-node-name> [endpoint]\n"
                 << "  sovereign-cli verify-outcome [--json] <action> <expected> <observed...>\n"
                 << "  sovereign-cli goal-execute [--json] <workspace> <goal...>\n"
+                << "  sovereign-cli curiosity-probe [--json] <probe-action> <topic...>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3745,6 +3746,45 @@ int main(int argc, char** argv)
                       << " node=" << ex.node_name << " evidence_hash=" << ver.evidence_hash << " memory_recorded=1\n";
         host.Close();
         return ver.verified ? 0 : 1;
+    }
+
+    if (cmd == "curiosity-probe" && argc >= 4)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 5) { as_json = true; ++idx; }
+        const std::string probe_act = argv[idx];
+        std::string topic;
+        for (int i = idx + 1; i < argc; ++i) { if (!topic.empty()) topic.push_back(' '); topic += argv[i]; }
+        sovereign::PrincipalId actor{};
+        const auto rep = host.Curiosity().RunBoundedProbe(actor, probe_act, topic);
+        sovereign::audit::AuditEntry ae;
+        ae.category = "curiosity";
+        ae.action = rep.allowed ? "probe.allowed" : "probe.denied";
+        ae.subject = rep.topic;
+        ae.detail = "action=" + probe_act + " reason=" + rep.reason;
+        (void)host.Audit().Append(ae);
+        if (rep.allowed)
+        {
+            sovereign::memory::MemoryRecord mr;
+            mr.tags = {"curiosity", "bounded_probe"};
+            mr.body = "topic=" + rep.topic + " action=" + probe_act + " questions=" + std::to_string(rep.questions.size());
+            (void)host.Memory().Append(mr);
+        }
+        if (as_json)
+        {
+            std::cout << "{\"allowed\":" << (rep.allowed ? "true" : "false")
+                      << ",\"probe_action\":\"" << rep.probe_action << "\",\"topic\":\"" << rep.topic
+                      << "\",\"questions\":" << rep.questions.size() << ",\"reason\":\"" << rep.reason << "\"}\n";
+        }
+        else
+        {
+            std::cout << "allowed=" << (rep.allowed ? "1" : "0") << " probe_action=" << rep.probe_action
+                      << " topic=" << rep.topic << " questions=" << rep.questions.size()
+                      << " reason=" << rep.reason << "\n";
+        }
+        host.Close();
+        return rep.allowed ? 0 : 1;
     }
 
     PrintUsage();
