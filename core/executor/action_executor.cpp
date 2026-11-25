@@ -87,4 +87,35 @@ Result<ExecutionRecord> ActionExecutor::Execute(
     return result;
 }
 
+VerificationReceipt ActionExecutor::VerifyOutcome(
+    const std::string& action,
+    const std::string& check_kind,
+    const std::string& expected_token,
+    const std::string& observed_output)
+{
+    VerificationReceipt rec;
+    rec.action = action;
+    rec.check_kind = check_kind.empty() ? "non_empty_output" : check_kind;
+    std::uint64_t h = 14695981039346656037ULL;
+    for (unsigned char c : observed_output) { h ^= c; h *= 1099511628211ULL; }
+    std::string hex(16, '0');
+    std::snprintf(hex.data(), hex.size() + 1, "%016llx", static_cast<unsigned long long>(h));
+    rec.evidence_hash = hex;
+    if (observed_output.empty())
+    {
+        rec.verified = false;
+        rec.observed_detail = "empty_observed_output";
+        return rec;
+    }
+    if (!expected_token.empty() && observed_output.find(expected_token) == std::string::npos)
+    {
+        rec.verified = false;
+        rec.observed_detail = "missing_expected_token:" + expected_token;
+        return rec;
+    }
+    rec.verified = true;
+    rec.observed_detail = observed_output;
+    return rec;
+}
+
 } // namespace sovereign::executor

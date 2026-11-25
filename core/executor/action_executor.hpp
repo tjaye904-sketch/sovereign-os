@@ -5,6 +5,7 @@
 #include "cognitive_service.hpp"
 #include "governance_service.hpp"
 #include "policy_engine.hpp"
+#include <cstdio>
 
 #include <functional>
 #include <string>
@@ -44,6 +45,15 @@ struct Result<void>
     }
 };
 
+struct VerificationReceipt
+{
+    bool verified{false};
+    std::string action;
+    std::string check_kind;
+    std::string evidence_hash;
+    std::string observed_detail;
+};
+
 struct ExecutionRecord
 {
     std::string action;
@@ -69,6 +79,12 @@ public:
         const std::string& action,
         const std::array<std::uint8_t, 16>& governance_decision_id,
         const std::vector<std::string>& actor_roles = {});
+
+    static VerificationReceipt VerifyOutcome(
+        const std::string& action,
+        const std::string& check_kind,
+        const std::string& expected_token,
+        const std::string& observed_output);
 
     const std::vector<ExecutionRecord>& History() const noexcept
     {
