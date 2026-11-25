@@ -3443,7 +3443,7 @@ int main(int argc, char** argv)
         auto probe = [](const sovereign::os_runtime::SessionServiceEndpoint& ep) -> bool {
             if (ep.port == 0)
                 return std::system("pgrep -f sovereign-daemon >/dev/null 2>&1") == 0;
-            const std::string cmd_str = "curl -fsS --noproxy \"*\" --max-time 1 " + ep.health_url + " >/dev/null 2>&1";
+            const std::string cmd_str = "curl -4 -fsS --noproxy \"*\" --max-time 1 " + ep.health_url + " >/dev/null 2>&1";
             return std::system(cmd_str.c_str()) == 0;
         };
         const auto rep = sovereign::os_runtime::ServiceOrchestrator::EvaluateSessionReadiness(probe);
