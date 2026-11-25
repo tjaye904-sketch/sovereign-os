@@ -94,17 +94,8 @@ sovereign_add_smoke(memory_facets_smoke_test memory sovereign_memory)
 sovereign_add_smoke(workspace_controller_smoke_test workspace sovereign_workspace)
 
 sovereign_add_smoke(capability_registry_smoke_test capability sovereign_capability)
+sovereign_add_smoke(capability_gate_smoke_test capability sovereign_capability)
 
 sovereign_add_smoke(node_registry_smoke_test node sovereign_node)
 
-sovereign_add_smoke(capability_gate_smoke_test capability sovereign_capability)
-
-# L6
-if(TARGET sovereign_capability)
-  add_executable(node_capability_binding_smoke_test
-    capability/node_capability_binding_smoke_test.cpp)
-  target_link_libraries(node_capability_binding_smoke_test PRIVATE sovereign_capability)
-  target_include_directories(node_capability_binding_smoke_test PRIVATE
-    ${CMAKE_SOURCE_DIR}/core/capability)
-  add_test(NAME node_capability_binding_smoke_test COMMAND node_capability_binding_smoke_test)
-endif()
+sovereign_add_smoke(node_capability_binding_smoke_test capability sovereign_capability)
