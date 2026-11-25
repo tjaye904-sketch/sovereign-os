@@ -99,7 +99,7 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
         std::cout << "id=" << id << " enabled=" << (r.value ? 1 : 0) << "\n";
         return 0;
     }
-    if (cmd.rfind("node-", 0) != 0) return -1;
+    if (cmd.rfind("node-", 0) != 0 || cmd == "node-execute") return -1;
     sovereign::node::NodeRegistry nodes;
     if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
     { std::cerr << "node open failed\n"; return 1; }

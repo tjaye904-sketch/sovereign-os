@@ -41,6 +41,11 @@ int main()
     REQUIRE(r_nocap.Ok() && !r_nocap.value.allowed && r_nocap.value.reason == "node_missing_capability:voice.speak");
     auto r_unb = reg.RouteWorkspaceAction("research", "cli", "host.cli");
     REQUIRE(r_unb.Ok() && !r_unb.value.allowed && r_unb.value.reason == "no_node_bound_to_workspace");
+    // L12: governed execution on bound node
+    auto ex_ok = reg.ExecuteOnBoundNode("development", "cli", "host.cli", "echo ok");
+    REQUIRE(ex_ok.Ok() && ex_ok.value.executed && !ex_ok.value.node_id_hex.empty());
+    auto ex_deny = reg.ExecuteOnBoundNode("research", "cli", "host.cli", "echo fail");
+    REQUIRE(ex_deny.Ok() && !ex_deny.value.executed && ex_deny.value.reason == "no_node_bound_to_workspace");
 
     reg.Close();
     sovereign::node::NodeRegistry reg2;
