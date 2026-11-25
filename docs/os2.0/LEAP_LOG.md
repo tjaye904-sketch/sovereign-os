@@ -64,3 +64,4 @@
 - L30 live Linux wmctrl window dispatch & Piper TTS audio playback bindings (CTest #65 cli_live_window_voice_bridge)
 - L31 two-node peer enrollment drill (sovereign-multinode-drill.sh) & physical USB flash helper (sovereign-flash-usb.sh, CTest #66)
 - L34 16 canonical workspace domains, L35 task-oriented multi-model routing, L36 canonical architectural README.md & 5-tier Maturity Matrix
+- L37 push-to-talk hands-free voice chat bridge (sovereign-voice-talk.sh: Dell mic -> Whisper STT -> sovereign-hub-chat -> Piper TTS, CTest #69)

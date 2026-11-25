@@ -174,6 +174,10 @@ if(TARGET sovereign-cli)
         NAME model_router_task_assignment_smoke
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l35.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> model-bind development qwen2.5-coder:7b >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> model-bind communications granite4.1:3b >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> model-route --json development && SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> model-route --json communications")
     set_tests_properties(model_router_task_assignment_smoke PROPERTIES PASS_REGULAR_EXPRESSION "granite4.1:3b")
+    add_test(
+        NAME voice_talk_bridge_smoke
+        COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l37.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-enable host.voice >/dev/null; printf '#!/usr/bin/env bash\necho content=Voice bridge verified.\n' > $ROOT/mock-chat.sh; chmod +x $ROOT/mock-chat.sh; SOVEREIGN_DATA_ROOT=$ROOT SOVEREIGN_CLI=$<TARGET_FILE:sovereign-cli> SOVEREIGN_HUB_CHAT=$ROOT/mock-chat.sh SOVEREIGN_VOICE_DRY_RUN=1 bash ${CMAKE_SOURCE_DIR}/scripts/sovereign-voice-talk.sh --text 'Check status'")
+    set_tests_properties(voice_talk_bridge_smoke PROPERTIES PASS_REGULAR_EXPRESSION "VOICE_TALK_TURN_OK")
 endif()
 
 if(TARGET sovereign-daemon)
