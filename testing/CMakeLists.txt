@@ -102,6 +102,10 @@ if(TARGET sovereign-cli)
         NAME cli_node_execute
         COMMAND sh -c "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-node-exec $<TARGET_FILE:sovereign-cli> node-execute --json unbound-ws browser_open || true")
     set_tests_properties(cli_node_execute PROPERTIES PASS_REGULAR_EXPRESSION "no_node_bound_to_workspace")
+    add_test(
+        NAME mc_federation_governance_smoke
+        COMMAND python3 -c "import sys; sys.path.insert(0, '${CMAKE_SOURCE_DIR}/tools/mission_control'); import capability_api as c; f=c.federation_status(); g=c.list_pending_decisions(); assert f.get('ok') and g.get('ok'); print('mc_fed_gov_ok')")
+    set_tests_properties(mc_federation_governance_smoke PROPERTIES PASS_REGULAR_EXPRESSION "mc_fed_gov_ok")
 endif()
 
 if(TARGET sovereign-daemon)

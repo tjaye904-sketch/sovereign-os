@@ -15,7 +15,8 @@
 - L9 desktop operator visibility (`ba94a88d`, `ca5109f`)
 - L10 session ensure ready (`428939e`, `d6c9343e`)
 - L11 federation plan routing (`0409941`)
-- L12 federation node execute (`leap/L12-federation-node-execute`) — `NodeRegistry::ExecuteOnBoundNode`, `SovereignHost::Nodes()`, `sovereign-cli node-execute [--json]` with `AuditLog` node-id recording
+- L12 federation node execute (`fcab1f9`)
+- L13 Mission Control federation & governance console (`leap/L13-mc-federation-governance-console`) — `/api/federation`, `/api/governance/pending`, `POST /api/governance/{id}`, and `/ui` governance console
 
 ## In progress / Starting point
-- **OS 2.0 Leaps L1–L12 complete on `main` (51/51 CTest)**
+- **OS 2.0 Leaps L1–L13 complete on `main` (52/52 CTest)**

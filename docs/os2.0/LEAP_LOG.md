@@ -45,3 +45,4 @@
 - L10 session ensure ready (5-service topology + CLI + scripts/sovereign-session-ensure.sh + Mission Control)
 - L11 federation plan routing (NodeRegistry::RouteWorkspaceAction + CLI plan-route + Mission Control /api/federation)
 - L12 federation node execute (NodeRegistry::ExecuteOnBoundNode + SovereignHost::Nodes + CLI node-execute + AuditLog)
+- L13 Mission Control federation & governance console (/api/federation + /api/governance/pending + /ui approve/reject)
