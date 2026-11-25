@@ -274,6 +274,8 @@ void PrintUsage()
                 << "  sovereign-cli session-ensure [--json]\n"
                 << "  sovereign-cli plan-route [--json] <workspace> <action>\n"
                 << "  sovereign-cli node-execute [--json] <workspace> <action> [payload...]\n"
+                << "  sovereign-cli core-backup [--json] <snapshot-dir>\n"
+                << "  sovereign-cli core-restore [--json] <snapshot-dir>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3552,6 +3554,38 @@ int main(int argc, char** argv)
         }
         host.Close();
         return rep.executed ? 0 : 1;
+    }
+
+    if ((cmd == "core-backup" || cmd == "core-restore") && argc >= 3)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 4) { as_json = true; ++idx; }
+        const std::filesystem::path snap_dir = argv[idx];
+        const auto rep = (cmd == "core-backup")
+            ? sovereign::archive::ArchiveService::CreateCoreSnapshot(host.DataRoot(), snap_dir)
+            : sovereign::archive::ArchiveService::RestoreCoreSnapshot(snap_dir, host.DataRoot());
+        sovereign::audit::AuditEntry ae;
+        ae.category = "ha";
+        ae.action = cmd;
+        ae.subject = snap_dir.string();
+        ae.detail = "ok=" + std::string(rep.ok ? "1" : "0") + " checksum=" + rep.checksum_hex + " detail=" + rep.detail;
+        (void)host.Audit().Append(ae);
+        if (as_json)
+        {
+            std::cout << "{\"ok\":" << (rep.ok ? "true" : "false")
+                      << ",\"op\":\"" << cmd << "\",\"files\":" << rep.file_count
+                      << ",\"bytes\":" << rep.total_bytes << ",\"checksum\":\"" << rep.checksum_hex
+                      << "\",\"detail\":\"" << rep.detail << "\"}\n";
+        }
+        else
+        {
+            std::cout << "ok=" << (rep.ok ? "1" : "0") << " op=" << cmd << " files=" << rep.file_count
+                      << " bytes=" << rep.total_bytes << " checksum=" << rep.checksum_hex
+                      << " detail=" << rep.detail << "\n";
+        }
+        host.Close();
+        return rep.ok ? 0 : 1;
     }
 
     PrintUsage();
