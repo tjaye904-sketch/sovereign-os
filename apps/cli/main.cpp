@@ -681,13 +681,11 @@ int main(int argc, char** argv)
             sovereign::workspace::Result<sovereign::workspace::Workspace> r;
             if (key.size() == 32)
             {
-                sovereign::workspace::WorkspaceId id{};
                 // try hex via List scan
                 auto all = host.Workspace().List();
                 if (!all.Ok()) { r.error = all.error; return r; }
                 for (const auto& w : all.value)
                 {
-                    bool match = true;
                     static const char* hx = "0123456789abcdef";
                     std::string h(32, '0');
                     for (size_t i = 0; i < 16; ++i) {

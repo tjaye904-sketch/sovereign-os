@@ -58,3 +58,4 @@
 - L23 hardening & daily UX doctor + unified Mission Control dashboard (TransparencyService::RunDoctor + CLI doctor --fix + /api/doctor + WP-00..WP-12 done)
 - L24 OS 2.0 NixOS ISO/VM lab build & boot verification (verify-nixos-iso-vm-boot.sh + CLI os2-lab-status + /api/os2-lab + WP-13 done)
 - L24 OS 2.0 NixOS ISO/VM lab build & boot verification (verify-nixos-iso-vm-boot.sh + CLI os2-lab-status + /api/os2-lab + WP-13 done)
+- L28 zero-warning C++23 build, persistent systemd sovereign-caps-ui.service & updated HANDOFF.md / L28-L31 roadmap
