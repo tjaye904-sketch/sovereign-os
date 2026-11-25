@@ -259,5 +259,4 @@ SessionReadinessReport ServiceOrchestrator::EvaluateSessionReadiness(
     report.all_ready = !report.services.empty() && report.ready_count == report.services.size();
     return report;
 }
-
 } // namespace sovereign::os_runtime
