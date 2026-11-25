@@ -1,0 +1,13 @@
+[Unit]
+Description=Sovereign L5 capability panel (8769)
+After=default.target
+
+[Service]
+Type=simple
+Environment=SOVEREIGN_DATA_ROOT=%h/.local/share/sovereign
+Environment=SOVEREIGN_CLI=%h/src/sovereign-os/sovereign-work/build/apps/cli/sovereign-cli
+ExecStart=/usr/bin/python3 /home/tjaye904/.local/share/sovereign-hub/caps_sidecar.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

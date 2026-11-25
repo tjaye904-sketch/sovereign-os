@@ -4,12 +4,9 @@
 - **Strict merge gate:** Merge `leap/L{N}-…` into `main` only via `scripts/leap.sh finish` once stable and at **100% CTest pass** (`agent/*` branches never merge directly to `main`).
 
 ## Completed
-- L1–L7: Capability Registry, Node Federation, CapabilityGate, Python CU/sys Bridge, Mission Control Caps Panel, Node-Capability Binding, Federation Peer Auth
-- L8–L10: Governed Purpose Runner (`937dfc1`), Desktop Operator Visibility (`ca5109f`), 5-Service Session Ensure Ready (`d6c9343`)
-- L11–L13: Federation Plan Routing (`0409941`), Federation Node Execute (`fcab1f9`), Mission Control Federation & Governance Console (`10ad708`)
-- L14–L16: Core HA Backup & Restore (`6703fd5`), NixOS Lab & Headless Node Image Gates (`b89f13d`), Multi-Workspace Node Fleet Scale & Replace Drill (`132e59d`)
-- L17–L20: Post-Act Outcome Verification (`9ac9c8c`), Policy-Bounded Curiosity Probe (`b52dd16`), Unified Inventory & Policy Allowlist (`e85656d`), Canonical Purpose Library (`de2dbc1`)
-- L21–L24: Desktop Operator A11y / Window Drive (`88b12b8`), Voice Router Integration (`d66f62f`), Hardening & Daily UX Doctor (`1bb8a82`), OS 2.0 NixOS ISO/VM Lab Build & Boot Verification (`leap/L24-nixos-iso-vm-boot-verification`, `WP-13` `done`)
+- L1–L16: OS 2.0 Master Build Plan (`P0`–`P7`) — Capabilities, Federation, Governance, Desktop Operator, 5-Service Session Ensure, Plan Route, Node Execute, Mission Control Console, Core HA Backup/Restore, NixOS Lab Gates, Multi-Workspace Fleet Scale & Replace Drill
+- L17–L27: JARVIS Completion Pathway (`WP-00`–`WP-13`) — Observe After Act (`goal-execute`), Policy-Bounded Curiosity Probe (`curiosity-probe`), Unified Inventory Allowlist (`inventory-sync`, `app-check`), Canonical Purpose Library (`purpose-seed`, `purpose-inspect`), Desktop A11y/Window Drive (`desktop-drive`), Voice Router (`voice-route`), Hardening Doctor (`doctor --fix`) + Unified Mission Control UI, NixOS ISO/VM Lab Build & Serial Boot Verification, Default `chat-tools` Router (`56797b1`)
+- L28: Zero-warning C++23 build (`apps/cli/main.cpp`), persistent `systemd --user` `sovereign-caps-ui.service`, and updated `HANDOFF.md` + OS 2.0 roadmap docs (`L28`–`L31`)
 
 ## In progress / Starting point
-- **All OS 2.0 Master Build Plan (P0–P7) & JARVIS Completion Pathway (WP-00–WP-13) complete on `main` (63/63 CTest)**
+- **Next packet:** `leap/L29-autonomous-multi-turn-tool-loop` (Autonomous multi-turn tool dispatch & synthesis loop in `sovereign-cli chat-tools`), followed by `L30` (live window/A11y & Piper TTS audio) and `L31` (multi-node peer enrollment & physical USB flash / bare-metal boot)
