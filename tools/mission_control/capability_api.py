@@ -193,3 +193,9 @@ def purposes_status() -> dict[str, Any]:
     c, out = _run(["purpose-list"])
     packs = [l for l in out.splitlines() if l.strip()]
     return {"ok": c == 0, "count": len(packs), "purposes": packs}
+
+
+def desktop_drive_status() -> dict[str, Any]:
+    c, out = _run(["audit-list", "desktop_drive"])
+    drives = [l for l in out.splitlines() if l.strip()]
+    return {"ok": c == 0, "count": len(drives), "drives": drives[-20:]}
