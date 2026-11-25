@@ -518,4 +518,64 @@ DesktopDriveReceipt DesktopOperatorGateway::DriveWindow(
     return out;
 }
 
+VoiceRouteReceipt DesktopOperatorGateway::RouteVoice(
+    const std::string& mode,
+    const std::string& utterance)
+{
+    VoiceRouteReceipt out;
+    out.mode = mode;
+    out.utterance = utterance;
+    if (host_ == nullptr) { out.reason = "host_not_bound"; return out; }
+    if (mode != "speak" && mode != "listen" && mode != "intent")
+    {
+        out.reason = "unsupported_voice_mode:" + mode;
+        return out;
+    }
+    if (utterance.empty()) { out.reason = "empty_utterance"; return out; }
+    const auto gate = host_->Gate().RequireForAction("voice");
+    if (!gate.allowed)
+    {
+        out.reason = gate.reason.empty() ? "capability_denied:host.voice" : gate.reason;
+        return out;
+    }
+    if (mode == "intent")
+    {
+        const bool dangerous = (utterance.find("delete") != std::string::npos ||
+                                utterance.find("wipe") != std::string::npos ||
+                                utterance.find("shutdown") != std::string::npos ||
+                                utterance.find("sudo") != std::string::npos);
+        if (dangerous)
+        {
+            out.reason = "governance_approval_required_for_mutating_voice_intent";
+            sovereign::audit::AuditEntry ae;
+            ae.category = "voice";
+            ae.action = "voice.intent.blocked";
+            ae.subject = mode;
+            ae.detail = out.reason;
+            (void)host_->Audit().Append(ae);
+            return out;
+        }
+    }
+    out.allowed = true;
+    out.routed = true;
+    out.reason = "routed_on_same_router";
+    const std::string raw = mode + ":" + utterance;
+    std::uint64_t h = 14695981039346656037ULL;
+    for (unsigned char c : raw) { h ^= c; h *= 1099511628211ULL; }
+    std::string hex(16, '0');
+    std::snprintf(hex.data(), hex.size() + 1, "%016llx", static_cast<unsigned long long>(h));
+    out.evidence_hash = hex;
+    sovereign::audit::AuditEntry ae;
+    ae.category = "voice";
+    ae.action = "voice." + mode;
+    ae.subject = mode;
+    ae.detail = "hash=" + out.evidence_hash + " utterance=" + utterance;
+    (void)host_->Audit().Append(ae);
+    sovereign::memory::MemoryRecord mr;
+    mr.tags = {"voice", "router", mode};
+    mr.body = "mode=" + mode + " utterance=" + utterance + " hash=" + out.evidence_hash;
+    (void)host_->Memory().Append(mr);
+    return out;
+}
+
 } // namespace sovereign::product

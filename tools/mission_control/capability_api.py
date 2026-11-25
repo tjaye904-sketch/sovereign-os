@@ -199,3 +199,9 @@ def desktop_drive_status() -> dict[str, Any]:
     c, out = _run(["audit-list", "desktop_drive"])
     drives = [l for l in out.splitlines() if l.strip()]
     return {"ok": c == 0, "count": len(drives), "drives": drives[-20:]}
+
+
+def voice_status() -> dict[str, Any]:
+    c, out = _run(["audit-list", "voice"])
+    turns = [l for l in out.splitlines() if l.strip()]
+    return {"ok": c == 0, "count": len(turns), "turns": turns[-20:]}

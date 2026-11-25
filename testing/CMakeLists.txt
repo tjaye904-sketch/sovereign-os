@@ -142,6 +142,10 @@ if(TARGET sovereign-cli)
         NAME cli_desktop_drive_mvp
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l21.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> inventory-sync --apps firefox >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> desktop-drive --json --allow-headless focus_window firefox && ! SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> desktop-drive --json --allow-headless focus_window unlisted-app >/dev/null")
     set_tests_properties(cli_desktop_drive_mvp PROPERTIES PASS_REGULAR_EXPRESSION "driven_and_observed")
+    add_test(
+        NAME cli_voice_router_smoke
+        COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l22.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-enable host.voice >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> voice-route --json speak system_ready && ! SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> voice-route --json intent delete_all_files >/dev/null")
+    set_tests_properties(cli_voice_router_smoke PROPERTIES PASS_REGULAR_EXPRESSION "routed_on_same_router")
 endif()
 
 if(TARGET sovereign-daemon)

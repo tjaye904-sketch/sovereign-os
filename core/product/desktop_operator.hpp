@@ -36,6 +36,16 @@ struct DesktopDriveReceipt
     std::string reason;
 };
 
+struct VoiceRouteReceipt
+{
+    bool allowed{false};
+    bool routed{false};
+    std::string mode;
+    std::string utterance;
+    std::string evidence_hash;
+    std::string reason;
+};
+
 class DesktopOperatorGateway
 {
 public:
@@ -63,6 +73,9 @@ public:
         std::string& report);
 
     [[nodiscard]] DesktopOperatorStatus Status(std::size_t audit_limit = 10) const;
+    VoiceRouteReceipt RouteVoice(
+        const std::string& mode,
+        const std::string& utterance);
     DesktopDriveReceipt DriveWindow(
         const std::string& op,
         const std::string& target_app,

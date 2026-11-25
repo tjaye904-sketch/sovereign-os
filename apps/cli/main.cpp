@@ -287,6 +287,7 @@ void PrintUsage()
                 << "  sovereign-cli purpose-seed\n"
                 << "  sovereign-cli purpose-inspect [--json] <purpose-id>\n"
                 << "  sovereign-cli desktop-drive [--json] [--allow-headless] <op> <app> [payload...]\n"
+                << "  sovereign-cli voice-route [--json] <speak|listen|intent> <utterance...>\n"
         << "Env: SOVEREIGN_DATA_ROOT, OLLAMA_HOST, SOVEREIGN_OLLAMA_MODEL\n";
 }
 
@@ -3911,6 +3912,26 @@ int main(int argc, char** argv)
                       << " evidence_hash=" << rec.evidence_hash << " reason=" << rec.reason << "\n";
         host.Close();
         return rec.executed ? 0 : 1;
+    }
+
+    if (cmd == "voice-route" && argc >= 4)
+    {
+        bool as_json = false;
+        int idx = 2;
+        if (std::string(argv[idx]) == "--json" && argc >= 5) { as_json = true; ++idx; }
+        const std::string mode = argv[idx];
+        std::string utt;
+        for (int i = idx + 1; i < argc; ++i) { if (!utt.empty()) utt.push_back(' '); utt += argv[i]; }
+        sovereign::product::DesktopOperatorGateway gw(host);
+        const auto rec = gw.RouteVoice(mode, utt);
+        if (as_json)
+            std::cout << "{\"routed\":" << (rec.routed ? "true" : "false") << ",\"mode\":\"" << rec.mode
+                      << "\",\"evidence_hash\":\"" << rec.evidence_hash << "\",\"reason\":\"" << rec.reason << "\"}\n";
+        else
+            std::cout << "routed=" << (rec.routed ? "1" : "0") << " mode=" << rec.mode
+                      << " evidence_hash=" << rec.evidence_hash << " reason=" << rec.reason << "\n";
+        host.Close();
+        return rec.routed ? 0 : 1;
     }
 
     PrintUsage();
