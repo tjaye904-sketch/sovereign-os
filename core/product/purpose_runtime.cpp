@@ -663,14 +663,6 @@ PurposeEvaluation PurposeRuntime::CanRun(
             eval.reason = host_gate.reason.empty() ? "capability denied: host.purpose" : host_gate.reason;
             return eval;
         }
-        const auto action_gate = gate_->RequireForAction(action_name);
-        if (!action_gate.allowed)
-        {
-            eval.reason = action_gate.reason.empty()
-                ? ("capability denied for action: " + action_name)
-                : action_gate.reason;
-            return eval;
-        }
     }
 
     if (!ListContains(pack.allowed_tools, action_name))
