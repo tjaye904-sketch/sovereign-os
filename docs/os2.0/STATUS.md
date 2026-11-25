@@ -8,7 +8,7 @@
 - L8–L10: Governed Purpose Runner (`937dfc1`), Desktop Operator Visibility (`ca5109f`), 5-Service Session Ensure Ready (`d6c9343`)
 - L11–L13: Federation Plan Routing (`0409941`), Federation Node Execute (`fcab1f9`), Mission Control Federation & Governance Console (`10ad708`)
 - L14–L16: Core HA Backup & Restore (`6703fd5`), NixOS Lab & Headless Node Image Gates (`b89f13d`), Multi-Workspace Node Fleet Scale & Replace Drill (`132e59d`)
-- L17–L22: Post-Act Outcome Verification & Closed-Loop Execution (`9ac9c8c`), Policy-Bounded Curiosity Probe (`b52dd16`), Unified Inventory & Policy Allowlist (`e85656d`), Canonical Purpose Library (`de2dbc1`), Desktop Operator A11y / Window Drive MVP (`88b12b8`), Voice Router Integration (`leap/L22-voice-router-integration`)
+- L17–L23: Post-Act Outcome Verification (`9ac9c8c`), Policy-Bounded Curiosity Probe (`b52dd16`), Unified Inventory & Policy Allowlist (`e85656d`), Canonical Purpose Library (`de2dbc1`), Desktop Operator A11y / Window Drive (`88b12b8`), Voice Router Integration (`d66f62f`), Hardening & Daily UX Doctor + Unified Mission Control Dashboard (`leap/L23-hardening-daily-ux-doctor`)
 
 ## In progress / Starting point
-- **OS 2.0 Leaps L1–L22 complete on `main` (61/61 CTest)**
+- **OS 2.0 Master Build Plan (P0–P7) & JARVIS Completion Pathway (WP-00–WP-12) complete on `main` (62/62 CTest)**

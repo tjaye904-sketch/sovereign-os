@@ -22,20 +22,20 @@
 
 | WP | Name | Status |
 |----|------|--------|
-| 00 | Baseline freeze | in_progress |
-| 01 | Session permanence (reboot-proof) | not_started |
+| 00 | Baseline freeze | done |
+| 01 | Session permanence (reboot-proof) | done |
 | 02 | Truthful status | done |
 | 03 | Chat → tool router | done |
-| 04 | Observe after act | not_started |
-| 05 | Curiosity engine | not_started |
-| 06 | Inventory enforce app_open | in_progress |
-| 07 | Full cognitive loop integration | not_started |
-| 08 | Unified allowlist (inventory = policy) | not_started |
-| 09 | Purpose library | not_started |
-| 10 | Desktop operator MVP | not_started |
-| 11 | Voice on same router | not_started |
-| 12 | Hardening & daily UX | not_started |
-| 13 | OS 2.0 optional (ISO/VM) | blocked_until_12 |
+| 04 | Observe after act | done |
+| 05 | Curiosity engine | done |
+| 06 | Inventory enforce app_open | done |
+| 07 | Full cognitive loop integration | done |
+| 08 | Unified allowlist (inventory = policy) | done |
+| 09 | Purpose library | done |
+| 10 | Desktop operator MVP | done |
+| 11 | Voice on same router | done |
+| 12 | Hardening & daily UX | done |
+| 13 | OS 2.0 optional (ISO/VM) | ready_for_os2_lab |
 
 Update **Status** only when closing a WP: `not_started` → `in_progress` → `done`.
 

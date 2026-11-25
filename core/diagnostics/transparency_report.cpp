@@ -302,4 +302,42 @@ TransparencyReport TransparencyService::BuildSection(
     return r;
 }
 
+DoctorReport TransparencyService::RunDoctor(bool auto_fix)
+{
+    DoctorReport rep;
+    std::error_code ec;
+    if (auto_fix)
+    {
+        std::filesystem::permissions(host_.DataRoot(), std::filesystem::perms::owner_all, std::filesystem::perm_options::replace, ec);
+        if (host_.Capabilities().List().value.empty()) (void)host_.Capabilities().SeedDefaults();
+        if (host_.Policy().ListInventoryAllowlist().empty()) (void)host_.Policy().SyncInventoryAllowlist({"firefox", "code"});
+        (void)host_.Purpose().SeedDefaultLibrary(host_.DataRoot() / "purposes");
+    }
+    const auto st = std::filesystem::status(host_.DataRoot(), ec);
+    const bool perms_ok = !ec && ((st.permissions() & std::filesystem::perms::others_all) == std::filesystem::perms::none);
+    rep.checks.push_back({"data_root_hardened", perms_ok, perms_ok ? "owner_restricted" : "world_accessible"});
+
+    const auto audit_ok = host_.Audit().VerifyChain();
+    rep.checks.push_back({"audit_chain_intact", audit_ok.Ok(), audit_ok.Ok() ? "verified" : "chain_error"});
+
+    const auto caps = host_.Capabilities().List();
+    const bool caps_ok = caps.Ok() && !caps.value.empty();
+    rep.checks.push_back({"capabilities_seeded", caps_ok, "count=" + std::to_string(caps.value.size())});
+
+    const auto inv = host_.Policy().ListInventoryAllowlist();
+    const bool inv_ok = !inv.empty();
+    rep.checks.push_back({"inventory_allowlist", inv_ok, "count=" + std::to_string(inv.size())});
+
+    const bool purp_ok = std::filesystem::exists(host_.DataRoot() / "purposes", ec);
+    rep.checks.push_back({"purpose_library", purp_ok, purp_ok ? "present" : "not_seeded"});
+
+    const bool pol_ok = host_.Policy().Version() >= 1;
+    rep.checks.push_back({"policy_engine", pol_ok, "v" + std::to_string(host_.Policy().Version())});
+
+    rep.total = rep.checks.size();
+    for (const auto& c : rep.checks) if (c.ok) ++rep.passed;
+    rep.all_ok = (rep.passed == rep.total);
+    return rep;
+}
+
 } // namespace sovereign::diagnostics

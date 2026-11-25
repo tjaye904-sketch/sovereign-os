@@ -55,3 +55,4 @@
 - L20 canonical purpose library & inventory validation (PurposeRuntime::SeedDefaultLibrary + ValidateAgainstInventory + CLI purpose-seed/purpose-inspect + /api/purposes)
 - L21 desktop operator a11y / window drive MVP (DesktopOperatorGateway::DriveWindow + CLI desktop-drive + /api/desktop-drive)
 - L22 voice router integration on unified CapabilityGate + Policy router (DesktopOperatorGateway::RouteVoice + CLI voice-route + /api/voice)
+- L23 hardening & daily UX doctor + unified Mission Control dashboard (TransparencyService::RunDoctor + CLI doctor --fix + /api/doctor + WP-00..WP-12 done)
