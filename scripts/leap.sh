@@ -70,7 +70,7 @@ cmd_finish() {
   cmd_check
   git checkout "$MAIN"
   # Merge without committing, test the exact merged tree, commit only if green.
-  if ! git merge --no-ff --no-commit "$b"; then
+  if ! git merge --no-ff --no-commit ${MERGE_OPTS:-} "$b"; then
     git merge --abort || true; git checkout "$b"; die "merge conflict: main untouched"
   fi
   if run_tests; then
