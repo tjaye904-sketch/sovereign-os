@@ -54,3 +54,4 @@
 - L19 unified inventory & policy allowlist enforcement (PolicyEngine::SyncInventoryAllowlist + CLI inventory-sync/app-check + /api/inventory)
 - L20 canonical purpose library & inventory validation (PurposeRuntime::SeedDefaultLibrary + ValidateAgainstInventory + CLI purpose-seed/purpose-inspect + /api/purposes)
 - L21 desktop operator a11y / window drive MVP (DesktopOperatorGateway::DriveWindow + CLI desktop-drive + /api/desktop-drive)
+- L22 voice router integration on unified CapabilityGate + Policy router (DesktopOperatorGateway::RouteVoice + CLI voice-route + /api/voice)
