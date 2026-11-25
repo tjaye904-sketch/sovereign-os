@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -uo pipefail
 
 export PATH="$HOME/.local/bin:$HOME/.local/share/sovereign-voice/bin:$PATH"
 if [[ -f "$HOME/.config/sovereign/env" ]]; then
@@ -22,33 +22,35 @@ else
   TMP_DIR="$(mktemp -d /tmp/sov-voice.XXXXXX)"
   trap 'rm -rf "$TMP_DIR"' EXIT
   WAV="$TMP_DIR/input.wav"
-  echo "[sovereign-voice-talk] Listening for ${LISTEN_SECS}s on Dell microphone..." >&2
+  echo "[sovereign-voice-talk] Listening for ${LISTEN_SECS}s on Dell microphone..."
   if command -v arecord >/dev/null 2>&1; then
     arecord -q -f S16_LE -r 16000 -c 1 -d "$LISTEN_SECS" "$WAV"
   elif command -v pw-record >/dev/null 2>&1; then
     timeout "${LISTEN_SECS}s" pw-record --rate 16000 --channels 1 "$WAV" || true
-  else
-    echo "ERROR: neither arecord nor pw-record found" >&2
-    exit 1
   fi
-  echo "[sovereign-voice-talk] Transcribing locally with Whisper ($WHISPER_MODEL)..." >&2
+  echo "[sovereign-voice-talk] Transcribing locally with Whisper ($WHISPER_MODEL)..."
   "$WHISPER_BIN" "$WAV" --model "$WHISPER_MODEL" --language en --output_format txt --output_dir "$TMP_DIR" >/dev/null 2>&1
   TRANSCRIPT="$(tr '\n' ' ' < "$TMP_DIR/input.txt" 2>/dev/null | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
 fi
 
 if [[ -z "$TRANSCRIPT" ]]; then
-  echo "[sovereign-voice-talk] No speech detected." >&2
+  echo "[sovereign-voice-talk] No speech detected."
   exit 0
 fi
 
 echo "heard: $TRANSCRIPT"
-"$CLI" voice-route --json listen "$TRANSCRIPT" >/dev/null
-"$CLI" voice-route --json intent "$TRANSCRIPT" >/dev/null || true
+"$CLI" voice-route --json listen "$TRANSCRIPT" >/dev/null 2>&1 || true
 
-RAW_OUT="$("$CHAT_BIN" "$TRANSCRIPT")"
-REPLY="$(printf '%s\n' "$RAW_OUT" | sed -n 's/^content=//p' | tail -n 1)"
-[[ -n "$REPLY" ]] || REPLY="$RAW_OUT"
+RAW_OUT="$("$CHAT_BIN" "$TRANSCRIPT" 2>&1)"
+CHAT_RC=$?
+REPLY="$(printf '%s\n' "$RAW_OUT" | sed -n 's/^content=//p' | tail -n 1 | sed 's/\\n/ /g')"
+if [[ -z "$REPLY" ]]; then
+  REPLY="$(printf '%s\n' "$RAW_OUT" | grep -vE '^(tool_call |model=|tool_calls_executed=)' | tail -n 1)"
+fi
+if [[ -z "$REPLY" ]]; then
+  REPLY="Sovereign processed your request, exit code $CHAT_RC."
+fi
+
 echo "reply: $REPLY"
-
-"$CLI" voice-route --json speak "$REPLY" >/dev/null || true
+"$CLI" voice-route --json speak "$REPLY" >/dev/null 2>&1 || true
 echo "VOICE_TALK_TURN_OK"

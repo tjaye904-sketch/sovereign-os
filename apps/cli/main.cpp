@@ -2732,7 +2732,8 @@ int main(int argc, char** argv)
                 auto q2 = (q1!=std::string::npos) ? r.value.content.find('"', q1+1) : std::string::npos;
                 if (q1!=std::string::npos && q2!=std::string::npos && q2>q1+1) calls.push_back({"in_"+std::to_string(t), r.value.content.substr(q1+1, q2-q1-1), "{}"});
             }
-            if (calls.empty() || cmd != "chat-tools") { std::cout << "model=" << r.value.model << "\ntool_calls_executed=" << turns << "\ncontent=" << r.value.content << '\n'; break; }
+            if (calls.empty() || cmd != "chat-tools" || t == 3) { std::cout << "model=" << r.value.model << "\ntool_calls_executed=" << turns << "\ncontent=" << r.value.content << '\n'; break; }
+            if (t == 2) { req.tools.clear(); req.messages.push_back({"system", "Now provide a concise, plain-English final answer summarizing the tool results above. Do not output JSON.", {}, {}}); }
             req.messages.push_back({"assistant", r.value.content, {}, {}});
             for (const auto& tc : calls) { ++turns; auto res = run_t(tc.name, tc.arguments_json); std::cout << "tool_call name=" << tc.name << " result=" << res << '\n'; req.messages.push_back({"tool", res, tc.name, tc.id}); }
         }
