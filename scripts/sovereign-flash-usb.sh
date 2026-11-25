@@ -22,7 +22,7 @@ fi
 if [[ "${1:-}" == "--list" || $# -eq 0 ]]; then
   echo "Verified ISO: $ISO_FILE ($(du -h "$ISO_FILE" | awk '{print $1}'))"
   echo "Removable USB block devices:"
-  lsblk -d -o NAME,TRAN,RM,SIZE,MODEL | awk 'NR==1 || ($2=="usb" && $3=="1")'
+  lsblk -d -o NAME,TRAN,RM,SIZE,MODEL | awk 'NR==1 || ($2=="usb" && $3=="1") || $2=="mmc" || $1 ~ /^mmcblk/'
   exit 0
 fi
 
@@ -38,7 +38,7 @@ TRAN="$(lsblk -dn -o TRAN "$DEV" 2>/dev/null || true)"
 RM="$(lsblk -dn -o RM "$DEV" 2>/dev/null | tr -d ' ')"
 MOUNTED="$(lsblk -nr -o MOUNTPOINT "$DEV" | grep -v '^$' || true)"
 
-if [[ "$TRAN" != "usb" || "$RM" != "1" ]]; then
+if [[ ! ( ( "$TRAN" == "usb" && "$RM" == "1" ) || "$TRAN" == "mmc" || "$BASE" == mmcblk* ) ]]; then
   echo "REFUSED: $DEV is not a removable USB device (TRAN=$TRAN RM=$RM)" >&2
   exit 1
 fi
