@@ -35,8 +35,11 @@ in
   boot.supportedFilesystems = [ "btrfs" "ext4" "vfat" "ntfs" "xfs" ];
   boot.initrd.availableKernelModules = [
     "ahci" "xhci_pci" "virtio_pci" "virtio_blk" "virtio_net"
-    "usb_storage" "sd_mod" "sr_mod" "nvme" "kvm"
+    "usb_storage" "uas" "sd_mod" "sr_mod" "nvme" "kvm"
+    "rtsx_pci" "rtsx_pci_sdmmc" "rtsx_usb" "rtsx_usb_sdmmc"
+    "mmc_core" "mmc_block" "sdhci" "sdhci_pci"
   ];
+  boot.initrd.kernelModules = [ "rtsx_pci_sdmmc" "mmc_block" "usb_storage" ];
 
   networking.hostName = "sovereign";
   networking.networkmanager.enable = lib.mkForce false;
