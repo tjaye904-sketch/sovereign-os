@@ -181,3 +181,9 @@ def curiosity_status() -> dict[str, Any]:
     c, out = _run(["audit-list", "curiosity"])
     probes = [l for l in out.splitlines() if l.strip()]
     return {"ok": c == 0, "count": len(probes), "probes": probes[-20:]}
+
+
+def inventory_status() -> dict[str, Any]:
+    c, out = _run(["audit-list", "inventory"])
+    events = [l for l in out.splitlines() if l.strip()]
+    return {"ok": c == 0, "count": len(events), "events": events[-20:]}
