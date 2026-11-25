@@ -10,7 +10,7 @@ let
   };
   whisperModel = pkgs.fetchurl {
     url = "https://huggingface.co";
-    sha256 = "137c40403d78fd54d454da0f9bd998f78703390c618ecef37214fb462453a690";
+    sha256 = "sha256-88ZEgynBnRmY4QFLZGRAxIcKtbQmJtK/PFTI75Ve/Rw=";
   };
   hubChat = pkgs.writeShellScriptBin "sovereign-hub-chat" ''
     set -euo pipefail
