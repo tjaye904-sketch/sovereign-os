@@ -122,6 +122,10 @@ if(TARGET sovereign-cli)
             "SOVEREIGN_CLI=$<TARGET_FILE:sovereign-cli>"
             bash ${CMAKE_SOURCE_DIR}/scripts/sovereign-fleet-drill.sh)
     set_tests_properties(cli_fleet_replace_drill PROPERTIES PASS_REGULAR_EXPRESSION "FLEET_DRILL_OK")
+    add_test(
+        NAME cli_closed_loop_observe
+        COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l17.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-register-local n1 >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-heartbeat n1 >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-bind n1 development >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-caps n1 host.computer_use >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> goal-execute --json development verify_build")
+    set_tests_properties(cli_closed_loop_observe PROPERTIES PASS_REGULAR_EXPRESSION "\"verified\":true")
 endif()
 
 if(TARGET sovereign-daemon)

@@ -49,3 +49,4 @@
 - L14 Core HA backup, verify & cold-failover restore (ArchiveService Core snapshot + CLI core-backup/core-restore + sovereign-ha-drill.sh)
 - L15 NixOS lab & headless workspace node image gates (sovereign-node.nix + flake.nix + verify-nixos-lab-gates.sh + CLI profile-check)
 - L16 multi-workspace node fleet scaling & atomic replace drill (GetFleetSummary + ReplaceWorkspaceNode + sovereign-fleet-drill.sh + /api/fleet)
+- L17 post-act outcome verification & closed-loop goal execution (ActionExecutor::VerifyOutcome + CLI verify-outcome/goal-execute + /api/observe)

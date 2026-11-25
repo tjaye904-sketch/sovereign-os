@@ -3716,7 +3716,7 @@ int main(int argc, char** argv)
         const std::string ws = argv[idx];
         std::string goal;
         for (int i = idx + 1; i < argc; ++i) { if (!goal.empty()) goal.push_back(' '); goal += argv[i]; }
-        const std::string act = "cli";
+        const std::string act = "browser_open";
         const auto gate = host.Gate().RequireForAction(act);
         sovereign::node::NodeExecutionReport ex;
         if (gate.allowed)
