@@ -30,7 +30,7 @@ if [[ -z "$CLI" ]]; then
   exit 127
 fi
 
-MODE="${SOVEREIGN_HUB_CHAT_MODE:-chat}"  # chat | chat-tools
+MODE="${SOVEREIGN_HUB_CHAT_MODE:-chat-tools}"  # chat | chat-tools
 PROMPT="${*:-}"
 if [[ -z "$PROMPT" ]]; then
   echo "usage: sovereign-hub-chat.sh <prompt...>" >&2
@@ -42,7 +42,7 @@ if ! "$CLI" status >/dev/null 2>&1; then
   true
 fi
 
-if [[ "$MODE" == "chat-tools" ]] && "$CLI" 2>&1 | grep -q 'chat-tools'; then
+if [[ "$MODE" == "chat-tools" ]] ; then
   exec "$CLI" chat-tools "$PROMPT"
 fi
 exec "$CLI" chat "$PROMPT"
