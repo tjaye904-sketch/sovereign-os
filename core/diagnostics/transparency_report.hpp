@@ -8,6 +8,7 @@
 
 #include <chrono>
 #include <string>
+#include <vector>
 
 namespace sovereign::diagnostics
 {
@@ -15,6 +16,21 @@ namespace sovereign::diagnostics
 struct TransparencyReport
 {
     std::string text;
+};
+
+struct DoctorCheck
+{
+    std::string name;
+    bool ok{false};
+    std::string detail;
+};
+
+struct DoctorReport
+{
+    bool all_ok{false};
+    std::size_t passed{0};
+    std::size_t total{0};
+    std::vector<DoctorCheck> checks;
 };
 
 class TransparencyService
@@ -28,6 +44,7 @@ public:
     // Section filter: identity|memory|model|policy|plans|approvals|
     // executions|state|timing|errors|audit|health|coverage|all
     TransparencyReport BuildSection(const std::string& section) const;
+    DoctorReport RunDoctor(bool auto_fix = false);
 
 private:
     product::SovereignHost& host_;
