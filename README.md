@@ -436,7 +436,7 @@ Its NixOS foundation provides reproducible infrastructure.
 
 ---
 
-## Implementation Maturity Matrix (`main` @ `L36` — `68/68` CTest Verified)
+## Implementation Maturity Matrix (`main` @ `L36` — `69/69` CTest Verified — Bare-Metal KDE Plasma 6 + Two-Way Voice Verified)
 
 The project includes verified subsystems across infrastructure, identity, governance, capabilities, memory, planning, workspaces, model routing, audit logs, federation, and mission control. For the complete table detailing subsystem maturity levels and verification evidence, refer to the repository's `README.md`.
 
@@ -458,7 +458,7 @@ ctest --test-dir build --output-on-failure
 ```
 
 ### Bootable NixOS ISO & Bare-Metal / SD / USB Deployment
-- Download `sovereign-os-2.0-0f246fd-x86_64.iso` and `SHA256SUMS` from [GitHub Releases (`v2.0.0`)](https://github.com), or build locally with `nix build .#iso`.
+- Download `sovereign-os-2.0-plasma6-x86_64.iso` and `SHA256SUMS` from [GitHub Releases (`v2.0.0`)](https://github.com), or build locally with `nix build .#iso`.
 - Write safely to a removable USB drive or SD card using the provided flashing script.
   ```bash
   ./scripts/sovereign-flash-usb.sh --list
