@@ -4,21 +4,10 @@
 - **Strict merge gate:** Merge `leap/L{N}-…` into `main` only via `scripts/leap.sh finish` once stable and at **100% CTest pass** (`agent/*` branches never merge directly to `main`).
 
 ## Completed
-- L1 capability registry
-- L2 node federation
-- L3 CapabilityGate + gate-check (`e87a8f7`)
-- L4 capability bridge (Python CU/sys)
-- L5 Mission Control capability panel
-- L6 node <-> capability binding (`7da20bb`)
-- L7 federation peer auth (`1a58ad2`)
-- L8 governed purpose runner (`937dfc1`)
-- L9 desktop operator visibility (`ba94a88d`, `ca5109f`)
-- L10 session ensure ready (`428939e`, `d6c9343e`)
-- L11 federation plan routing (`0409941`)
-- L12 federation node execute (`fcab1f9`)
-- L13 Mission Control federation & governance console (`10ad708`)
-- L14 Core HA backup, verify & cold-failover restore (`6703fd5`)
-- L15 NixOS lab & headless workspace node image gates (`leap/L15-nixos-lab-node-image-gates`) — `nix/modules/sovereign-node.nix`, `flake.nix` `sovereign-node`, `scripts/verify-nixos-lab-gates.sh`, and `sovereign-cli profile-check [--json]`
+- L1–L7: Capability Registry, Node Federation, CapabilityGate, Python CU/sys Bridge, Mission Control Caps Panel, Node-Capability Binding, Federation Peer Auth
+- L8–L10: Governed Purpose Runner (`937dfc1`), Desktop Operator Visibility (`ca5109f`), 5-Service Session Ensure Ready (`d6c9343`)
+- L11–L13: Federation Plan Routing (`0409941`), Federation Node Execute (`fcab1f9`), Mission Control Federation & Governance Console (`10ad708`)
+- L14–L16: Core HA Backup & Restore (`6703fd5`), NixOS Lab & Headless Node Image Gates (`b89f13d`), Multi-Workspace Node Fleet Scale & Replace Drill (`leap/L16-workspace-node-fleet-replace`)
 
 ## In progress / Starting point
-- **OS 2.0 Leaps L1–L15 complete on `main` (54/54 CTest)**
+- **OS 2.0 Master Build Plan Leaps L1–L16 complete on `main` (55/55 CTest)**

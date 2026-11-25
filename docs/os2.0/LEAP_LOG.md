@@ -48,3 +48,4 @@
 - L13 Mission Control federation & governance console (/api/federation + /api/governance/pending + /ui approve/reject)
 - L14 Core HA backup, verify & cold-failover restore (ArchiveService Core snapshot + CLI core-backup/core-restore + sovereign-ha-drill.sh)
 - L15 NixOS lab & headless workspace node image gates (sovereign-node.nix + flake.nix + verify-nixos-lab-gates.sh + CLI profile-check)
+- L16 multi-workspace node fleet scaling & atomic replace drill (GetFleetSummary + ReplaceWorkspaceNode + sovereign-fleet-drill.sh + /api/fleet)
