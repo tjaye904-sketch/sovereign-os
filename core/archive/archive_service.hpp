@@ -1,6 +1,9 @@
 #pragma once
 // Append-only archive of immutable artifacts (hashes + metadata).
 #include "principal_id.hpp"
+#include <algorithm>
+#include <cstdio>
+#include <fstream>
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -33,6 +36,15 @@ template<> struct Result<void> {
   ArchiveError error{ArchiveError::Ok};
   bool Ok() const noexcept { return error==ArchiveError::Ok; }
 };
+struct CoreBackupReport {
+  bool ok{false};
+  std::filesystem::path snapshot_dir;
+  std::size_t file_count{0};
+  std::uint64_t total_bytes{0};
+  std::string checksum_hex;
+  std::string detail;
+};
+
 class ArchiveService {
 public:
   ArchiveError Open(const std::filesystem::path& directory);
@@ -40,6 +52,9 @@ public:
   Result<ArtifactId> Store(const Artifact& artifact);
   Result<Artifact> Get(const ArtifactId& id) const;
   Result<std::vector<Artifact>> List() const;
+  static CoreBackupReport CreateCoreSnapshot(const std::filesystem::path& data_root, const std::filesystem::path& snapshot_dir);
+  static CoreBackupReport VerifyCoreSnapshot(const std::filesystem::path& snapshot_dir);
+  static CoreBackupReport RestoreCoreSnapshot(const std::filesystem::path& snapshot_dir, const std::filesystem::path& target_data_root);
 private:
   ArchiveError Load();
   ArchiveError Save() const;
