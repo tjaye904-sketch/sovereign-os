@@ -1,8 +1,5 @@
 #pragma once
-
-// Phase II — OS Runtime service manager (Sovereign primary orchestration).
-// Manages declared services: dependency order, lifecycle, health, restart policy.
-
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -13,32 +10,18 @@
 namespace sovereign::os_runtime
 {
 
-enum class ServiceState : std::uint8_t
-{
-    Stopped = 0,
-    Starting,
-    Running,
-    Degraded,
-    Failed,
-    Stopping
-};
-
-enum class RestartPolicy : std::uint8_t
-{
-    No = 0,
-    OnFailure,
-    Always
-};
+enum class ServiceState : std::uint8_t { Stopped = 0, Starting, Running, Degraded, Failed, Stopping };
+enum class RestartPolicy : std::uint8_t { No = 0, OnFailure, Always };
 
 struct ServiceSpec
 {
     std::string name;
-    std::vector<std::string> after; // start after these
+    std::vector<std::string> after;
     RestartPolicy restart{RestartPolicy::OnFailure};
     std::uint32_t max_restarts{5};
-    std::function<bool()> start; // returns true if started ok
+    std::function<bool()> start;
     std::function<void()> stop;
-    std::function<bool()> health; // true = healthy
+    std::function<bool()> health;
 };
 
 struct ServiceStatus
@@ -49,6 +32,22 @@ struct ServiceStatus
     std::string last_error;
 };
 
+struct SessionServiceEndpoint
+{
+    std::string name;
+    std::string unit_or_bin;
+    std::string health_url;
+    std::uint16_t port{0};
+    bool ready{false};
+};
+
+struct SessionReadinessReport
+{
+    bool all_ready{false};
+    std::size_t ready_count{0};
+    std::vector<SessionServiceEndpoint> services;
+};
+
 class ServiceOrchestrator
 {
 public:
@@ -57,10 +56,12 @@ public:
     void StopAll() noexcept;
     bool StartOne(const std::string& name);
     void StopOne(const std::string& name) noexcept;
-    // Watchdog tick: health-check running services; restart per policy
     void WatchdogTick();
     std::vector<ServiceStatus> List() const;
     ServiceStatus Get(const std::string& name) const;
+    static std::vector<SessionServiceEndpoint> DefaultSessionTopology();
+    static SessionReadinessReport EvaluateSessionReadiness(
+        const std::function<bool(const SessionServiceEndpoint&)>& probe);
 
 private:
     std::vector<std::string> TopoOrder() const;

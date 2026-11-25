@@ -88,6 +88,12 @@ if(TARGET sovereign-cli)
             "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-desktop-status"
             $<TARGET_FILE:sovereign-cli> desktop-status --json)
     set_tests_properties(cli_desktop_status PROPERTIES PASS_REGULAR_EXPRESSION "computer_use_enabled")
+    add_test(
+        NAME cli_session_ensure
+        COMMAND ${CMAKE_COMMAND} -E env
+            "SOVEREIGN_DATA_ROOT=${CMAKE_BINARY_DIR}/ctest-data-session-ensure"
+            $<TARGET_FILE:sovereign-cli> session-ensure --json)
+    set_tests_properties(cli_session_ensure PROPERTIES PASS_REGULAR_EXPRESSION "\"total\":5")
 endif()
 
 if(TARGET sovereign-daemon)

@@ -38,6 +38,14 @@ int main()
     orch.WatchdogTick();
     orch.StopAll();
     REQUIRE(stopped == 2);
+    const auto topo = ServiceOrchestrator::DefaultSessionTopology();
+    REQUIRE(topo.size() == 5);
+    const auto partial = ServiceOrchestrator::EvaluateSessionReadiness([](const SessionServiceEndpoint& ep) { return ep.name == "daemon" || ep.name == "caps"; });
+    REQUIRE(!partial.all_ready);
+    REQUIRE(partial.ready_count == 2);
+    const auto full = ServiceOrchestrator::EvaluateSessionReadiness([](const SessionServiceEndpoint&) { return true; });
+    REQUIRE(full.all_ready);
+    REQUIRE(full.ready_count == 5);
     std::cout << "service_orchestrator_smoke_test: OK\n";
     return 0;
 }
