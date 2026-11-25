@@ -151,4 +151,13 @@ bool ApiGatewayService::RejectDecision(
     return host_->Governance().Reject(actor, true, id, reason).Ok();
 }
 
+DesktopOperatorStatus ApiGatewayService::GetDesktopStatus(std::size_t audit_limit) const
+{
+    if (host_ == nullptr)
+    {
+        return DesktopOperatorStatus{};
+    }
+    return host_->Desktop().Status(audit_limit);
+}
+
 } // namespace sovereign::product
