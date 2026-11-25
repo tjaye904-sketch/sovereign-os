@@ -593,7 +593,7 @@ VoiceRouteReceipt DesktopOperatorGateway::RouteVoice(
             if (!clean.empty())
             {
                 const std::string player = std::filesystem::exists("/usr/bin/pw-play") ? "/usr/bin/pw-play" : "/usr/bin/aplay";
-                const std::string cmd = "printf '%s\n' '" + clean + "' | '" + piper_bin + "' --model '" + model_path + "' --output-raw 2>/dev/null | '" + player + "' --rate 22050 --format s16 --channels 1 - >/dev/null 2>&1";
+                const std::string cmd = "TMPW=$(mktemp /tmp/sov-tts.XXXXXX.wav); printf '%s\\n' '" + clean + "' | '" + piper_bin + "' --model '" + model_path + "' --output_file \"$TMPW\" >/dev/null 2>&1 && '" + player + "' \"$TMPW\" >/dev/null 2>&1; RC=$?; rm -f \"$TMPW\"; exit $RC";
                 audio_dispatched = (std::system(cmd.c_str()) == 0);
             }
         }

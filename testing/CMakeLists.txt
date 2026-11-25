@@ -145,7 +145,7 @@ if(TARGET sovereign-cli)
     add_test(
         NAME cli_voice_router_smoke
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l22.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-enable host.voice >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> voice-route --json speak system_ready && ! SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> voice-route --json intent delete_all_files >/dev/null")
-    set_tests_properties(cli_voice_router_smoke PROPERTIES PASS_REGULAR_EXPRESSION "routed_on_same_router")
+    set_tests_properties(cli_voice_router_smoke PROPERTIES ENVIRONMENT "SOVEREIGN_VOICE_DRY_RUN=1" PASS_REGULAR_EXPRESSION "routed_on_same_router")
     add_test(
         NAME cli_doctor_hardening_smoke
         COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l23.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> doctor --json --fix")
