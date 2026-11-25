@@ -61,3 +61,4 @@
 - L28 zero-warning C++23 build, persistent systemd sovereign-caps-ui.service & updated HANDOFF.md / L28-L31 roadmap
 - L29 autonomous 4-turn tool dispatch & synthesis loop in sovereign-cli chat-tools (CTest #64 cli_chat_tools_loop_smoke)
 - L29 autonomous 4-turn tool dispatch & synthesis loop in sovereign-cli chat-tools (CTest #64 cli_chat_tools_loop_smoke)
+- L30 live Linux wmctrl window dispatch & Piper TTS audio playback bindings (CTest #65 cli_live_window_voice_bridge)

@@ -498,7 +498,26 @@ DesktopDriveReceipt DesktopOperatorGateway::DriveWindow(
     if (!host_->Policy().IsInventoryAppAllowed(target_app)) { out.reason = "app_not_in_unified_inventory:" + target_app; return out; }
     out.allowed = true;
     out.executed = true;
-    out.reason = "driven_and_observed";
+    bool live_dispatched = false;
+    const char* drv_dry = std::getenv("SOVEREIGN_DRIVE_DRY_RUN");
+    const bool dry_drv = (drv_dry != nullptr && std::string(drv_dry) == "1");
+    if (!dry_drv && out.headed && std::filesystem::exists("/usr/bin/wmctrl"))
+    {
+        auto safe = [](const std::string& s) {
+            std::string r;
+            for (char c : s) if (std::isalnum(static_cast<unsigned char>(c)) || c=='-' || c=='_' || c==' ') r.push_back(c);
+            return r;
+        };
+        const std::string target_safe = safe(payload.empty() ? target_app : payload);
+        if (!target_safe.empty() && (op == "focus_window" || op == "read_tree"))
+        {
+            const std::string cmd = (op == "focus_window")
+                ? ("/usr/bin/wmctrl -a '" + target_safe + "' >/dev/null 2>&1")
+                : ("/usr/bin/wmctrl -l >/dev/null 2>&1");
+            live_dispatched = (std::system(cmd.c_str()) == 0);
+        }
+    }
+    out.reason = live_dispatched ? "driven_live_wmctrl" : "driven_and_observed";
     const std::string obs = op + ":" + target_app + ":" + payload;
     std::uint64_t h = 14695981039346656037ULL;
     for (unsigned char c : obs) { h ^= c; h *= 1099511628211ULL; }
@@ -558,7 +577,28 @@ VoiceRouteReceipt DesktopOperatorGateway::RouteVoice(
     }
     out.allowed = true;
     out.routed = true;
-    out.reason = "routed_on_same_router";
+    bool audio_dispatched = false;
+    const char* voc_dry = std::getenv("SOVEREIGN_VOICE_DRY_RUN");
+    const bool dry_voc = (voc_dry != nullptr && std::string(voc_dry) == "1");
+    if (!dry_voc && mode == "speak")
+    {
+        const char* home = std::getenv("HOME");
+        const char* env_m = std::getenv("SOVEREIGN_PIPER_MODEL");
+        const std::string piper_bin = home ? (std::string(home) + "/.local/bin/piper") : "";
+        const std::string model_path = env_m ? std::string(env_m) : (home ? (std::string(home) + "/.local/share/piper/en_US-lessac-medium.onnx") : "");
+        if (!piper_bin.empty() && std::filesystem::exists(piper_bin) && !model_path.empty() && std::filesystem::exists(model_path))
+        {
+            std::string clean;
+            for (char c : utterance) if (std::isalnum(static_cast<unsigned char>(c)) || c==' ' || c=='.' || c==',' || c=='-' || c=='!') clean.push_back(c);
+            if (!clean.empty())
+            {
+                const std::string player = std::filesystem::exists("/usr/bin/pw-play") ? "/usr/bin/pw-play" : "/usr/bin/aplay";
+                const std::string cmd = "printf '%s\n' '" + clean + "' | '" + piper_bin + "' --model '" + model_path + "' --output-raw 2>/dev/null | '" + player + "' --rate 22050 --format s16 --channels 1 - >/dev/null 2>&1";
+                audio_dispatched = (std::system(cmd.c_str()) == 0);
+            }
+        }
+    }
+    out.reason = audio_dispatched ? "routed_and_spoken_piper" : "routed_on_same_router";
     const std::string raw = mode + ":" + utterance;
     std::uint64_t h = 14695981039346656037ULL;
     for (unsigned char c : raw) { h ^= c; h *= 1099511628211ULL; }
