@@ -482,4 +482,51 @@ Result<std::vector<std::string>> NodeRegistry::RecentEvents(std::size_t limit) c
     return r;
 }
 
+Result<PlanRouteDecision> NodeRegistry::RouteWorkspaceAction(
+    const std::string& workspace_name,
+    const std::string& action,
+    const std::string& required_cap_id) const
+{
+    PlanRouteDecision out;
+    out.workspace = workspace_name;
+    out.action = action;
+    out.capability_id = required_cap_id;
+    const auto bound = ListByWorkspace(workspace_name);
+    if (!bound.Ok()) return Result<PlanRouteDecision>{bound.error, out};
+    if (bound.value.empty())
+    {
+        out.reason = "no_node_bound_to_workspace";
+        return Result<PlanRouteDecision>{NodeError::Ok, out};
+    }
+    const NodeRecord* chosen = nullptr;
+    for (const auto& n : bound.value)
+    {
+        if (n.health == NodeHealth::Healthy) { chosen = &n; break; }
+    }
+    if (chosen == nullptr) chosen = &bound.value.front();
+    out.node_id_hex = IdHex(chosen->id);
+    out.node_name = chosen->name;
+    out.endpoint = chosen->endpoint.empty() ? "local" : chosen->endpoint;
+    out.health = chosen->health;
+    if (chosen->health != NodeHealth::Healthy)
+    {
+        out.reason = std::string("node_unhealthy:") + HealthName(chosen->health);
+        return Result<PlanRouteDecision>{NodeError::Ok, out};
+    }
+    if (!required_cap_id.empty())
+    {
+        bool has_cap = false;
+        for (const auto& c : chosen->capabilities)
+            if (c == required_cap_id) { has_cap = true; break; }
+        if (!has_cap)
+        {
+            out.reason = "node_missing_capability:" + required_cap_id;
+            return Result<PlanRouteDecision>{NodeError::Ok, out};
+        }
+    }
+    out.allowed = true;
+    out.reason = "routed";
+    return Result<PlanRouteDecision>{NodeError::Ok, out};
+}
+
 } // namespace sovereign::node

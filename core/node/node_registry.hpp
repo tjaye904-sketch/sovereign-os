@@ -35,6 +35,7 @@ public:
     // L2.4
     Result<void> SetCapabilities(const NodeId& id, const std::vector<std::string>& caps);
     Result<bool> NodeHasCapability(const NodeId& id, const std::string& cap_id) const;
+    Result<PlanRouteDecision> RouteWorkspaceAction(const std::string& workspace_name, const std::string& action, const std::string& required_cap_id) const;
 
     // L2.5 — append-only lifecycle events under data_root/node/events.dat
     Result<void> AppendEvent(const std::string& kind, const std::string& detail);
