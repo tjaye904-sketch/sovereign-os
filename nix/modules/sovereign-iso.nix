@@ -5,7 +5,7 @@ let
   firstBoot = pkgs.writeShellScriptBin "sovereign-first-boot" ''
     set -euo pipefail
     export SOVEREIGN_DATA_ROOT="''${SOVEREIGN_DATA_ROOT:-/var/lib/sovereign}"
-    mkdir -p "$SOVEREIGN_DATA_ROOT"
+    if ! mkdir -p "$SOVEREIGN_DATA_ROOT" 2>/dev/null; then sudo mkdir -p "$SOVEREIGN_DATA_ROOT" && sudo chown -R sovereign:sovereign "$SOVEREIGN_DATA_ROOT"; fi
     if [ ! -d "$SOVEREIGN_DATA_ROOT/identity" ]; then
       echo "=== Sovereign first boot ==="
       echo "No identity store. Bootstrap an owner:"
