@@ -182,6 +182,8 @@ if(TARGET sovereign-cli)
     set_tests_properties(federation_node_discovery_smoke PROPERTIES PASS_REGULAR_EXPRESSION "none_unenrolled")
     add_test(NAME federation_zero_touch_installer_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l48.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT/core $<TARGET_FILE:sovereign-cli> bootstrap owner secret123 >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT/core $<TARGET_FILE:sovereign-cli> node-provision --json local:$ROOT/worker worker-alpha")
     set_tests_properties(federation_zero_touch_installer_smoke PROPERTIES PASS_REGULAR_EXPRESSION "enrolled_compute_only")
+    add_test(NAME federation_governed_auto_assign_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l49.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-register-peer gpu-01 10.0.0.20:8765 >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-auto-assign --json gpu-01 ai_inference_node | grep -q pending_approval; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-auto-assign --json --approve gpu-01 ai_inference_node")
+    set_tests_properties(federation_governed_auto_assign_smoke PROPERTIES PASS_REGULAR_EXPRESSION "policy_plane_governed")
 endif()
 
 if(TARGET sovereign-daemon)
