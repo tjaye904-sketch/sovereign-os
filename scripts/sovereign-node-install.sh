@@ -14,6 +14,7 @@ if [[ "$TARGET" == local:* ]]; then
   cp -a "$BUNDLE" "$DEST/sovereign-bundle"
   install -m 0755 "$CLI" "$DEST/bin/sovereign-cli"
   [[ -x "$DAEMON" ]] && install -m 0755 "$DAEMON" "$DEST/bin/sovereign-daemon" || true
+  SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" bootstrap worker sovereign-worker >/dev/null 2>&1 || true
   SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" peer-import "$DEST/sovereign-bundle" >/dev/null
   ENDPOINT="local://$DEST"
 else
