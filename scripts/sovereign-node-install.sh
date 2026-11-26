@@ -11,15 +11,15 @@ BUNDLE="$("$CLI" peer-export "$STAGE/trust-bundle" | sed -n 's/^bundle=//p')"
 if [[ "$TARGET" == local:* ]]; then
   DEST="${TARGET#local:}"
   mkdir -p "$DEST/bin" "$DEST/data"
-  cp -f "$BUNDLE" "$DEST/peer_bundle.dat"
+  cp -a "$BUNDLE" "$DEST/sovereign-bundle"
   install -m 0755 "$CLI" "$DEST/bin/sovereign-cli"
   [[ -x "$DAEMON" ]] && install -m 0755 "$DAEMON" "$DEST/bin/sovereign-daemon" || true
-  SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" peer-import "$DEST/peer_bundle.dat" >/dev/null
+  SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" peer-import "$DEST/sovereign-bundle" >/dev/null
   ENDPOINT="local://$DEST"
 else
   ssh -o BatchMode=yes -o ConnectTimeout=5 "$TARGET" "mkdir -p ~/.local/bin ~/.local/share/sovereign"
-  scp -q "$BUNDLE" "$CLI" "$TARGET:~/.local/share/sovereign/"
-  ssh -o BatchMode=yes "$TARGET" "install -m 0755 ~/.local/share/sovereign/sovereign-cli ~/.local/bin/sovereign-cli && ~/.local/bin/sovereign-cli peer-import ~/.local/share/sovereign/peer_bundle.dat >/dev/null"
+  scp -q -r "$BUNDLE" "$CLI" "$TARGET:~/.local/share/sovereign/"
+  ssh -o BatchMode=yes "$TARGET" "install -m 0755 ~/.local/share/sovereign/sovereign-cli ~/.local/bin/sovereign-cli && ~/.local/bin/sovereign-cli peer-import ~/.local/share/sovereign/$(basename "$BUNDLE") >/dev/null"
   ENDPOINT="$TARGET:8765"
 fi
 "$CLI" node-register-peer "$NODE_NAME" "$ENDPOINT" >/dev/null || true
