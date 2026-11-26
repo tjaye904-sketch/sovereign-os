@@ -68,3 +68,4 @@
 - L40 NixOS ISO audio & two-way voice stack (PipeWire, Intel SOF firmware, piper-tts en_US-lessac-medium, whisper-cpp ggml-base.en, ollama, sovereign-voice-talk)
 - L45 KDE Plasma 6 graphical desktop + SDDM Wayland autologin + NetworkManager Wi-Fi + Firefox & Mission Control launchers in NixOS ISO
 - L46 update public README.md and GitHub Release v2.0.0 with bare-metal KDE Plasma 6 + PipeWire/Piper/Whisper two-way voice ISO
+- L47-L50 Plug-and-Play Federation Suite: candidate node discovery (fleet-discover), zero-touch installer (node-provision), policy-governed auto-assignment (node-auto-assign), and self-healing failover dispatch (fleet-dispatch, CTest 73/73)

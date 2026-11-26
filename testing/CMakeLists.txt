@@ -184,6 +184,8 @@ if(TARGET sovereign-cli)
     set_tests_properties(federation_zero_touch_installer_smoke PROPERTIES PASS_REGULAR_EXPRESSION "enrolled_compute_only")
     add_test(NAME federation_governed_auto_assign_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l49.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-register-peer gpu-01 10.0.0.20:8765 >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-auto-assign --json gpu-01 ai_inference_node | grep -q pending_approval; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-auto-assign --json --approve gpu-01 ai_inference_node")
     set_tests_properties(federation_governed_auto_assign_smoke PROPERTIES PASS_REGULAR_EXPRESSION "policy_plane_governed")
+    add_test(NAME federation_live_dispatch_failover_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l50.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-enable host.sys >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> fleet-dispatch --json development run_task host.sys ping")
+    set_tests_properties(federation_live_dispatch_failover_smoke PROPERTIES PASS_REGULAR_EXPRESSION "\"dispatched\":true")
 endif()
 
 if(TARGET sovereign-daemon)

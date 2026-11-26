@@ -3700,6 +3700,23 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    if (cmd == "fleet-dispatch" && argc >= 5) {
+        bool json = false; std::vector<std::string> a;
+        for (int i = 2; i < argc; ++i) { std::string s = argv[i]; if (s == "--json") json = true; else a.push_back(s); }
+        const std::string ws = a.empty() ? "" : a.at(0), act = a.size() > 1 ? a.at(1) : "", cap = a.size() > 2 ? a.at(2) : "", pay = a.size() > 3 ? a.at(3) : "";
+        bool failover = false;
+        auto dec = host.Nodes().RouteWorkspaceAction(ws, act, cap);
+        if (!dec.Ok() || !dec.value.allowed) {
+            auto rep = host.Nodes().ReplaceWorkspaceNode(ws, "failover-local-" + ws, "local");
+            if (rep.Ok()) { (void)host.Nodes().Heartbeat(rep.value, sovereign::node::NodeHealth::Healthy); (void)host.Nodes().SetCapabilities(rep.value, {cap}); failover = true; }
+        }
+        auto ex = host.Nodes().ExecuteOnBoundNode(ws, act, cap, pay);
+        sovereign::audit::AuditEntry ae; ae.category = "federation"; ae.action = "fleet.dispatch"; ae.subject = ws + ":" + act; ae.detail = "failover=" + std::string(failover ? "1" : "0");
+        (void)host.Audit().Append(ae);
+        if (json) std::cout << "{\"dispatched\":" << (ex.Ok() && ex.value.executed ? "true" : "false") << ",\"workspace\":\"" << ws << "\",\"node\":\"" << ex.value.node_name << "\",\"failover_triggered\":" << (failover ? "true" : "false") << ",\"reason\":\"" << ex.value.reason << "\"}\n";
+        else std::cout << "dispatched=" << (ex.Ok() && ex.value.executed ? 1 : 0) << " node=" << ex.value.node_name << " failover=" << (failover ? 1 : 0) << "\n";
+        host.Close(); return (ex.Ok() && ex.value.executed) ? 0 : 1;
+    }
     if (cmd == "fleet-discover") {
         bool json = false; std::vector<std::string> tg;
         for (int i = 2; i < argc; ++i) {
