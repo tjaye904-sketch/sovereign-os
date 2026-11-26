@@ -600,3 +600,69 @@ Result<NodeId> NodeRegistry::ReplaceWorkspaceNode(
 }
 
 } // namespace sovereign::node
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <fstream>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <thread>
+#include <unistd.h>
+namespace sovereign::node {
+namespace {
+bool TcpProbe(const std::string& host, std::uint16_t port, int ms = 80) {
+    addrinfo h{}; h.ai_family = AF_UNSPEC; h.ai_socktype = SOCK_STREAM; addrinfo* res = nullptr;
+    if (::getaddrinfo(host.c_str(), std::to_string(port).c_str(), &h, &res) != 0 || !res) return false;
+    bool ok = false;
+    for (auto* rp = res; rp && !ok; rp = rp->ai_next) {
+        int fd = ::socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if (fd < 0) continue;
+        ::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+        if (::connect(fd, rp->ai_addr, rp->ai_addrlen) == 0) ok = true;
+        else {
+            fd_set wf; FD_ZERO(&wf); FD_SET(fd, &wf); timeval tv{0, ms * 1000};
+            int e = 0; socklen_t l = sizeof(e);
+            if (::select(fd + 1, nullptr, &wf, nullptr, &tv) > 0 && ::getsockopt(fd, SOL_SOCKET, SO_ERROR, &e, &l) == 0 && e == 0) ok = true;
+        }
+        ::close(fd);
+    }
+    ::freeaddrinfo(res); return ok;
+}
+} // namespace
+Result<NodeId> NodeRegistry::RegisterCandidate(const std::string& name, const std::string& endpoint) {
+    if (name.empty()) return {NodeError::InvalidArgument, {}};
+    std::lock_guard<std::mutex> lk(mutex_);
+    if (!open_) return {NodeError::NotOpen, {}};
+    for (const auto& n : nodes_) if (n.name == name) return {NodeError::AlreadyExists, n.id};
+    NodeRecord r; r.id = NewId(); r.name = name; r.kind = NodeKind::Candidate;
+    r.health = NodeHealth::Unknown; r.last_heartbeat_unix = Now(); r.endpoint = endpoint;
+    nodes_.push_back(r);
+    return Save() == NodeError::Ok ? Result<NodeId>{NodeError::Ok, r.id} : Result<NodeId>{NodeError::StorageFailure, {}};
+}
+std::vector<DiscoveredCandidate> NodeRegistry::DiscoverCandidates(const std::vector<std::string>& targets) {
+    std::vector<DiscoveredCandidate> out;
+    std::uint64_t ram_mb = 0; std::ifstream in("/proc/meminfo"); std::string k; std::uint64_t kb = 0;
+    while (in >> k >> kb) { if (k == "MemTotal:") { ram_mb = kb / 1024; break; } std::getline(in, k); }
+    DiscoveredCandidate s{"candidate-local-host", "127.0.0.1:8765",
+        std::filesystem::exists("/etc/sovereign-release") ? "nixos-sovereign" : "linux",
+        "", std::max(1u, std::thread::hardware_concurrency()), ram_mb,
+        TcpProbe("127.0.0.1", 11434), TcpProbe("127.0.0.1", 22), TcpProbe("127.0.0.1", 8765), false};
+    s.role_hint = (s.ram_mb >= 32768 || s.has_ollama) ? "compute_and_intelligence" : "general_worker";
+    s.staged = RegisterCandidate(s.name, s.endpoint).Ok();
+    out.push_back(s);
+    for (std::size_t i = 0; i < targets.size(); ++i) {
+        if (targets[i].empty()) continue;
+        auto col = targets[i].find(':');
+        std::string host = col == std::string::npos ? targets[i] : targets[i].substr(0, col);
+        std::uint16_t port = col == std::string::npos ? 0 : static_cast<std::uint16_t>(std::stoi(targets[i].substr(col + 1)));
+        bool pd = TcpProbe(host, 8765), po = TcpProbe(host, 11434), ps = TcpProbe(host, 22);
+        bool pc = (port && port != 8765 && port != 11434 && port != 22) ? TcpProbe(host, port) : false;
+        DiscoveredCandidate c{"candidate-" + host + "-" + std::to_string(i + 1), port ? targets[i] : host + ":22",
+            pd ? "sovereign-node" : (ps ? "ssh-provisionable" : "remote-endpoint"),
+            po ? "ai_inference_node" : (pd ? "federated_worker" : (ps ? "install_target" : "unreachable")),
+            1, 0, po, ps, pd, false};
+        if (pd || po || ps || pc) c.staged = RegisterCandidate(c.name, c.endpoint).Ok();
+        out.push_back(c);
+    }
+    return out;
+}
+} // namespace sovereign::node

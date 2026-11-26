@@ -23,6 +23,9 @@ public:
     Result<NodeRecord> FindByName(const std::string& name) const;
     Result<std::vector<NodeRecord>> List() const;
 
+    Result<NodeId> RegisterCandidate(const std::string& name, const std::string& endpoint);
+    std::vector<DiscoveredCandidate> DiscoverCandidates(const std::vector<std::string>& targets = {});
+
     // L2.2
     Result<void> Heartbeat(const NodeId& id, NodeHealth health = NodeHealth::Healthy);
     Result<void> MarkStale(std::uint64_t max_age_seconds);

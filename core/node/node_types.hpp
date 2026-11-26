@@ -15,6 +15,7 @@ enum class NodeKind : std::uint8_t
     LocalHost = 1,
     Peer = 2,
     WorkspaceBound = 3,
+    Candidate = 4,
 };
 
 enum class NodeHealth : std::uint8_t
@@ -78,6 +79,8 @@ struct NodeExecutionReport
     std::string reason;
 };
 
+struct DiscoveredCandidate { std::string name, endpoint, substrate, role_hint; std::uint32_t cpu_cores{1}; std::uint64_t ram_mb{0}; bool has_ollama{false}, has_ssh{false}, has_sovereign_daemon{false}, staged{false}; };
+
 struct FleetSummary
 {
     std::size_t total_nodes{0};
@@ -105,6 +108,7 @@ inline const char* KindName(NodeKind k)
     case NodeKind::LocalHost: return "local_host";
     case NodeKind::Peer: return "peer";
     case NodeKind::WorkspaceBound: return "workspace_bound";
+    case NodeKind::Candidate: return "candidate";
     }
     return "unknown";
 }

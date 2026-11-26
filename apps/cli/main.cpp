@@ -3664,6 +3664,29 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    if (cmd == "fleet-discover") {
+        bool json = false; std::vector<std::string> tg;
+        for (int i = 2; i < argc; ++i) {
+            std::string a = argv[i];
+            if (a == "--json") json = true;
+            else if (a == "--probe" && i + 1 < argc) {
+                std::string s = argv[++i]; std::size_t q = 0;
+                while (q <= s.size()) { auto k = s.find(',', q); tg.push_back(k == std::string::npos ? s.substr(q) : s.substr(q, k - q)); if (k == std::string::npos) break; q = k + 1; }
+            }
+        }
+        auto f = host.Nodes().DiscoverCandidates(tg);
+        sovereign::audit::AuditEntry ae; ae.category = "federation"; ae.action = "fleet.discover"; ae.subject = "candidates=" + std::to_string(f.size()); ae.detail = "authority=none_unenrolled";
+        (void)host.Audit().Append(ae);
+        if (json) {
+            std::cout << "{\"discovered\":" << f.size() << ",\"authority\":\"none_unenrolled\",\"candidates\":[";
+            for (std::size_t i = 0; i < f.size(); ++i) {
+                if (i) std::cout << ',';
+                std::cout << "{\"name\":\"" << f[i].name << "\",\"endpoint\":\"" << f[i].endpoint << "\",\"role_hint\":\"" << f[i].role_hint << "\",\"cores\":" << f[i].cpu_cores << ",\"ram_mb\":" << f[i].ram_mb << ",\"staged\":" << (f[i].staged ? "true" : "false") << '}';
+            }
+            std::cout << "]}\n";
+        } else for (const auto& x : f) std::cout << "candidate=" << x.name << " endpoint=" << x.endpoint << " role_hint=" << x.role_hint << " authority=none_unenrolled\n";
+        host.Close(); return 0;
+    }
     if (cmd == "fleet-status")
     {
         const bool as_json = (argc >= 3 && std::string(argv[2]) == "--json");
