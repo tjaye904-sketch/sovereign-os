@@ -103,6 +103,29 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
     sovereign::node::NodeRegistry nodes;
     if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
     { std::cerr << "node open failed\n"; return 1; }
+    if (cmd == "node-auto-assign" && argc >= 3) {
+        bool json = false, approve = false; std::vector<std::string> args;
+        for (int i = 2; i < argc; ++i) { std::string a = argv[i]; if (a == "--json") json = true; else if (a == "--approve") approve = true; else args.push_back(a); }
+        const std::string name = args.empty() ? "" : args[0];
+        const std::string hint = args.size() > 1 ? args[1] : "federated_worker";
+        auto nr = host.Nodes().FindByName(name);
+        if (!nr.Ok()) { std::cerr << "node not found\n"; host.Close(); return 1; }
+        const std::string ws = (hint.find("intel") != std::string::npos || hint.find("ai") != std::string::npos) ? "intelligence" : ((hint.find("robot") != std::string::npos) ? "robotics" : "development");
+        const std::vector<std::string> caps = (ws == "intelligence") ? std::vector<std::string>{"host.model", "host.sys"} : std::vector<std::string>{"host.sys"};
+        if (!approve) {
+            sovereign::PrincipalId actor{}; auto rec = host.Cognitive().RecommendAction(actor, "node.auto_assign", name + "->" + ws, "cli");
+            if (json) std::cout << "{\"assigned\":false,\"status\":\"pending_approval\",\"node\":\"" << name << "\",\"proposed_workspace\":\"" << ws << "\",\"decision_hex\":\"" << (rec.Ok() ? sovereign::ToHex(rec.value.governance_decision_id) : "") << "\"}\n";
+            else std::cout << "status=pending_approval node=" << name << " proposed_workspace=" << ws << "\n";
+            host.Close(); return 0;
+        }
+        (void)host.Nodes().BindWorkspace(nr.value.id, ws);
+        (void)host.Nodes().SetCapabilities(nr.value.id, caps);
+        sovereign::audit::AuditEntry ae; ae.category = "federation"; ae.action = "node.auto_assign"; ae.subject = name; ae.detail = "workspace=" + ws;
+        (void)host.Audit().Append(ae);
+        if (json) std::cout << "{\"assigned\":true,\"status\":\"active_governed\",\"node\":\"" << name << "\",\"workspace\":\"" << ws << "\",\"authority\":\"policy_plane_governed\"}\n";
+        else std::cout << "assigned=1 node=" << name << " workspace=" << ws << " authority=policy_plane_governed\n";
+        host.Close(); return 0;
+    }
     if (cmd == "node-provision" && argc >= 4) {
         const bool json = (std::string(argv[2]) == "--json");
         const std::string target = json ? (argc >= 5 ? argv[3] : "") : argv[2];
@@ -1735,7 +1758,7 @@ int main(int argc, char** argv)
             host.Close();
             return 1;
         }
-        const auto decision_hex = ToHex(rec.value.governance_decision_id);
+        const auto decision_hex = sovereign::ToHex(rec.value.governance_decision_id);
         std::cout << "governance_decision_id=" << decision_hex << '\n';
 
         if (!auto_approve)
