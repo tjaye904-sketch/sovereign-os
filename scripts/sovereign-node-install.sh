@@ -6,6 +6,7 @@ CLI="${SOVEREIGN_CLI:-$HOME/.local/bin/sovereign-cli}"
 DAEMON="${SOVEREIGN_DAEMON:-$(dirname "$CLI")/sovereign-daemon}"
 STAGE="$(mktemp -d /tmp/sov-install.XXXXXX)"
 trap 'rm -rf "$STAGE"' EXIT
+"$CLI" bootstrap owner sovereign-core >/dev/null 2>&1 || true
 "$CLI" peer-export "$STAGE/trust-bundle" >/dev/null
 if [[ "$TARGET" == local:* ]]; then
   DEST="${TARGET#local:}"
@@ -13,6 +14,7 @@ if [[ "$TARGET" == local:* ]]; then
   cp -a "$STAGE/trust-bundle" "$DEST/trust-bundle"
   install -m 0755 "$CLI" "$DEST/bin/sovereign-cli"
   [[ -x "$DAEMON" ]] && install -m 0755 "$DAEMON" "$DEST/bin/sovereign-daemon" || true
+  SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" bootstrap worker sovereign-worker >/dev/null 2>&1 || true
   SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" peer-import "$DEST/trust-bundle" >/dev/null
   ENDPOINT="local://$DEST"
 else
