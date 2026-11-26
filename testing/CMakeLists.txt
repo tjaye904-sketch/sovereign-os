@@ -180,6 +180,8 @@ if(TARGET sovereign-cli)
     set_tests_properties(voice_talk_bridge_smoke PROPERTIES PASS_REGULAR_EXPRESSION "VOICE_TALK_TURN_OK")
     add_test(NAME federation_node_discovery_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l47.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> status >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> fleet-discover --json --probe 127.0.0.1:22")
     set_tests_properties(federation_node_discovery_smoke PROPERTIES PASS_REGULAR_EXPRESSION "none_unenrolled")
+    add_test(NAME federation_zero_touch_installer_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l48.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT/core $<TARGET_FILE:sovereign-cli> bootstrap owner secret123 >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT/core $<TARGET_FILE:sovereign-cli> node-provision --json local:$ROOT/worker worker-alpha")
+    set_tests_properties(federation_zero_touch_installer_smoke PROPERTIES PASS_REGULAR_EXPRESSION "enrolled_compute_only")
 endif()
 
 if(TARGET sovereign-daemon)
