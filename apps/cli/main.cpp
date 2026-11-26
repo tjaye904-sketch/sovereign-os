@@ -103,6 +103,19 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
     sovereign::node::NodeRegistry nodes;
     if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
     { std::cerr << "node open failed\n"; return 1; }
+    if (cmd == "node-provision" && argc >= 4) {
+        const bool json = (std::string(argv[2]) == "--json");
+        const std::string target = json ? (argc >= 5 ? argv[3] : "") : argv[2];
+        const std::string name = json ? (argc >= 5 ? argv[4] : "") : argv[3];
+        const std::string scr = std::filesystem::exists("scripts/sovereign-node-install.sh") ? "scripts/sovereign-node-install.sh" : (std::filesystem::exists("../scripts/sovereign-node-install.sh") ? "../scripts/sovereign-node-install.sh" : "sovereign-node-install");
+        const std::string cmd_s = "SOVEREIGN_CLI='" + std::string(argv[0]) + "' bash '" + scr + "' '" + target + "' '" + name + "' >/dev/null 2>&1";
+        const int rc = std::system(cmd_s.c_str());
+        sovereign::audit::AuditEntry ae; ae.category = "federation"; ae.action = "node.provision"; ae.subject = name; ae.detail = "target=" + target + " rc=" + std::to_string(rc);
+        (void)host.Audit().Append(ae);
+        if (json) std::cout << "{\"provisioned\":" << (rc == 0 ? "true" : "false") << ",\"node_name\":\"" << name << "\",\"target\":\"" << target << "\",\"authority\":\"enrolled_compute_only\"}\n";
+        else std::cout << "provisioned=" << (rc == 0 ? 1 : 0) << " node=" << name << " authority=enrolled_compute_only\n";
+        host.Close(); return rc == 0 ? 0 : 1;
+    }
     if (cmd == "node-register-local") {
         if (argc < 3) { std::cerr << "usage: node-register-local <name>\n"; return 2; }
         auto r = nodes.RegisterLocal(argv[2]);
