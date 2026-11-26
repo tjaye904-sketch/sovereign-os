@@ -2,7 +2,7 @@
 set -euo pipefail
 TARGET="${1:?target required (user@host or local:/path)}"
 NODE_NAME="${2:?node-name required}"
-CLI="${SOVEREIGN_CLI:-$HOME/.local/bin/sovereign-cli}"
+CLI="$(command -v "${SOVEREIGN_CLI:-$HOME/.local/bin/sovereign-cli}")"
 DAEMON="${SOVEREIGN_DAEMON:-$(dirname "$CLI")/sovereign-daemon}"
 STAGE="$(mktemp -d /tmp/sov-install.XXXXXX)"
 trap 'rm -rf "$STAGE"' EXIT
