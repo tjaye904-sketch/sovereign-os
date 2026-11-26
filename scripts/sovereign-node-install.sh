@@ -7,20 +7,19 @@ DAEMON="${SOVEREIGN_DAEMON:-$(dirname "$CLI")/sovereign-daemon}"
 STAGE="$(mktemp -d /tmp/sov-install.XXXXXX)"
 trap 'rm -rf "$STAGE"' EXIT
 "$CLI" bootstrap owner sovereign-core >/dev/null 2>&1 || true
-"$CLI" peer-export "$STAGE/trust-bundle" >/dev/null
+BUNDLE="$("$CLI" peer-export "$STAGE/trust-bundle" | sed -n 's/^bundle=//p')"
 if [[ "$TARGET" == local:* ]]; then
   DEST="${TARGET#local:}"
   mkdir -p "$DEST/bin" "$DEST/data"
-  cp -a "$STAGE/trust-bundle" "$DEST/trust-bundle"
+  cp -f "$BUNDLE" "$DEST/peer_bundle.dat"
   install -m 0755 "$CLI" "$DEST/bin/sovereign-cli"
   [[ -x "$DAEMON" ]] && install -m 0755 "$DAEMON" "$DEST/bin/sovereign-daemon" || true
-  SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" bootstrap worker sovereign-worker >/dev/null 2>&1 || true
-  SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" peer-import "$DEST/trust-bundle" >/dev/null
+  SOVEREIGN_DATA_ROOT="$DEST/data" "$DEST/bin/sovereign-cli" peer-import "$DEST/peer_bundle.dat" >/dev/null
   ENDPOINT="local://$DEST"
 else
   ssh -o BatchMode=yes -o ConnectTimeout=5 "$TARGET" "mkdir -p ~/.local/bin ~/.local/share/sovereign"
-  scp -q -r "$STAGE/trust-bundle" "$CLI" "$TARGET:~/.local/share/sovereign/"
-  ssh -o BatchMode=yes "$TARGET" "install -m 0755 ~/.local/share/sovereign/sovereign-cli ~/.local/bin/sovereign-cli && ~/.local/bin/sovereign-cli peer-import ~/.local/share/sovereign/trust-bundle >/dev/null"
+  scp -q "$BUNDLE" "$CLI" "$TARGET:~/.local/share/sovereign/"
+  ssh -o BatchMode=yes "$TARGET" "install -m 0755 ~/.local/share/sovereign/sovereign-cli ~/.local/bin/sovereign-cli && ~/.local/bin/sovereign-cli peer-import ~/.local/share/sovereign/peer_bundle.dat >/dev/null"
   ENDPOINT="$TARGET:8765"
 fi
 "$CLI" node-register-peer "$NODE_NAME" "$ENDPOINT" >/dev/null || true
