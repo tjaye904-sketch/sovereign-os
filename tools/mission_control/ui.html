@@ -7,7 +7,7 @@ body{background:#0d1117;color:#e6edf3;font-family:system-ui,sans-serif;margin:1.
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:1rem}
 section{border:1px solid #30363d;border-radius:8px;padding:1rem;margin-bottom:1rem;background:#161b22}
 h1,h2{margin-top:0} table{width:100%;border-collapse:collapse} td,th{border-bottom:1px solid #30363d;padding:6px;text-align:left}
-button{background:#238636;color:#fff;border:none;border-radius:5px;padding:4px 10px;cursor:pointer;margin-right:4px}
+button{background:#238636;color:#fff;border:none;border-radius:5px;padding:4px 10px;cursor:pointer;margin-right:4px} input,select{background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:5px;padding:4px 8px;margin:2px}
 button.deny{background:#da3633} pre{background:#0d1117;padding:0.75rem;border-radius:6px;overflow:auto;max-height:220px}
 </style>
 </head>
@@ -20,8 +20,17 @@ button.deny{background:#da3633} pre{background:#0d1117;padding:0.75rem;border-ra
   <section><h2>Desktop &amp; Voice Telemetry</h2><pre id="desk">loading...</pre></section>
   <section><h2>Observe, Curiosity &amp; Purposes</h2><pre id="obs">loading...</pre></section>
 </div>
+<section><h2>Plug-and-Play Federation &amp; 16-Workspace Selector</h2>
+<div><input id="fn" placeholder="node-name (e.g. sec-01)" value="sec-node-01"><input id="ft" placeholder="target (user@host or local:/tmp/sec)" value="local:/tmp/sov-ui-node"><button onclick="fedAct('discover')">Discover</button><button onclick="fedAct('provision')">Provision</button></div>
+<div><select id="fws"></select><button onclick="fedAct('apply')">Approve &amp; Deploy Workspace + Pack</button></div>
+<div><input id="fapp" placeholder="Repoman / extra app (e.g. burpsuite)"><button onclick="fedAct('install_app')">Install App</button></div>
+<div><input id="fcmd" placeholder="Node terminal command" value="uname -a"><button onclick="fedAct('terminal')">Run Terminal</button></div>
+<pre id="fout">Ready — discover or provision a node, then select any of the 16 canonical workspaces.</pre></section>
 <section><h2>Capabilities</h2><table><thead><tr><th>ID</th><th>Enabled</th><th>Description</th><th>Action</th></tr></thead><tbody id="caps"></tbody></table></section>
 <script>
+async function fedAct(action){const body={action,node:document.getElementById('fn').value,target:document.getElementById('ft').value,workspace:document.getElementById('fws').value,app:document.getElementById('fapp').value,cmd:document.getElementById('fcmd').value};document.getElementById('fout').textContent='Running '+action+'...';const r=await(await fetch('/api/federation/action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();document.getElementById('fout').textContent=JSON.stringify(r,null,2);refresh();}
+async function loadCatalog(){const wc=await(await fetch('/api/workspace-catalog')).json();const s=document.getElementById('fws');s.innerHTML=(wc.blueprints||[]).map(b=>`<option value="${b.slug}">${b.title} (${b.slug}) — ${b.authority_boundary}</option>`).join('');}
+loadCatalog();
 async function toggleCap(id, en){await fetch('/api/capabilities/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({enabled:en})});refresh();}
 async function decideGov(id, d){await fetch('/api/governance/'+id,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({decision:d,reason:'mission-control-ui'})});refresh();}
 async function refresh(){

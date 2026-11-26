@@ -71,3 +71,4 @@
 - L47-L50 Plug-and-Play Federation Suite: candidate node discovery (fleet-discover), zero-touch installer (node-provision), policy-governed auto-assignment (node-auto-assign), and self-healing failover dispatch (fleet-dispatch, CTest 73/73)
 - L57-L58 Pre-Staged 16 Workspace Blueprints, Domain-Optimized Toolset Packs, Repoman+Flatpak App Store & Node Terminal (CTest 75/75)
 - L59 Canonical 16-Workspace Specification & Shared Contract: aligned all 16 workspace blueprints, authority boundaries, maturity status, integrations, Repoman+Flatpak store, and per-node terminal (CTest 76/76)
+- L60 Mission Control Plug-and-Play Federation & 16-Workspace Selector UI: GET /api/workspace-catalog, POST /api/federation/action (discover, provision, approve+deploy pack, Repoman install_app, node terminal) in http://localhost:8769/ui (CTest 77/77)

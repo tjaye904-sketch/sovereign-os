@@ -223,3 +223,30 @@ def os2_lab_status() -> dict[str, Any]:
         return {"ok": c == 0, **_j.loads(out.splitlines()[-1])}
     except Exception:
         return {"ok": False, "raw": out}
+
+def workspace_catalog() -> dict[str, Any]:
+    rc, out = _run(["workspace-catalog"])
+    try: return json.loads(out) if rc == 0 else {"count": 0, "blueprints": []}
+    except Exception: return {"count": 0, "blueprints": []}
+
+def federation_action(payload: dict[str, Any]) -> dict[str, Any]:
+    act = str(payload.get("action", ""))
+    node = str(payload.get("node", "")).strip()
+    target = str(payload.get("target", "")).strip()
+    ws = str(payload.get("workspace", "")).strip()
+    app = str(payload.get("app", "")).strip()
+    cmd = str(payload.get("cmd", "")).strip()
+    if act == "discover":
+        rc, out = _run(["fleet-discover", "--json"] + (["--probe", target] if target else []))
+    elif act == "provision":
+        rc, out = _run(["node-provision", "--json", target, node])
+    elif act == "apply":
+        rc, out = _run(["node-apply-profile", "--approve", node, ws])
+        if rc == 0: _, out2 = _run(["node-install-pack", "--approve", node, ws]); out = out.strip() + "\n" + out2.strip()
+    elif act == "install_app":
+        rc, out = _run(["node-install-app", "--approve", node, app])
+    elif act == "terminal":
+        rc, out = _run(["node-terminal", node, cmd or "uname -a"])
+    else:
+        return {"ok": False, "error": "unknown_action"}
+    return {"ok": rc == 0, "action": act, "output": out.strip()}

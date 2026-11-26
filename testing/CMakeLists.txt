@@ -192,6 +192,8 @@ if(TARGET sovereign-cli)
     set_tests_properties(workspace_specialized_packs_repoman_terminal_smoke PROPERTIES PASS_REGULAR_EXPRESSION "NODE_TERM_OK")
     add_test(NAME canonical_16_workspace_contract_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l59.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-catalog | grep core_policy_engine_enforces_runtime")
     set_tests_properties(canonical_16_workspace_contract_smoke PROPERTIES PASS_REGULAR_EXPRESSION "core_policy_engine_enforces_runtime")
+    add_test(NAME mission_control_federation_ui_smoke COMMAND python3 -c "import sys; sys.path.insert(0, '../../tools/mission_control'); import capability_api; wc = capability_api.workspace_catalog(); assert wc.get('count') == 16; assert 'Plug-and-Play Federation' in open('../../tools/mission_control/ui.html').read(); print('MC_FED_UI_OK')")
+    set_tests_properties(mission_control_federation_ui_smoke PROPERTIES PASS_REGULAR_EXPRESSION "MC_FED_UI_OK")
 endif()
 
 if(TARGET sovereign-daemon)

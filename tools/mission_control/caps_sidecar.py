@@ -5,7 +5,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 sys.path.insert(0, str(Path(__file__).parent))
-from capability_api import list_capabilities, set_capability, gate_check, desktop_status, federation_status, list_pending_decisions, decide_governance, fleet_status, observe_status, curiosity_status, inventory_status, purposes_status, desktop_drive_status, voice_status, doctor_status, os2_lab_status
+from capability_api import list_capabilities, set_capability, gate_check, desktop_status, federation_status, list_pending_decisions, decide_governance, fleet_status, observe_status, curiosity_status, inventory_status, purposes_status, desktop_drive_status, voice_status, doctor_status, os2_lab_status, workspace_catalog, federation_action
 
 class H(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
@@ -51,6 +51,8 @@ class H(BaseHTTPRequestHandler):
             return self._json(200, doctor_status())
         if path == "/api/os2-lab":
             return self._json(200, os2_lab_status())
+        if path == "/api/workspace-catalog":
+            return self._json(200, workspace_catalog())
         if path == "/api/governance/pending":
             return self._json(200, list_pending_decisions())
         if path == "/api/gate-check":
@@ -86,6 +88,10 @@ load();
             did = path.split("/api/governance/", 1)[1]
             approve = str(body.get("decision", "approve")).lower() == "approve"
             return self._json(200, decide_governance(did, approve, str(body.get("reason", "mission-control"))))
+        if path == "/api/federation/action":
+            n = int(self.headers.get("Content-Length", "0")); body = json.loads(self.rfile.read(n).decode() or "{}") if n > 0 else {}
+            r = federation_action(body)
+            return self._json(200 if r.get("ok") else 400, r)
         if path.startswith("/api/capabilities/"):
             cap_id = path.split("/api/capabilities/", 1)[1]
             return self._json(200, set_capability(cap_id, bool(body.get("enabled", True))))
