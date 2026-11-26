@@ -104,6 +104,46 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
     sovereign::node::NodeRegistry nodes;
     if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
     { std::cerr << "node open failed\n"; return 1; }
+    if (cmd == "node-terminal" && argc >= 3) {
+        const std::string node = argv[2];
+        auto nr = host.Nodes().FindByName(node);
+        if (!nr.Ok()) { std::cerr << "node not found\n"; host.Close(); return 1; }
+        std::string rcmd;
+        for (int i = 3; i < argc; ++i) { if (i > 3) rcmd += ' '; rcmd += argv[i]; }
+        sovereign::audit::AuditEntry ae; ae.category = "federation"; ae.action = "node.terminal"; ae.subject = node; ae.detail = rcmd.empty() ? "interactive" : rcmd;
+        (void)host.Audit().Append(ae);
+        host.Close();
+        std::string tgt = nr.value.endpoint;
+        if (tgt == "local" || tgt.rfind("local://", 0) == 0 || tgt.rfind("127.0.0.1", 0) == 0)
+            return std::system(rcmd.empty() ? "bash" : rcmd.c_str()) == 0 ? 0 : 1;
+        auto col = tgt.find(':'); if (col != std::string::npos) tgt = tgt.substr(0, col);
+        const std::string sh = rcmd.empty() ? ("ssh " + tgt) : ("ssh -o BatchMode=yes " + tgt + " '" + rcmd + "'");
+        return std::system(sh.c_str()) == 0 ? 0 : 1;
+    }
+    if ((cmd == "node-install-pack" || cmd == "node-install-app") && argc >= 4) {
+        bool approve = false; std::vector<std::string> a;
+        for (int i = 2; i < argc; ++i) { std::string s = argv[i]; if (s == "--approve") approve = true; else if (s != "--json") a.push_back(s); }
+        const std::string node = a.size() > 0 ? a.at(0) : "", arg2 = a.size() > 1 ? a.at(1) : "";
+        auto nr = host.Nodes().FindByName(node);
+        if (!nr.Ok()) { std::cerr << "node not found\n"; host.Close(); return 1; }
+        const std::string ws = (cmd == "node-install-pack") ? arg2 : (nr.value.workspace_name.empty() ? "personal" : nr.value.workspace_name);
+        const std::string extra = (cmd == "node-install-app") ? arg2 : "";
+        if (!approve) {
+            sovereign::PrincipalId actor{}; auto rec = host.Cognitive().RecommendAction(actor, cmd, node + ":" + arg2, "cli");
+            std::cout << "{\"installed\":false,\"status\":\"pending_approval\",\"node\":\"" << node << "\",\"item\":\"" << arg2 << "\",\"decision_hex\":\"" << (rec.Ok() ? sovereign::ToHex(rec.value.governance_decision_id) : "") << "\"}\n";
+            host.Close(); return 0;
+        }
+        std::string tgt = nr.value.endpoint;
+        if (tgt.rfind("local://", 0) == 0) tgt = "local:" + tgt.substr(8);
+        else if (tgt == "local" || tgt.rfind("127.0.0.1", 0) == 0) tgt = "local:/tmp/sov-node-" + node;
+        else { auto col = tgt.find(':'); if (col != std::string::npos) tgt = tgt.substr(0, col); }
+        const std::string scr = std::filesystem::exists("scripts/sovereign-install-pack.sh") ? "scripts/sovereign-install-pack.sh" : (std::filesystem::exists("../scripts/sovereign-install-pack.sh") ? "../scripts/sovereign-install-pack.sh" : "sovereign-install-pack");
+        const int rc = std::system(("bash '" + scr + "' '" + tgt + "' '" + ws + "' '" + extra + "' >/dev/null 2>&1").c_str());
+        sovereign::audit::AuditEntry ae; ae.category = "federation"; ae.action = cmd; ae.subject = node; ae.detail = "ws=" + ws + " extra=" + extra;
+        (void)host.Audit().Append(ae);
+        std::cout << "{\"installed\":" << (rc == 0 ? "true" : "false") << ",\"node\":\"" << node << "\",\"workspace\":\"" << ws << "\",\"store\":\"repoman+flatpak\",\"terminal\":\"tmux+konsole\",\"extra_app\":\"" << extra << "\"}\n";
+        host.Close(); return rc == 0 ? 0 : 1;
+    }
     if (cmd == "node-apply-profile" && argc >= 4) {
         bool approve = false; std::vector<std::string> a;
         for (int i = 2; i < argc; ++i) { std::string s = argv[i]; if (s == "--approve") approve = true; else if (s != "--json") a.push_back(s); }

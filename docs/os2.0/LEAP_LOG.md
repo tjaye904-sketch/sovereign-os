@@ -69,3 +69,4 @@
 - L45 KDE Plasma 6 graphical desktop + SDDM Wayland autologin + NetworkManager Wi-Fi + Firefox & Mission Control launchers in NixOS ISO
 - L46 update public README.md and GitHub Release v2.0.0 with bare-metal KDE Plasma 6 + PipeWire/Piper/Whisper two-way voice ISO
 - L47-L50 Plug-and-Play Federation Suite: candidate node discovery (fleet-discover), zero-touch installer (node-provision), policy-governed auto-assignment (node-auto-assign), and self-healing failover dispatch (fleet-dispatch, CTest 73/73)
+- L57-L58 Pre-Staged 16 Workspace Blueprints, Domain-Optimized Toolset Packs, Repoman+Flatpak App Store & Node Terminal (CTest 75/75)

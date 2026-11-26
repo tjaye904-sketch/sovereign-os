@@ -188,6 +188,8 @@ if(TARGET sovereign-cli)
     set_tests_properties(federation_live_dispatch_failover_smoke PROPERTIES PASS_REGULAR_EXPRESSION "\"dispatched\":true")
     add_test(NAME staged_workspace_blueprints_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l57.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-catalog | grep -q \"count\":16; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-register-peer bot-01 10.0.0.50:8765 >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-apply-profile --approve bot-01 robotics")
     set_tests_properties(staged_workspace_blueprints_smoke PROPERTIES PASS_REGULAR_EXPRESSION "\"blueprint\":\"robotics\"")
+    add_test(NAME workspace_specialized_packs_repoman_terminal_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l58.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-register-peer sec-01 local://$ROOT/sec >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-install-pack --approve sec-01 security >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-install-app --approve sec-01 burpsuite >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-terminal sec-01 \"echo NODE_TERM_OK\"")
+    set_tests_properties(workspace_specialized_packs_repoman_terminal_smoke PROPERTIES PASS_REGULAR_EXPRESSION "NODE_TERM_OK")
 endif()
 
 if(TARGET sovereign-daemon)
