@@ -190,6 +190,8 @@ if(TARGET sovereign-cli)
     set_tests_properties(staged_workspace_blueprints_smoke PROPERTIES PASS_REGULAR_EXPRESSION "\"blueprint\":\"robotics\"")
     add_test(NAME workspace_specialized_packs_repoman_terminal_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l58.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-register-peer sec-01 local://$ROOT/sec >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-install-pack --approve sec-01 security >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-install-app --approve sec-01 burpsuite >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-terminal sec-01 \"echo NODE_TERM_OK\"")
     set_tests_properties(workspace_specialized_packs_repoman_terminal_smoke PROPERTIES PASS_REGULAR_EXPRESSION "NODE_TERM_OK")
+    add_test(NAME canonical_16_workspace_contract_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l59.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-catalog | grep core_policy_engine_enforces_runtime")
+    set_tests_properties(canonical_16_workspace_contract_smoke PROPERTIES PASS_REGULAR_EXPRESSION "core_policy_engine_enforces_runtime")
 endif()
 
 if(TARGET sovereign-daemon)

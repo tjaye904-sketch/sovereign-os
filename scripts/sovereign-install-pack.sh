@@ -10,16 +10,16 @@ case "$WORKSPACE" in
   robotics)       PKGS="python3 usbutils can-utils minicom i2c-tools gpsd" ;;
   creative)       PKGS="blender gimp inkscape ffmpeg imagemagick krita" ;;
   media)          PKGS="ffmpeg vlc audacity sox pipewire" ;;
-  research)       PKGS="python3 pandoc jq curl ripgrep sqlite" ;;
-  operations)     PKGS="htop btop sysstat tmux rsync openssh iproute2" ;;
+  knowledge|research)       PKGS="python3 pandoc jq curl ripgrep sqlite" ;;
+  infrastructure|operations)     PKGS="htop btop sysstat tmux rsync openssh iproute2" ;;
   automation)     PKGS="jq yq curl python3 sqlite tmux" ;;
-  finance)        PKGS="gnupg sqlite python3 qrencode libreoffice" ;;
-  governance)     PKGS="sqlite gnupg jq git" ;;
+  business|finance)        PKGS="gnupg sqlite python3 qrencode libreoffice" ;;
+  governance|federation)     PKGS="sqlite gnupg jq git" ;;
   communications) PKGS="openssh wireguard-tools curl openssl mosh" ;;
   home)           PKGS="avahi mosquitto iproute2 pipewire" ;;
   education)      PKGS="pandoc python3 sqlite okular" ;;
   health)         PKGS="python3 sqlite jq gnupg" ;;
-  personal)       PKGS="sqlite tar zstd gnupg tmux" ;;
+  life-management|personal)       PKGS="sqlite tar zstd gnupg tmux" ;;
   *) echo "unknown workspace pack: $WORKSPACE" >&2; exit 1 ;;
 esac
 STORE_AND_TERM="repoman flatpak tmux konsole"

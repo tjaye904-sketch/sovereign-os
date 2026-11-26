@@ -163,15 +163,6 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
         std::cout << "{\"applied\":true,\"node\":\"" << node << "\",\"blueprint\":\"" << bp->slug << "\",\"title\":\"" << bp->title << "\",\"capabilities\":" << bp->capabilities.size() << ",\"os_tools\":" << bp->os_tools.size() << ",\"applications\":" << bp->applications.size() << ",\"functions\":" << bp->functions.size() << "}\n";
         host.Close(); return 0;
     }
-    if (cmd == "workspace-catalog") {
-        const auto& all = sovereign::workspace::StagedBlueprints();
-        std::cout << "{\"count\":" << all.size() << ",\"blueprints\":[";
-        for (std::size_t i = 0; i < all.size(); ++i) {
-            if (i) std::cout << ',';
-            std::cout << "{\"slug\":\"" << all[i].slug << "\",\"title\":\"" << all[i].title << "\",\"role\":\"" << all[i].role << "\",\"caps\":" << all[i].capabilities.size() << ",\"os_tools\":" << all[i].os_tools.size() << ",\"apps\":" << all[i].applications.size() << ",\"functions\":" << all[i].functions.size() << '}';
-        }
-        std::cout << "]}\n"; host.Close(); return 0;
-    }
     if (cmd == "node-auto-assign" && argc >= 3) {
         bool json = false, approve = false; std::vector<std::string> args;
         for (int i = 2; i < argc; ++i) { std::string a = argv[i]; if (a == "--json") json = true; else if (a == "--approve") approve = true; else args.push_back(a); }
@@ -3786,6 +3777,15 @@ int main(int argc, char** argv)
         if (json) std::cout << "{\"dispatched\":" << (ex.Ok() && ex.value.executed ? "true" : "false") << ",\"workspace\":\"" << ws << "\",\"node\":\"" << ex.value.node_name << "\",\"failover_triggered\":" << (failover ? "true" : "false") << ",\"reason\":\"" << ex.value.reason << "\"}\n";
         else std::cout << "dispatched=" << (ex.Ok() && ex.value.executed ? 1 : 0) << " node=" << ex.value.node_name << " failover=" << (failover ? 1 : 0) << "\n";
         host.Close(); return (ex.Ok() && ex.value.executed) ? 0 : 1;
+    }
+    if (cmd == "workspace-catalog") {
+        const auto& all = sovereign::workspace::StagedBlueprints();
+        std::cout << "{\"count\":" << all.size() << ",\"blueprints\":[";
+        for (std::size_t i = 0; i < all.size(); ++i) {
+            if (i) std::cout << ',';
+            std::cout << "{\"slug\":\"" << all[i].slug << "\",\"title\":\"" << all[i].title << "\",\"authority_boundary\":\"" << all[i].authority_boundary << "\",\"maturity\":\"" << all[i].maturity << "\",\"store\":\"repoman+flatpak\",\"terminal\":\"tmux+konsole\",\"integrations\":" << all[i].integrations.size() << '}';
+        }
+        std::cout << "]}\n"; host.Close(); return 0;
     }
     if (cmd == "fleet-discover") {
         bool json = false; std::vector<std::string> tg;
