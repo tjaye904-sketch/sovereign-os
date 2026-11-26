@@ -186,6 +186,8 @@ if(TARGET sovereign-cli)
     set_tests_properties(federation_governed_auto_assign_smoke PROPERTIES PASS_REGULAR_EXPRESSION "policy_plane_governed")
     add_test(NAME federation_live_dispatch_failover_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l50.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-seed >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> capability-enable host.sys >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> fleet-dispatch --json development run_task host.sys ping")
     set_tests_properties(federation_live_dispatch_failover_smoke PROPERTIES PASS_REGULAR_EXPRESSION "\"dispatched\":true")
+    add_test(NAME staged_workspace_blueprints_smoke COMMAND sh -c "ROOT=$(mktemp -d /tmp/sov-l57.XXXXXX); trap 'rm -rf $ROOT' EXIT; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> workspace-catalog | grep -q \"count\":16; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-register-peer bot-01 10.0.0.50:8765 >/dev/null; SOVEREIGN_DATA_ROOT=$ROOT $<TARGET_FILE:sovereign-cli> node-apply-profile --approve bot-01 robotics")
+    set_tests_properties(staged_workspace_blueprints_smoke PROPERTIES PASS_REGULAR_EXPRESSION "\"blueprint\":\"robotics\"")
 endif()
 
 if(TARGET sovereign-daemon)

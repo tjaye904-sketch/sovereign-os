@@ -1,3 +1,4 @@
+#include "workspace_blueprints.hpp"
 #include "capability_gate.hpp"
 #include "node_registry.hpp"
 #include "capability_registry.hpp"
@@ -103,6 +104,34 @@ int TryCapabilityAndNodeCommands(sovereign::product::SovereignHost& host, int ar
     sovereign::node::NodeRegistry nodes;
     if (nodes.Open(host.DataRoot()) != sovereign::node::NodeError::Ok)
     { std::cerr << "node open failed\n"; return 1; }
+    if (cmd == "node-apply-profile" && argc >= 4) {
+        bool approve = false; std::vector<std::string> a;
+        for (int i = 2; i < argc; ++i) { std::string s = argv[i]; if (s == "--approve") approve = true; else if (s != "--json") a.push_back(s); }
+        const std::string node = a.size() > 0 ? a.at(0) : "", slug = a.size() > 1 ? a.at(1) : "";
+        const auto* bp = sovereign::workspace::FindBlueprint(slug);
+        auto nr = host.Nodes().FindByName(node);
+        if (!bp || !nr.Ok()) { std::cerr << "node or blueprint not found\n"; host.Close(); return 1; }
+        if (!approve) {
+            sovereign::PrincipalId actor{}; auto rec = host.Cognitive().RecommendAction(actor, "node.apply_profile", node + "->" + slug, "cli");
+            std::cout << "{\"applied\":false,\"status\":\"pending_approval\",\"node\":\"" << node << "\",\"blueprint\":\"" << slug << "\",\"decision_hex\":\"" << (rec.Ok() ? sovereign::ToHex(rec.value.governance_decision_id) : "") << "\"}\n";
+            host.Close(); return 0;
+        }
+        (void)host.Nodes().BindWorkspace(nr.value.id, bp->slug);
+        (void)host.Nodes().SetCapabilities(nr.value.id, bp->capabilities);
+        sovereign::audit::AuditEntry ae; ae.category = "federation"; ae.action = "node.apply_profile"; ae.subject = node; ae.detail = "blueprint=" + bp->slug;
+        (void)host.Audit().Append(ae);
+        std::cout << "{\"applied\":true,\"node\":\"" << node << "\",\"blueprint\":\"" << bp->slug << "\",\"title\":\"" << bp->title << "\",\"capabilities\":" << bp->capabilities.size() << ",\"os_tools\":" << bp->os_tools.size() << ",\"applications\":" << bp->applications.size() << ",\"functions\":" << bp->functions.size() << "}\n";
+        host.Close(); return 0;
+    }
+    if (cmd == "workspace-catalog") {
+        const auto& all = sovereign::workspace::StagedBlueprints();
+        std::cout << "{\"count\":" << all.size() << ",\"blueprints\":[";
+        for (std::size_t i = 0; i < all.size(); ++i) {
+            if (i) std::cout << ',';
+            std::cout << "{\"slug\":\"" << all[i].slug << "\",\"title\":\"" << all[i].title << "\",\"role\":\"" << all[i].role << "\",\"caps\":" << all[i].capabilities.size() << ",\"os_tools\":" << all[i].os_tools.size() << ",\"apps\":" << all[i].applications.size() << ",\"functions\":" << all[i].functions.size() << '}';
+        }
+        std::cout << "]}\n"; host.Close(); return 0;
+    }
     if (cmd == "node-auto-assign" && argc >= 3) {
         bool json = false, approve = false; std::vector<std::string> args;
         for (int i = 2; i < argc; ++i) { std::string a = argv[i]; if (a == "--json") json = true; else if (a == "--approve") approve = true; else args.push_back(a); }
