@@ -19,6 +19,10 @@ stdenv.mkDerivation rec {
     mkdir -p $out/bin
     CLI=$(find . -name sovereign-cli -type f -executable | head -1)
     install -m755 "$CLI" $out/bin/sovereign-cli
+    install -m755 "$src/scripts/sovereign-node-install.sh" $out/bin/sovereign-node-install
+    install -m755 "$src/scripts/sovereign-install-pack.sh" $out/bin/sovereign-install-pack
+    mkdir -p $out/share/sovereign-hub
+    cp -f "$src/tools/mission_control/"*.py "$src/tools/mission_control/"*.html $out/share/sovereign-hub/
     runHook postInstall
   '';
 
